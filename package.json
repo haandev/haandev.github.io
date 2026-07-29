@@ -1,0 +1,10 @@
+{
+  "name": "haandev-blog",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "new": "node new-post.mjs",
+    "preview": "node build.mjs && python3 -m http.server 4000"
+  }
+}

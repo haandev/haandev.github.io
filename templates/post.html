@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Build scripti bu üç meta'yı okur. date zorunlu, format YYYY-MM-DD. -->
+    <meta name="date" content="{{date}}" />
+    <meta name="description" content="" />
+    <meta name="tags" content="" />
+    <!-- Yayına hazır değilse: <meta name="draft" content="true" /> -->
+
+    <title>{{title}} · haandev</title>
+    <link rel="canonical" href="https://haandev.github.io/posts/{{slug}}.html" />
+    <link rel="alternate" type="application/rss+xml" title="haandev" href="/rss.xml" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="{{title}}" />
+    <meta property="og:url" content="https://haandev.github.io/posts/{{slug}}.html" />
+    <link rel="stylesheet" href="/assets/style.css" />
+
+    <!-- Bu yazıya özel stil / script buraya. Sayfa tamamen senin. -->
+  </head>
+  <body class="post">
+    <header class="post-header">
+      <a class="back" href="/">← haandev</a>
+      <h1>{{title}}</h1>
+      <time datetime="{{date}}">{{date}}</time>
+    </header>
+
+    <main class="post-body">
+      <p>Buraya yaz.</p>
+    </main>
+
+    <footer class="site-footer">
+      <a class="back" href="/">← tüm yazılar</a>
+    </footer>
+  </body>
+</html>

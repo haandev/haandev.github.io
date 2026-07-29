@@ -1,0 +1,10 @@
+# build.mjs tarafından üretilir — GitHub Actions her push'ta yeniden üretir.
+/index.html
+/index.json
+/rss.xml
+/sitemap.xml
+/robots.txt
+
+.DS_Store
+node_modules/
+.claude/

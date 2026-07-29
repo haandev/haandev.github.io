@@ -1,0 +1,252 @@
+:root {
+  --bg: #fbfbfa;
+  --fg: #1c1c1a;
+  --muted: #6b6b66;
+  --accent: #b4532a;
+  --rule: #e2e1dd;
+  --code-bg: #f0efec;
+  --measure: 40rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16161a;
+    --fg: #e6e5e1;
+    --muted: #9a9a94;
+    --accent: #e08b5f;
+    --rule: #2c2c32;
+    --code-bg: #22222a;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0 auto;
+  padding: 3rem 1.25rem 5rem;
+  max-width: var(--measure);
+  background: var(--bg);
+  color: var(--fg);
+  font: 1.0625rem/1.7 ui-serif, "Iowan Old Style", "Source Serif 4", Georgia, serif;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* --- anasayfa --- */
+
+.site-header {
+  margin-bottom: 3.5rem;
+}
+
+.site-title {
+  margin: 0;
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+}
+
+.site-description {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+}
+
+.site-nav {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1.25rem;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.875rem;
+}
+
+.post-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.post-item + .post-item {
+  border-top: 1px solid var(--rule);
+}
+
+.post-link {
+  display: block;
+  padding: 1.5rem 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.post-link:hover h2 {
+  color: var(--accent);
+}
+
+.post-link time {
+  display: block;
+  color: var(--muted);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+}
+
+.post-link h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.3125rem;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  transition: color 0.15s;
+}
+
+.post-link p {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+}
+
+.tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.75rem;
+}
+
+.tags li {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  color: var(--muted);
+}
+
+.empty {
+  color: var(--muted);
+  padding: 1.5rem 0;
+}
+
+/* --- yazı sayfası --- */
+
+.back {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.post-header {
+  margin-bottom: 2.5rem;
+}
+
+.post-header h1 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 2rem;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.post-header time {
+  color: var(--muted);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.8125rem;
+}
+
+.post-body > * + * {
+  margin-top: 1.25rem;
+}
+
+.post-body h2 {
+  margin-top: 2.5rem;
+  font-size: 1.375rem;
+  letter-spacing: -0.015em;
+}
+
+.post-body h3 {
+  margin-top: 2rem;
+  font-size: 1.125rem;
+}
+
+.post-body img,
+.post-body video,
+.post-body svg,
+.post-body iframe {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.post-body blockquote {
+  margin-inline: 0;
+  padding-left: 1.25rem;
+  border-left: 3px solid var(--rule);
+  color: var(--muted);
+}
+
+.post-body figcaption {
+  margin-top: 0.5rem;
+  color: var(--muted);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.8125rem;
+}
+
+code,
+kbd,
+pre {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.875em;
+}
+
+:not(pre) > code {
+  padding: 0.15em 0.35em;
+  background: var(--code-bg);
+  border-radius: 4px;
+}
+
+pre {
+  padding: 1rem;
+  background: var(--code-bg);
+  border-radius: 8px;
+  overflow-x: auto;
+  line-height: 1.55;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+th,
+td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+}
+
+hr {
+  margin: 2.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.site-footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.8125rem;
+}
