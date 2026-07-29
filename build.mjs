@@ -11,12 +11,14 @@ const POSTS_DIR = join(ROOT, "posts");
 const site = JSON.parse(await readFile(join(ROOT, "site.json"), "utf8"));
 const baseUrl = site.url.replace(/\/$/, "");
 
+// content'in tırnağını yakalayıp aynısıyla kapatıyoruz — yoksa Türkçedeki
+// kesme işareti ("1994'te") tek tırnaklı sanılıp metni ortadan kesiyor.
 const meta = (html, name) => {
   const re = new RegExp(
-    `<meta\\s+name=["']${name}["']\\s+content=["']([^"']*)["']`,
+    `<meta\\s+name=["']${name}["']\\s+content=(["'])([\\s\\S]*?)\\1`,
     "i",
   );
-  return html.match(re)?.[1]?.trim() ?? "";
+  return html.match(re)?.[2]?.trim() ?? "";
 };
 
 const stripTags = (s) => s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
