@@ -1,0 +1,51 @@
+---
+import site from "../../site.json" with { type: "json" };
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Sayfanın kanonik yolu, ör. "/" veya "/posts/slug.html" */
+  path: string;
+  ogType?: "website" | "article";
+  ogTitle?: string;
+  ogDescription?: string;
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description = "",
+  path,
+  ogType = "website",
+  ogTitle = title,
+  ogDescription = description,
+  bodyClass,
+} = Astro.props;
+
+const canonical = new URL(path, Astro.site).href;
+---
+
+<!doctype html>
+<html lang={site.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" type="application/rss+xml" title={site.title} href="/rss.xml" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={ogTitle} />
+    {ogDescription && <meta property="og:description" content={ogDescription} />}
+    <meta property="og:url" content={canonical} />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <slot />
+    <script
+      data-goatcounter="https://haandev-blog.goatcounter.com/count"
+      async
+      src="//gc.zgo.at/count.js"></script>
+  </body>
+</html>

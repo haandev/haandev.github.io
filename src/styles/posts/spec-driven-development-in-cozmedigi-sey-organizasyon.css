@@ -1,0 +1,110 @@
+/* Spec-Driven Development'ın Çözmediği Şey: Organizasyon — yazıya özel stil. MDX'ten import ediliyor. */
+/* Yazıya özel stil. Üç organizasyon tipi üç renk taşıyor; şekillerdeki
+   karşılıkları .fig-frame kağıdı üzerinde sabit hex olarak duruyor
+   (koyu temada da kağıt beyaz kaldığı için). */
+.s-sdd {
+  --t1: var(--danger);   /* Tip 1 — parçalı spec   */
+  --t2: var(--geo);      /* Tip 2 — ortak spec     */
+  --t3: var(--alg);      /* Tip 3 — genel bilici   */
+  --ai: #c47b00;         /* AI ekseni              */
+}
+@media (prefers-color-scheme: dark) {
+  .s-sdd { --ai: #e0a94e; }
+}
+
+/* bölüm başlıklarının kenar rengi konuyu izliyor */
+.s-anat h2,
+.s-lit h2,
+.s-tip h2,
+.s-olcu h2,
+.s-yer h2,
+.s-itiraz h2,
+.s-son h2   { border-left: 4px solid var(--fg);    padding-left: 0.875rem; }
+.s-tani h2  { border-left: 4px solid var(--t1);    padding-left: 0.875rem; }
+.s-eksen h2 { border-left: 4px solid var(--ai);    padding-left: 0.875rem; }
+.s-akr h2   { border-left: 4px solid var(--muted); padding-left: 0.875rem; }
+.s-aidlc h2 { border-left: 4px solid var(--ai);    padding-left: 0.875rem; }
+.s-onk h2   { border-left: 4px solid var(--t3);    padding-left: 0.875rem; }
+
+/* üç tipin başlıkları */
+.s-tip h3 {
+  margin-top: 3.25rem;
+  padding-left: 0.875rem;
+  border-left: 5px solid var(--rule);
+  font-size: 1.3125rem;
+}
+.s-tip h3 .k {
+  font-family: var(--font-ui);
+  letter-spacing: 0.06em;
+}
+.s-tip h3.t1 { border-color: var(--t1); }
+.s-tip h3.t2 { border-color: var(--t2); }
+.s-tip h3.t3 { border-color: var(--t3); }
+.s-tip h3.t1 .k { color: var(--t1); }
+.s-tip h3.t2 .k { color: var(--t2); }
+.s-tip h3.t3 .k { color: var(--t3); }
+
+/* kapı listesi — K0…K5 */
+.kapilar {
+  list-style: none;
+  margin: 1.75rem 0;
+  padding: 0;
+  counter-reset: kapi;
+}
+.kapilar li {
+  position: relative;
+  margin: 0;
+  padding: 0.75rem 0 0.75rem 1.25rem;
+  border-left: 3px solid var(--t2);
+  font-size: 1rem;
+}
+.kapilar li + li { margin-top: 0.125rem; }
+.kapilar li strong { font-family: var(--font-ui); }
+
+/* metrik listesi */
+.metrik { list-style: none; margin: 1.75rem 0; padding: 0; }
+.metrik li {
+  padding: 0.75rem 0 0.75rem 1.125rem;
+  border-left: 3px solid var(--rule);
+  font-size: 1rem;
+}
+.metrik li + li { margin-top: 0.125rem; }
+.metrik li strong { font-family: var(--font-ui); }
+
+.refs ul { padding-left: 1.25rem; margin: 0; list-style: none; }
+.refs li {
+  position: relative;
+  margin-bottom: 0.625rem;
+  line-height: 1.55;
+}
+.refs li::before {
+  content: "·";
+  position: absolute;
+  left: -1rem;
+  color: var(--muted);
+}
+
+/* sayı kutucukları: global .chip vitrin boyutunda; burada metnin
+   içinde okunan bir ölçüm satırı olduğu için küçültüyoruz. */
+.chips.tight { gap: 0.4rem; margin: 1.5rem 0; }
+.chips.tight .chip {
+  min-width: 0;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.9375rem;
+  border-width: 1.5px;
+  border-radius: 5px;
+}
+.chips.tight .sep {
+  padding: 0;
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+.chips.tight .lbl { margin-top: 0.3rem; font-size: 0.6875rem; }
+
+/* bu yazıya has ölçüler; bileşenler style.css'te */
+.tbl table { min-width: 40rem; }
+.not { margin: 2.5rem 0 0; }
+
+/* bu yazının figürleri kendi fontunu belirtmiyor; arayüz fontuna bağla */
+figure svg text { font-family: var(--font-ui); }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Yeni yazı iskeleti oluşturur:  node new-post.mjs "Yazının Başlığı"
+// Yeni yazı iskeleti oluşturur:  npm run new -- "Yazının Başlığı"
 
-import { readFile, writeFile, access } from "node:fs/promises";
+import { writeFile, access } from "node:fs/promises";
 import { join } from "node:path";
 
 const ROOT = import.meta.dirname;
@@ -23,17 +23,29 @@ const slug = title
   .replace(/^-|-$/g, "");
 
 const date = new Date().toISOString().slice(0, 10);
-const file = join(ROOT, "posts", `${slug}.html`);
+const rel = `src/content/posts/${slug}.mdx`;
+const file = join(ROOT, rel);
 
 if (await access(file).then(() => true, () => false)) {
-  console.error(`posts/${slug}.html zaten var.`);
+  console.error(`${rel} zaten var.`);
   process.exit(1);
 }
 
-const template = await readFile(join(ROOT, "templates/post.html"), "utf8");
-await writeFile(
-  file,
-  template.replaceAll("{{title}}", title).replaceAll("{{date}}", date).replaceAll("{{slug}}", slug),
-);
+// Frontmatter alanları src/content.config.ts'teki şemayla doğrulanıyor.
+// Gövde markdown; figür/tablo gerekirse araya doğrudan HTML yazılabilir.
+const template = `---
+title: ${JSON.stringify(title)}
+date: "${date}"
+description: ""
+dek: ""
+tags: []
+draft: true
+---
 
-console.log(`posts/${slug}.html oluşturuldu.`);
+Buraya yaz.
+`;
+
+await writeFile(file, template);
+
+console.log(`${rel} oluşturuldu.`);
+console.log(`URL: /posts/${slug}.html  —  yayına almak için draft: true satırını sil.`);

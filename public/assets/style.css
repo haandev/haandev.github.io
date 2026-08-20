@@ -91,6 +91,11 @@ body {
   padding-inline: 1.375rem;
 }
 
+/* içeriği kenar boşluğu olmadan tam ölçüye yaslar */
+.wide.flush {
+  padding-inline: 0;
+}
+
 a {
   color: var(--accent);
   text-underline-offset: 0.15em;
@@ -102,6 +107,13 @@ a:hover {
 
 p {
   margin: 0 0 1.25rem;
+}
+
+/* Bir kabın son paragrafı fazladan boşluk bırakmasın. */
+blockquote > p:last-child,
+.foot > p:last-child,
+figcaption > p:last-child {
+  margin-bottom: 0;
 }
 
 strong {
@@ -239,13 +251,21 @@ h3 {
   color: var(--muted);
 }
 
-.dek .g {
+/* Konu kolu renkleri. Metin içinde bir ibareyi ilgili renge bağlar;
+   inline style yerine bunları kullan. */
+.dek .g,
+figcaption .g {
   color: var(--geo);
-  font-style: normal;
 }
 
-.dek .a {
+.dek .a,
+figcaption .a {
   color: var(--alg);
+}
+
+/* spot yazısı italik; renkli ibareler düz kalsın */
+.dek .g,
+.dek .a {
   font-style: normal;
 }
 
@@ -412,6 +432,12 @@ figure svg {
 
 /* Şekiller kağıt üzerinde duruyor: SVG'lerin içindeki renkler sabit
    olduğu için bu tabaka koyu temada da açık kalır. */
+/* küçük şemalar için dar kağıt */
+.fig-frame.tight {
+  max-width: 30rem;
+  margin-inline: auto;
+}
+
 .fig-frame {
   padding: 1.375rem;
   background: #fff;
@@ -427,8 +453,100 @@ figcaption {
   color: var(--muted);
 }
 
-figcaption b {
+figcaption b,
+figcaption strong {
   color: var(--fg);
+}
+
+
+/* ---------- yazı bileşenleri ----------
+   Birden fazla yazının paylaştığı kutu/tablo/figür bileşenleri. Yazıya özel
+   CSS'te tekrarlanmasınlar; oradaki dosyalar yalnızca o yazıya has renk
+   değişkenlerini ve bileşenleri taşısın. */
+
+/* Not: "figure svg text { font-family }" bilerek burada değil. CSS, SVG'nin
+   font-family niteliğini her zaman ezer; qr yazısının figürleri kendi
+   serif/mono tipografisini taşıdığı için global bir kural onları bozar.
+   İhtiyacı olan yazı bu kuralı kendi CSS dosyasına koyar. */
+
+/* dar figür kağıdı */
+.fig-narrow {
+  max-width: 34rem;
+  margin-inline: auto;
+}
+
+/* öz — yazının başındaki özet kutusu */
+.oz {
+  margin: 2.5rem 0 0;
+  padding: 1.375rem 1.5rem;
+  background: var(--code-bg);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.oz .lbl {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.oz p {
+  margin: 0;
+}
+
+/* not — epistemik statü / kaynak uyarısı kutusu */
+.not {
+  margin: 2rem 0;
+  padding: 1.125rem 1.375rem;
+  border: 1px dashed var(--rule);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.not p {
+  margin: 0;
+}
+
+.not strong {
+  color: var(--fg);
+}
+
+/* geniş tablolar dar ölçüye sığmaz: kendi içinde kaysınlar.
+   min-width tabloya göre değiştiği için yazıya özel CSS'te kalır. */
+.tbl {
+  margin: 1.625rem 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tbl table {
+  margin: 0;
+}
+
+.tbl th,
+.tbl td {
+  white-space: normal;
+}
+
+/* kaynakça — liste biçimi (numaralı / işaretli) yazıya göre değişir */
+.refs {
+  font-size: 0.96875rem;
+}
+
+.refs h3 {
+  margin: 2rem 0 0.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 /* ---------- 7. bölüm bantları ---------- */
@@ -692,7 +810,8 @@ figcaption b {
   color: var(--muted);
 }
 
-.cap .legend i {
+.cap .legend i,
+.cap .legend em {
   display: inline-block;
   width: 0.75rem;
   height: 0.75rem;

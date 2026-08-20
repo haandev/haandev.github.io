@@ -1,0 +1,50 @@
+/* Veri dillerinin anatomisi: bayt, isim ve spektrum — yazıya özel stil. MDX'ten import ediliyor. */
+/* Yazıya özel stil. Üç kutup üç renk taşıyor; şekillerdeki karşılıkları
+   .fig-frame kağıdı üzerinde sabit hex olarak duruyor (koyu temada da
+   kağıt beyaz kaldığı için). */
+.s-vd {
+  --fs: var(--alg);   /* dosya sistemi  */
+  --db: var(--geo);   /* veritabanı     */
+  --mq: #c47b00;      /* mesaj kuyruğu  */
+}
+@media (prefers-color-scheme: dark) {
+  .s-vd { --mq: #e0a94e; }
+}
+
+/* bölüm başlıklarının kenar rengi konuyu izliyor */
+.s-byte h2 { border-left: 4px solid var(--fg); padding-left: 0.875rem; }
+.s-isim h2 { border-left: 4px solid var(--db); padding-left: 0.875rem; }
+.s-sinir h2 { border-left: 4px solid var(--mq); padding-left: 0.875rem; }
+.s-spek h2 { border-left: 4px solid var(--fs); padding-left: 0.875rem; }
+.s-son h2 { border-left: 4px solid var(--fg); padding-left: 0.875rem; }
+
+.tbl-5 table { min-width: 46rem; }
+
+/* iddia kutuları */
+.iddia {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--rule);
+  background: var(--code-bg);
+  border-radius: 0 6px 6px 0;
+  font-size: 1rem;
+}
+.iddia p { margin: 0; }
+.iddia .t {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.refs ol { padding-left: 1.5rem; margin: 0; }
+.refs li { margin-bottom: 0.5rem; line-height: 1.55; }
+
+/* tablo genişlikleri bu yazıya has; bileşenin kendisi style.css'te */
+.tbl table { min-width: 38rem; }
+
+/* bu yazının figürleri kendi fontunu belirtmiyor; arayüz fontuna bağla */
+figure svg text { font-family: var(--font-ui); }

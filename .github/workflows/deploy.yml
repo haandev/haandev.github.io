@@ -26,15 +26,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+
+      - run: npm ci
 
       - name: Build
-        run: node build.mjs
+        run: npm run build
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: ./dist
 
       - id: deployment
         uses: actions/deploy-pages@v4

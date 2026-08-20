@@ -1,9 +1,6 @@
-# build.mjs tarafından üretilir — GitHub Actions her push'ta yeniden üretir.
-/index.html
-/index.json
-/rss.xml
-/sitemap.xml
-/robots.txt
+# Astro build çıktısı ve önbelleği — GitHub Actions her push'ta yeniden üretir.
+dist/
+.astro/
 
 .DS_Store
 node_modules/

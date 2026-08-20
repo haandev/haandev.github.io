@@ -1,0 +1,42 @@
+---
+import Base from "./Base.astro";
+import site from "../../site.json" with { type: "json" };
+import { humanDate, postPath } from "../lib/posts";
+import type { Post } from "../lib/posts";
+
+interface Props { post: Post }
+const { post } = Astro.props;
+const { title, date, description, ogDescription, dek, headerExtra, bodyClass } =
+  post.data;
+---
+
+<Base
+  title={`${title} · ${site.title}`}
+  description={description}
+  path={postPath(post.id)}
+  ogType="article"
+  ogTitle={title}
+  ogDescription={ogDescription ?? description}
+  bodyClass={bodyClass}
+>
+  <slot name="head" slot="head" />
+
+  <header class="post-header col">
+    <a class="back" href="/">← {site.title}</a>
+    {headerExtra && <Fragment set:html={headerExtra} />}
+    <h1>{title}</h1>
+    <time datetime={date}>{humanDate(date)}</time>
+    {/* dek markup taşıyor (span.g, span.a …), o yüzden ham HTML. */}
+    {dek && <p class="dek" set:html={dek} />}
+  </header>
+
+  {/* .col max-width veriyor; yazılar onu kendi section'larına koyuyor,
+      main'e koyarsak ölçü iki kez daralıyor. */}
+  <main>
+    <slot />
+  </main>
+
+  <footer class="site-footer col">
+    <a class="back" href="/">← tüm yazılar</a>
+  </footer>
+</Base>

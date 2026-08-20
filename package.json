@@ -3,8 +3,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node build.mjs",
-    "new": "node new-post.mjs",
-    "preview": "node build.mjs && python3 -m http.server 4000"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "new": "node new-post.mjs"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^7.0.7",
+    "@astrojs/rss": "^4.0.19",
+    "astro": "^7.2.4"
+  },
+  "overrides": {
+    "satteri": "0.10.5"
   }
 }

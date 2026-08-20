@@ -1,0 +1,42 @@
+---
+import Base from "../layouts/Base.astro";
+import site from "../../site.json" with { type: "json" };
+import { getPosts, humanDate, postPath } from "../lib/posts";
+
+const posts = await getPosts();
+const year = new Date().getUTCFullYear();
+---
+
+<Base title={site.title} description={site.description} path="/">
+  <header class="site-header col">
+    <h1 class="site-title">{site.title}</h1>
+    <p class="site-description">{site.description}</p>
+    <nav class="site-nav">
+      <a href="https://github.com/haandev">GitHub</a>
+      <a href="/rss.xml">RSS</a>
+      <a href="/index.json">JSON</a>
+    </nav>
+  </header>
+
+  <main class="col">
+    <ul class="post-list">
+      {posts.length === 0 && <li class="empty">Henüz yazı yok.</li>}
+      {posts.map((p) => (
+        <li class="post-item">
+          <a class="post-link" href={postPath(p.id)}>
+            <time datetime={p.data.date}>{humanDate(p.data.date)}</time>
+            <h2>{p.data.title}</h2>
+            {p.data.description && <p>{p.data.description}</p>}
+            {p.data.tags.length > 0 && (
+              <ul class="tags">{p.data.tags.map((t) => <li>{t}</li>)}</ul>
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </main>
+
+  <footer class="site-footer col">
+    <p>&copy; {year} {site.title}</p>
+  </footer>
+</Base>
