@@ -1,0 +1,65 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 304" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="K0'dan K5'e altı kapı; tersinmez kararlar K3 kapısını geçemez, tersinir kararlar K4'e ertelenir">
+  <defs>
+    <marker id="f9-ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#14724B"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="26" font-size="12" font-weight="700" fill="#141412">Zaman kutusu değil — kanıt kutusu</text>
+  <text x="740" y="26" font-size="11" text-anchor="end" fill="#8B8983">genişlik, aşamanın tipik süresini temsil ediyor</text>
+
+  <rect x="20"  y="44" width="98"  height="80" rx="8" fill="#F2F1ED" stroke="#8B8983" stroke-width="1.75"/>
+  <rect x="122" y="44" width="140" height="80" rx="8" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.75"/>
+  <rect x="266" y="44" width="140" height="80" rx="8" fill="#EBF4EF" stroke="#14724B" stroke-width="1.75"/>
+  <rect x="410" y="44" width="140" height="80" rx="8" fill="#EEF0FC" stroke="#2733C9" stroke-width="2.5"/>
+  <rect x="554" y="44" width="90"  height="80" rx="8" fill="#FBF1DC" stroke="#c47b00" stroke-width="1.75"/>
+  <rect x="648" y="44" width="92"  height="80" rx="8" fill="#FBEDEC" stroke="#B3261E" stroke-width="1.75"/>
+
+  <g font-size="12" font-weight="700" fill="#8B8983">
+    <text x="32" y="62">K0</text><text x="134" y="62">K1</text><text x="278" y="62">K2</text>
+    <text x="422" y="62">K3</text><text x="566" y="62">K4</text><text x="660" y="62">K5</text>
+  </g>
+  <g font-size="11.5" font-weight="700" fill="#141412">
+    <text x="32" y="79">Problem</text><text x="134" y="79">Kısıt haritası</text><text x="278" y="79">Keşif</text>
+    <text x="422" y="79">Karar + spec</text><text x="566" y="79">Uygulama</text><text x="660" y="79">Doğrulama</text>
+  </g>
+  <g font-size="9.5" fill="#55534E">
+    <text x="32" y="95">ne değişiyor,</text><text x="32" y="107">kim için</text>
+    <text x="134" y="95">kısıtlar + çürütmeler</text><text x="134" y="107">QA kriterleri yazar</text>
+    <text x="278" y="95">PoC turları,</text><text x="278" y="107">atılabilir kod</text>
+    <text x="422" y="95">tek, bütün,</text><text x="422" y="107">kontratları içeren</text>
+    <text x="566" y="95">LLM ağırlıklı</text><text x="566" y="107">üretim</text>
+    <text x="660" y="95">K1 kriterlerine</text><text x="660" y="107">karşı kanıt</text>
+  </g>
+  <g font-size="9.5" font-style="italic">
+    <text x="32" y="119" fill="#8B8983">çözüm yok</text>
+    <text x="134" y="119" fill="#2733C9">production kodu yok</text>
+    <text x="278" y="119" fill="#14724B">çıktı: kanıt</text>
+    <text x="422" y="119" fill="#2733C9">kimse çürütemiyor</text>
+    <text x="566" y="119" fill="#c47b00">en kısa aşama</text>
+    <text x="660" y="119" fill="#B3261E">sürpriz yok</text>
+  </g>
+
+  <line x1="552" y1="134" x2="552" y2="246" stroke="#C9C7C0" stroke-width="1.25" stroke-dasharray="4 4"/>
+
+  <text x="20" y="158" font-size="11" font-weight="700" fill="#B3261E">TERSİNMEZ KARARLAR — tip-1</text>
+  <rect x="20" y="166" width="532" height="30" rx="6" fill="#FBEDEC" stroke="#B3261E" stroke-width="1.5"/>
+  <text x="34" y="186" font-size="10.5" fill="#B3261E">veri şeması · public API kontratı · ücretlendirme · migration · deprecation takvimi</text>
+  <rect x="548" y="158" width="8" height="46" rx="2" fill="#B3261E"/>
+  <text x="566" y="180" font-size="11" font-weight="700" fill="#B3261E">K3'ü</text>
+  <text x="566" y="196" font-size="11" font-weight="700" fill="#B3261E">geçemez</text>
+
+  <text x="20" y="228" font-size="11" font-weight="700" fill="#14724B">TERSİNİR KARARLAR — tip-2</text>
+  <rect x="20" y="236" width="580" height="30" rx="6" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+  <text x="34" y="256" font-size="10.5" fill="#14724B">K4'e ertelenir, tartışılmaz; yanlış çıkarsa değiştirilir</text>
+  <line x1="600" y1="251" x2="626" y2="251" stroke="#14724B" stroke-width="2" marker-end="url(#f9-ag)"/>
+
+  <text x="380" y="292" font-size="12.5" text-anchor="middle" fill="#141412">K4 uzuyorsa hata K4'te değil — K3 yakınsamamıştır</text>
+</svg>
+</div>
+<figcaption>Kapılar süreyi değil **kanıtı** ölçer. K3 tek gerçek kapıdır: tersinmez olan her şey onun solunda kalmak zorundadır.</figcaption>
+</figure>
+</div>

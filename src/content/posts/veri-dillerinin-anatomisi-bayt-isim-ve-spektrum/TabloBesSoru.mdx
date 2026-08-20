@@ -1,0 +1,39 @@
+<div class="tbl">
+<table>
+<thead>
+<tr><th>\#</th><th>Soru</th><th>SQL etiketi</th><th>Teorik dayanak</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>**İsimler nasıl tanımlanır?** Hangi bayt gruplarına ne denecek — tablo, collection, topic, dizin. Veriyi değil, adlandırma şemasını değiştirir; bir isim uzayı kurar.</td>
+<td class="mono">CREATE ALTER DROP</td>
+<td>Şema kavramı — CODASYL DBTG (1971); ANSI/SPARC kavramsal katman (1975)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>**İsimlendirilen baytlar nasıl değiştirilir?** Bir durumdan diğerine geçiş.</td>
+<td class="mono">INSERT UPDATE DELETE</td>
+<td>Durum dönüşümü — Gray (1981)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>**İsim üzerinden baytlara nasıl ulaşılır?** Sorgu dediğimiz şey, isimden bayta giden yolun tarifidir.</td>
+<td class="mono">SELECT</td>
+<td>Veri bağımsızlığı ve ilişkisel cebir — Codd (1970)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>**Hangi isimlere kim dokunabilir?** Yetki daima isim düzeyinde verilir; kimse “0x4A3F'ten itibaren 512 bayt” üzerine yetki tanımlamaz.</td>
+<td class="mono">GRANT REVOKE</td>
+<td>Erişim matrisi — Saltzer &amp; Schroeder (1975)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>**Değişiklikler ne zaman “gerçek” olur?** İsimlerin gösterdiği baytların, bakan herkese aynı anda ve tutarlı görünme garantisi.</td>
+<td class="mono">COMMIT ROLLBACK</td>
+<td>İşlem kavramı, ACID — Gray (1981)</td>
+</tr>
+</tbody>
+</table>
+</div>

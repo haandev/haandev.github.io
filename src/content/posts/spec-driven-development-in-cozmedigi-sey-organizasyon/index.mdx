@@ -1,0 +1,522 @@
+---
+title: "Spec-Driven Development'ın Çözmediği Şey: Organizasyon"
+date: "2026-08-19"
+description: "Spec-driven development tartışması araç katmanında sıkışmış durumda. Asıl soru şu: spec'i kim yazıyor, kaç tane var, ve ürün kararı kod katılaşmadan önce mi alınıyor. Üç organizasyon tipi, bir kapı formülü ve tersinirliğin gerçek tanımı."
+ogDescription: "AI-coded'dan AI-centric'e: genel bilicilerin geri dönüşü. Üç organizasyon tipi, bir kapı formülü ve tersinirliğin gerçek tanımı."
+bodyClass: "s-sdd"
+dek: "<span class=\"g\">AI-coded</span>'dan <span class=\"a\">AI-centric</span>'e: Genel bilicilerin geri dönüşü"
+tags:
+  - "ai"
+  - "sdlc"
+  - "spec-driven development"
+  - "organizasyon"
+  - "agile"
+  - "yazılım mühendisliği"
+---
+
+import "./style.css";
+
+import SprintDagilimi from "./SprintDagilimi.mdx";
+import GeriAlmaMaliyeti from "./GeriAlmaMaliyeti.mdx";
+import OlgunlukSeviyeleri from "./OlgunlukSeviyeleri.mdx";
+import DikeyYatayBolme from "./DikeyYatayBolme.mdx";
+import AiCodedAiCentric from "./AiCodedAiCentric.mdx";
+import AiOncesiAtalar from "./AiOncesiAtalar.mdx";
+import DortYapi from "./DortYapi.mdx";
+import DriftKonisi from "./DriftKonisi.mdx";
+import TerkEdilmisKod from "./TerkEdilmisKod.mdx";
+import AltiKapi from "./AltiKapi.mdx";
+import TersinirlikZamanla from "./TersinirlikZamanla.mdx";
+import SenkronizasyonKanallari from "./SenkronizasyonKanallari.mdx";
+import AiDlcAyrimlari from "./AiDlcAyrimlari.mdx";
+import UcSutun from "./UcSutun.mdx";
+import KararAgaci from "./KararAgaci.mdx";
+import TipIkiBucuk from "./TipIkiBucuk.mdx";
+import KapananCember from "./KapananCember.mdx";
+import TabloRolDonusumu from "./TabloRolDonusumu.mdx";
+
+{/* ================= 1 ================= */}
+<section class="col s-anat">
+
+## 1. Problemin anatomisi
+
+Bir organizasyonu düşünün. Üst yönetim AI-merkezli bir SDLC'ye geçiş için ciddi baskı yapıyor. Aynı organizasyon takım içi rolleri sert sınırlarla bölmüş durumda: analist, backend, frontend, QA, PO. Sprint'in işleyişi şöyle:
+
+Analist bir feature'ı tanımlıyor ve ekibe veriyor. Bu tanım problemin ortaya konmasıdır; mühendislik analizi değil. Buna rağmen sprint başladığı anda backend ve frontend paralel geliştirmeye başlıyor, çünkü sprint sonunda çıktı beklentisi var. QA bu süre boyunca boşta. Sprint'in son hafta sonunda disiplinlerin çıktıları birleştiriliyor, kontrat uyumsuzlukları giderilmeye çalışılıyor, QA'ya bir ya da iki gün kalıyor; ve o iki günde bu sefer mühendislik boşta. Sprint süresince alınan kararların ürüne etkisi ancak bir sonraki sprint'te PM ve PO ile tartışılabilir hale geliyor çünkü daily stand-up süreleri kişilere verilen 2 şer dakilalık slotlar ile sınırlı. Ekip ise agile ritüellerine bağlı kalmaya zorlandığı ve time-sheet'e yazamayacaklar şeyleri performans raporunda kötü görünmemek için yapmaktan kaçınıyor. Ani gelişen toplantılar ve bilgi aktarımları zorlaşıyor. Basit bir karar alma süreci için ekip arkadaşından müsait slot bekliyorsun ve bazen bloklanmamak adına kararı hızlıca kendin alıyorsun.
+
+</section>
+
+<SprintDagilimi />
+
+<section class="col s-anat">
+
+Retroperspektif tartışma da genellikle şu ikilemle bitiyor: elde çalışan ama ürün kararına aykırı bir kod var; alternatif, ürün kararına uygun ama baştan yazım gerektiren bir iş. Büyük bir kod tabanında geri alma maliyeti yüksek olduğu için seçim çoğunlukla ilkinden yana yapılıyor. Ürün, kendi kararlarının aleyhine birikiyor.
+
+Bu tabloyu absürt yapan şey hiçbir rolün kötü çalışması değil. Herkes kendi rolünü doğru oynuyor. Absürt olan, sürecin bunu zorunlu kılması. Ve daha önemlisi: bu organizasyona en gelişmiş kod üretme araçlarını verseniz, ortaya çıkacak tek şey aynı uyumsuzlukları daha hızlı üretme kapasitesidir.
+
+</section>
+
+{/* ================= 2 ================= */}
+<section class="col s-tani">
+
+## 2. Teşhis
+
+**Sprint içi mini-şelale.** Agile, şelale modelini aylara yayılan aşamalardan kurtarmayı vaat etti. Şelaleden kurtulmadık aksine çoğu ekip aynı aşamaları iki haftaya sıkıştırdı. Analiz → geliştirme → entegrasyon → test → ürün geri bildirimi sırası korundu, sadece kutunun boyu küçüldü. Sonuç: şelalenin en kötü özelliği (geri bildirimin en sona kalması) korundu, en iyi özelliği (aşamaya girmeden önce yeterli düşünme süresi) kayboldu.
+
+**Kapasite tiyatrosu.** QA'nın sprint'in ilk sekiz günü boşta kalması bir kaynak planlama hatası gibi görünür ve genellikle “QA'ya da bir şeyler verelim” diye çözülmeye çalışılır. Bu yanlış teşhistir. QA boşta değil; **sırası yanlış**. QA'nın asıl çıktısı test yürütmek değil, bir çözümün nasıl yanlışlanacağını tanımlamaktır. Bu spec'in girdisidir, kodun çıktısı değil.
+
+Aynı şey kontrat uyumsuzluklarında da geçerli. Sprint'in son hafta sonunda backend ile frontend'in kontrat uzlaştırması bir entegrasyon sorunu değil, kontratın yanlış zamanda üretilmiş olmasının sonucudur. Kontrat, iki tarafın bağımsız kararlarının artığı olarak ortaya çıkıyor; oysa ortak bir tasarım kararı olmalıydı.
+
+**Karar gecikmesi.** Ürün etkisi olan bir mühendislik kararı Salı günü alınıyor, ürün ekibi iki hafta sonra öğreniyor. O aradaki iki haftada karar kod olarak katılaşıyor. Geri alma maliyeti, kararın kalitesinden bağımsız olarak kararı savunulabilir hale getiriyor. Kötü kararlar iyi kararları maliyetle yeniyor.
+
+</section>
+
+<GeriAlmaMaliyeti />
+
+{/* ================= 3 ================= */}
+<section class="col s-lit">
+
+## 3. Literatürün kör noktası
+
+Bu sorunların hiçbiri yeni değil, ama 2025-2026'nın spec-driven development (SDD) dalgası da bunlara cevap vermiyor; çünkü farklı bir katmanda çalışıyor.
+
+Terimin modern dalgası çoğunlukla Eylül 2025'te açık kaynak yapılan [GitHub Spec Kit](https://github.com/github/spec-kit)'e atfediliyor; AWS'nin Kiro'su ve Tessl ifadeyi yaygınlaştırdı. Alandaki referans metin, Thoughtworks'ten Birgitta Böckeler'in martinfowler.com'daki analizi: [Understanding Spec-Driven-Development: Kiro, spec-kit, and Tessl](https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html). Böckeler üç olgunluk seviyesi ayırıyor:
+
+- **Spec-first:** Spec yazılır, ilk üretimi yönlendirir, iş bitince terk edilir. Spec bir iskele.
+- **Spec-anchored:** Spec, feature'ın evrimi boyunca yaşayan belge olarak sürer.
+- **Spec-as-source:** Spec birincil artefakttır; insan üretilen koda hiç dokunmaz.
+
+</section>
+
+<OlgunlukSeviyeleri />
+
+<section class="col s-lit">
+
+Aynı yazının eleştirileri de en az sınıflandırması kadar önemli: mevcut araçlar aşırı inceleme yükü ve sahte bir kontrol hissi üretiyor, farklı problem boyutlarına iyi ölçeklenmiyor. Böckeler küçük bir bugfix'i Kiro'ya verdiğinde dört user story ve on altı kabul kriteri almış. Ve spec-as-source hedefiyle model-driven development'ın tarihsel başarısızlığı arasında keskin bir paralellik kuruyor. François Zaninotto'nun Kasım 2025 tarihli [Spec-Driven Development: The Waterfall Strikes Back](https://marmelab.com/blog/2025/11/12/spec-driven-development-waterfall-strikes-back.html) yazısı da aynı yere işaret ediyor; hatta daha sert: SDD, kodlamadan önce ağır dokümantasyon fikrini diriltiyor ve çevikliği markdown katmanlarının altına gömme riski taşıyor. Zaninotto'nun yerine önerdiği şey “Natural Language Development”: zor problemi çok sayıda küçük ve test edilebilir parçaya bölüp agent'a küçük adımlar attırmak.
+
+Bu eleştirilerin hepsi yerinde. Ama dikkat edin: **hepsi tek bir geliştirici ile bir agent arasındaki iş akışı hakkında.** Hangi markdown dosyası, hangi sıra, hangi araç, ne kadar ayrıntı. Bölüm 1'deki organizasyonun sorunu bu değildi. Onun sorunu, spec'i kimin yazdığı, kaç tane spec olduğu, hangi rolün ne zaman devreye girdiği ve ürün kararının kod katılaşmadan önce mi sonra mı alındığıydı.
+
+SDD literatürü araç katmanını çözdü. Organizasyon katmanı büyük ölçüde boş. Bu yazı o boşluğu doldurmayı deniyor.
+
+### Zaninotto ile nerede aynı çizgideyiz
+
+Zaninotto'nun eleştirisini reddetmiyorum; büyük ölçüde paylaşıyorum. Problemi küçük ve test edilebilir parçalara bölmek doğrudur; ama bu, her parçaya **bütün olarak** yaklaşmayı gerektirir. Dikey bölme (küçük ama uçtan uca dilim) ile yatay bölme (backend spec'i ayrı, frontend spec'i ayrı) aynı şey değildir. Bu yazıda itirazım ikincisinedir. “Spec bütündür” ilkesi spec'in büyük olmasını değil, bölünmemiş olmasını gerektirir; küçük bir spec de bütün olabilir.
+
+</section>
+
+<DikeyYatayBolme />
+
+<section class="col s-lit">
+
+İki noktada ise ayrışıyoruz ve ikisi de Zaninotto'nun yönteminin yanlış olduğunu değil, **kapsamının beyan edilmediğini** gösteriyor.
+
+**Birincisi, öğrenme kodunun nereye gittiği.** Zaninotto hatalardan iterasyonu savunuyor; bu yazı da savunuyor. Fark, o kodun ana dala girip girmediğinde. Ana dalda biriken deneysel kod, LLM üretiminde en pahalı hata kaynağı olan kirli context'i üretir. Bunun gerekçesini Tip 2 bölümünde ayrıntılandırdım.
+
+**İkincisi, tersinirliğin varsayılan kabul edilmesi.** Zaninotto'nun modeli, her şeyin ucuza yeniden yapılabildiği bir dünyada çalışıyor; ve verdiği örnek bunu ele veriyor: Claude Code ile yaklaşık 10 saatte üretilmiş bir 3D heykel aracı. Tek geliştirici, düz bir üretim hattı, sıfır tüketici, migration yok, deprecation takvimi yok, ikna edilecek pazar yok. Bu koşullarda gerçekten her şey tersinirdir ve kapı (çözüm yaklaşımlarını tersinir olması veya olmamasına göre ayırmak. Bezos, 2015 hissedar mektubu; tip-1 ve tip-2 kapılar) kurmak israftır. Ama iş dallandıkça, ürünün spec kapsamı dışındaki parçaları ve başka tüketiciler o karara bağlandıkça tersinmezlik doğar ve geri almak artık tüketiciye dokunmayı gerektirir.
+
+Yani Zaninotto'nun yaklaşımı tek ürün, çizgisel üretim hattı ve genellikle tek geliştirici koşullarında doğrudur. Aşağıdaki modelde de bir karşılığı vardır: **Tip 2'nin K2 ıraksama fazı** tam olarak bu koşulları yapay olarak yeniden kurar; kod ana dala girmediği için tüketici grafiği tanımı gereği boştur, dolayısıyla orada hızlı iterasyon yalnızca meşru değil, tercih edilendir.
+
+</section>
+
+{/* ================= 4 ================= */}
+<section class="col s-eksen">
+
+## 4. Kritik ayrım: AI-coded ve AI-centric
+
+Tartışmayı netleştiren tek bir eksen var ve çoğu kurumsal “AI dönüşümü” programı bu ekseni hiç görmüyor.
+
+**AI-coded**, AI'ın spec tamamlandıktan *sonra* devreye girmesidir. İnsanlar düşünür, tartışır, karar verir, spec'i olgunlaştırır; AI kod yazar. AI burada çok hızlı bir uygulayıcıdır ve başka bir şey değildir.
+
+**AI-centric**, AI'ın spec'in *oluşumuna* katılmasıdır. Araştırma ortağı, soru üretici, çelişki bulucu, ön inceleme mercii. Kod yazması bu işlevin yanında ikincil kalır.
+
+</section>
+
+<AiCodedAiCentric />
+
+<section class="col s-eksen">
+
+Fark önemsiz görünebilir ama organizasyon şemasını belirleyen şey tam olarak budur. AI-coded bir dünyada spec üretmenin maliyeti hâlâ insan koordinasyonuna bağlıdır; yani spec'i kim yazacaksa, o kişinin bilmediği her şey için başka bir insana ihtiyacı vardır. AI-centric bir dünyada bu doğru değildir: bir kişi, bilmediği alanda yeterli derinliğe *talep üzerine* ulaşabilir.
+
+Uzmanlığı iki türe ayıralım:
+
+<div class="reveal-note">
+<div class="cell g">
+<div class="t">Yerleşik derinlik:</div>
+
+Kişide kalıcı olarak bulunan, yıllarla ve yara izleriyle kazanılmış derinlik.
+
+</div>
+<div class="cell a">
+<div class="t">Talep üzerine derinlik:</div>
+
+Gerektiğinde, AI destekli araştırma ve inceleme ile ulaşılan derinlik.
+
+</div>
+</div>
+
+Sert disiplin ayrımı, yerleşik derinliğin tek seçenek olduğu dünyanın kurumudur. Talep üzerine derinlik yeterince iyi hale geldiğinde, bu kurumun ekonomik gerekçesi buharlaşır. Bu yazının tezi budur.
+
+</section>
+
+{/* ================= 5 ================= */}
+<section class="col s-akr">
+
+## 5. AI öncesi akrabalar
+
+Önerinin her mekanizmasının AI öncesinden bir atası var ve bunları anmak tezi zayıflatmaz; aksine “shiny new thing syndrome” eleştirisine karşı zırh sağlar.
+
+</section>
+
+<AiOncesiAtalar />
+
+<section class="col s-akr">
+
+**Set-based concurrent engineering** (Toyota; Ward, Liker, Cristiano ve Sobek, *Sloan Management Review*, 1995). Tek bir çözümü erken seçip üzerinde iterasyon yapmak yerine, birden çok rakip çözümü paralel geliştirip kısıtlar netleştikçe elemek. “The Second Toyota Paradox” olarak anılan bulgu şuydu: geç karar vermek, doğru anlaşıldığında daha hızlıdır. Bu yazıdaki “ıraksama modu” doğrudan bunun torunudur; ve önemi şurada: kanıtla eleme mantığı, big-design-up-front'un zıddıdır. Zaninotto'nun waterfall itirazına verilecek cevap burada yatıyor.
+
+**[Shape Up](https://basecamp.com/shapeup)** (Ryan Singer, Basecamp, 2019; çevrimiçi ücretsiz). Shaping, betting ve building'in ayrı faaliyetler olması; tahmin yerine “appetite”; backlog yerine betting table. Kritik detay: shaping işi, cycle ekiplerine paralel çalışan küçük bir kıdemli grup tarafından yapılır ve bir pitch bahse konu olmadan build ekipleriyle tartışılmaz. Sprint eleştirisi bu yazınınkiyle neredeyse aynı: sabit ritim, olgunlaşmamış işi üretime itiyor.
+
+**Dual-track agile** (Desirée Sy'nin 2007'deki çalışmasından çıkıp Marty Cagan ve Jeff Patton ile yaygınlaştı). Keşif ve teslimatın ayrı izler olarak yürütülmesi. Bu yazının önerisi bunun radikalleştirilmiş hali: iki paralel iz değil, teslimat izinin keşif izine tabi kılınması.
+
+**Tersinir ve tersinmez kararlar** (Bezos, 2015 hissedar mektubu; tip-1 ve tip-2 kapılar). Formüldeki K3 kapısının doğrudan dayanağı.
+
+**Conway yasası** (1968) ve **Team Topologies** (Skelton ve Pais, 2019). Ekip sınırlarının mimariyi belirlemesi ve stream-aligned ekip fikri. Bu yazıda önerilen dönüşüm, Team Topologies'in on yıldır söylediği şeyin hızlanmış hali olarak da okunabilir: bölünme ekseni yataydan (katman) dikeye (akış) döner.
+
+Yani LLM'ler yeni bir yön icat etmiyor. Mevcut bir yönün önündeki maliyet engelini kaldırıyorlar. O yön daha önceden de tarif edilmişti ama kod üretim maliyetleri bizi o yöne gitmemeye itti.
+
+</section>
+
+{/* ================= 6 ================= */}
+<section class="col s-tip">
+
+## 6. SDD sonrası üç organizasyon tipi
+
+SDD'yi benimsemiş organizasyonlar tek bir şeye dönüşmüyor. Üç ayrı yapıya ayrışıyorlar ve aralarındaki fark, verimlilik farkının tamamını açıklıyor.
+
+**Başlangıç noktası (SDD öncesi):** Disiplin uzmanlarının hem tasarımı hem kodu ürettiği klasik agile. Problemin Anatomisi bölümündeki organizasyon burada.
+
+</section>
+
+<DortYapi />
+
+<section class="col s-tip">
+
+<h3 class="t1"><span class="k">Tip 1;</span> Parçalı spec: drift fabrikası</h3>
+
+Disiplin uzmanları kendi spec'lerini ayrı ayrı yazar, kodu AI üretir.
+
+Bu, en yaygın ve en tehlikeli geçiş biçimi, çünkü mevcut organizasyon şemasını hiç değiştirmeden benimsenebilir. Herkes kendi alanının spec'ini yazar, herkes kendi agent'ını çalıştırır, herkes hızlanır. Yönetim tablosunda her şey iyi görünür.
+
+Sorun şu: ayrı zamanlarda, ayrı profesyoneller tarafından, ayrı bağlamlarla yazılmış spec'ler tanım gereği uyumsuzdur. Eskiden bu uyumsuzluk insan hızıyla üretiliyordu; şimdi makine hızıyla üretiliyor. Bölüm 2'deki üç patoloji ortadan kalkmaz, **şiddetlenir**:
+
+- Kontrat uyumsuzlukları daha çok kodun üzerine biner, çünkü her taraf kendi spec'ine sadık ve fazlasıyla üretken.
+- Karar gecikmesi aynı kalır ama katılaşan kod hacmi büyür, dolayısıyla geri alma maliyeti artar.
+- Aynı problem iki yerde birden çözülür: backend bir codemod yayınlarken ürün ekibi pazarı eğitmeyi planlar; frontend bir durumu maskelerken backend aynı durumu ayrı bir yolla düzeltir.
+
+</section>
+
+<DriftKonisi />
+
+<section class="col s-tip">
+
+Tip 1'in ayırt edici özelliği şudur: eski agile'ı ortadan kaldırmaz, onu **SDLC'nin omurgası olmaya zorlar**. Sürekli çıktı beklentisi, artık spec üretiminde de geçerli bir baskı haline gelir ve her disiplin kendi tarafında yarına kadar yaşayacak çözümler üretir. Drift'in asıl kaynağı burasıdır; ve pek çok organizasyon “AI dönüşümü yaptık” diyerek tam olarak burada duruyor. Tip-1'i asla durulmaması gereken bir organizasyon hedefi olarak görüyorum.
+
+</section>
+
+<section class="col s-tip">
+
+<h3 class="t2"><span class="k">Tip 2;</span> Ortak spec: yakınsama odaklı hibrit</h3>
+
+Disiplin uzmanları bir araya gelip **tek bir spec** üzerinde çalışır. Agile'ın işe yarar kısımları korunur ama döngüler kod üretmek için değil **spec üretmek için** koşturulur. Kod üretimi ucuz bir uygulama adımı olarak LLM'e bırakılır.
+
+Bu, saf AI-coded bir modeldir: AI spec olgunlaşana kadar bir PoC fabrikası veya research kaynıağı olmak dışında devrede değildir.
+
+**Çalışma birimi.** Bir döngünün “tamamlandı” tanımı sahaya çıkan bir özellik değil, yakınsamış bir spec'tir. Yakınsamış demek: bütün paydaş disiplinler onu okumuş ve kendi tarafından çürütmeye çalışmış, çürütememiştir; yanlışlanabilirlik kriterleri yazılıdır; kontratlar spec'in parçasıdır; ürün etkisi olan kararlar işaretlenmiş ve onaylanmıştır.
+
+Spec bütündür. Bir feature, bir bugfix ve bir davranış değişikliği farklı kapsamlara sahiptir ama aynı bütünlük kuralına tabidir. Özellikle davranış değişikliği: pazarda ürün olduğu için backfill, codegen, deprecation ve pazarı ikna etme spec'in gövdesidir, “sonra düşünülecek yan işler” değil.
+
+**İki mod (Dual-track agile'ın discovery/delivery ikilisiyle akraba).** Keşif modunda amaç seçenek üretmektir; kod ucuzdur ve atılmak üzere yazılır. **keşif modunda üretilen hiçbir kod ana dala girmez.**
+
+Bu kural iki ayrı sorunu birden çözüyor ve ikincisi LLM ile hayatımıza giren bir sorun.
+
+Birincisi, geri alma maliyetidir: bir yaklaşımı denemenin bedeli, onu terk etmenin bedelini içermemelidir. Bu klasik argüman ve set-based engineering'den beri biliniyor.
+
+İkincisi ve bugün daha kritik olanı **context kirliliği**. Terk edilmiş kodun ana dalda durması eskiden dağınıklıktı; artık üretimi aktif olarak yönlendiren bir girdidir. Çünkü codebase artık yalnızca bir artefakt değil, aynı zamanda bir prompt'tur. İnsan geliştiricinin bant dışı hafızası vardır; “o klasöre bakma, orası ölü” bilgisi kabile bilgisinde durur. Agent'ın böyle bir hafızası yoktur; **repo, hafızanın kendisidir.** Vazgeçilmiş bir yaklaşım ağaçta kaldığında agent bunu “denendi, olmadı” olarak değil, “bu projenin yerleşik deseni” olarak okur ve bir sonraki üretimlerin şablonu yapar. Klasik teknik borç doğrusal birikir; context borcu kendini çoğaltır, çünkü her üretim onu bir kat daha pekiştirir. “Sonra temizleriz” ucuz bir taahhüttü; artık değil.
+
+> İnsanlar uzun zamandır teknik borçtan bahsediyor. Ama şimdi elimizde, teknik borcu daha önce hiç mümkün olmayan şekillerde biriktirmemize izin verecek yepyeni bir kredi kartı var.
+>
+>
+>     <a href="https://www.wsj.com/articles/ai-is-writing-code-now-for-companies-that-is-good-and-bad-6f19ecdc" class="lbl">Armando Solar-Lezama, MIT Bilgisayar Bilimleri ve Yapay Zekâ Laboratuvarı profesörü, The Wall Street Journal röportajı.</a>
+
+</section>
+
+<TerkEdilmisKod />
+
+<section class="col s-tip">
+
+**Keşif modunun çıktısı silinen bir dal değil, bir karar kaydıdır.** Kural yalnızca “kodu atın” biçiminde uygulanırsa öğrenme de atılır ve aynı deney altı ay sonra tekrar koşulur. Kod atılır, bulgu kalır: hangi yaklaşım denendi, hangi ölçümle elendi, hangi kısıt ortaya çıktı. Bu kayıtlar Tip 3'ün ihtiyaç duyduğu külliyatın hammaddesidir.
+
+Karar modunda amaç seçenekleri elemek ve tek bir bütüne inmektir. Geleneksel sprint'in hatası bu iki modu aynı anda ve aynı kod tabanında çalıştırmasıydı: keşif yaparken production kodu yazıyorduk, bu yüzden keşfin sonucu bizi bağlıyordu.
+
+**Roller: uygulayıcıdan kısıt sağlayıcıya.** Disiplinler ortadan kalkmaz; işlevleri değişir.
+
+<TabloRolDonusumu />
+
+Kritik nokta: bir frontend mühendisinin “bu sayfalama modeliyle sonsuz kaydırma mümkün değil” demesi bir detay değil, ana spec'i geçersiz kılan bir kısıttır.
+
+**Formül.** Sprint'in yerine zaman kutusu değil kanıt kutusu geçer:
+
+<ul class="kapilar">
+<li>**K0; Problem beyanı.** Ne değişiyor, kim için, hangi ölçüt iyileşecek. Çözüm yok.</li>
+<li>**K1; Kısıt haritası.** Her disiplin kısıtlarını ve çürütmelerini koyar; QA yanlışlanabilirlik kriterlerini yazar. Production kodu yok.</li>
+<li>**K2; Keşif.** Açık sorular için PoC turları, atılabilir kod, ölçüm. Çıktı: kanıt.</li>
+<li>**K3; Karar + spec.** Tek, bütün, kontratları içeren spec. Kapı kriteri: hiçbir disiplin çürütemiyor.</li>
+<li>**K4; Uygulama.** LLM ağırlıklı üretim. Doğru yapıldığında en kısa aşamadır; uzuyorsa K3 yakınsamamıştır.</li>
+<li>**K5; Doğrulama.** K1'de yazılan kriterlere karşı kanıt. QA sürpriz yaşamaz.</li>
+</ul>
+
+</section>
+
+<AltiKapi />
+
+<section class="col s-tip">
+
+**Tersinirlik kuralı.** Tersinir kararlar (tip-2) K4'e ertelenir, tartışılmaz. Tersinmez kararlar (tip-1); veri şeması, public API kontratı, ücretlendirme, migration, deprecation takvimi; **K3'ü geçemez**.
+
+Ama “tersinmez” kelimesi burada özenli bir tanım gerektiriyor, çünkü yaygın kullanımı yanıltıcı. Tersinirlik kararın bir özelliği değildir; **kararın artı ona bağlananların** özelliğidir. Aynı karar birinci günde tersinir, dört yüzüncü günde tersinmezdir ve arada kararın kendisi hiç değişmemiştir. Tersinmezliği yaratan şey kod yazmak değil, birinin ona bağımlı hale gelmesidir; üstelik bu bağımlılar çoğu zaman spec'in kapsamı dışındadır: ürünün başka parçaları, başka ekiplerin kodu, entegratörler, sözleşmeye bağlanmış müşteri davranışları.
+
+</section>
+
+<TersinirlikZamanla />
+
+<section class="col s-tip">
+
+Bu, K3 kapısına öznel olmayan bir test verir. Soru “bu önemli bir karar mı” değildir; bu tartışılır ve tartışma kıdemle kazanılır. Soru şudur: **bu kararın spec sınırı dışında tüketicisi var mı?** Sıfırsa tersinirdir; ertelenir, tartışılmaz, yanlış çıkarsa değiştirilir. Sıfırdan büyükse tersinmezdir; K3'ü geçemez, çünkü geri almak artık tüketiciye dokunmayı gerektirir. Bölüm 6'nın başında sayılan backfill, codegen, deprecation yönetimi ve pazarı ikna etme kalemleri tam olarak bu tüketici grafiğinin faturasıdır.
+
+Buradan çıkan ilke, bu yazının en pratik cümlesi olabilir: **tersinirlik bir başlangıç koşuludur, kalıcı bir özellik değil.** Ürün yaşlandıkça ve dallandıkça monoton olarak azalır. Sıfır günündeki bir projede her şey tersinirdir ve bu yüzden kapı kurmak israftır. Bölüm 1'deki organizasyonun sorunu, tersinirliğin çoktan tükendiği bir kod tabanında hâlâ sıfır günü varsayımıyla çalışmasıydı.
+
+**Ölçeklendirme kuralı.** Kapılar feature'ın büyüklüğüyle değil, tüketici grafiğiyle ölçeklenir. Spec sınırı dışında tüketicisi olmayan bir iş; çoğu bugfix, çoğu iç iyileştirme; K0'dan K4'e doğrudan geçer ve kapı ritüeli hiç çalışmaz. Bu kural olmadan model, tek satırlık bir null kontrolü için dört user story üreten araçlarla aynı hataya düşer.
+
+Tip 2 gerçek bir kazanım sağlar. Ama bir tavanı vardır ve tavan şudur: **koordinasyon maliyeti hâlâ insan sayısıyla çarpımsal büyür.** Beş disiplinin aynı spec üzerinde yakınsaması, beş takvimin, beş bağlamın ve beş egonun senkronize edilmesi demektir. Tip 2 uyumsuzluğu çözer, koordinasyonu çözmez.
+
+</section>
+
+<section class="col s-tip">
+
+<h3 class="t3"><span class="k">Tip 3;</span> Genel bilici yazarlığı: AI-centric model</h3>
+
+Burada organizasyon şemasının kendisi değişir.
+
+Spec'i tek bir **genel bilici** yazar. Tek oturumda değil; birden fazla oturumda, titizlikle detaylandırarak. Yanında AI destekli araştırma vardır: bilmediği alanlarda soru-cevap ve tartışma turlarıyla talep üzerine derinliğe ulaşır. Kurduğu teknik kararlar frontier modeller tarafından ön incelemeden geçirilir. Sonuçta ortaya çıkan şey, tek bir zihnin kurduğu ama defalarca sınanmış, bütün bir spec'tir.
+
+Buradaki incelik şu: **spec'in tek yazarı olması, tek görüşle yazılması demek değildir.** Aksine, çok görüşlülük yazarın içine taşınmıştır. Tip 2'de backend uzmanı ile frontend uzmanı arasındaki gerilim iki insan arasında bir toplantıydı; Tip 3'te aynı gerilim tek bir insanın birden çok inceleme turunda ürettiği bir çelişki listesidir. Bütünlük artık uzlaşmayla değil, yazarlıkla sağlanır.
+
+</section>
+
+<SenkronizasyonKanallari />
+
+<section class="col s-tip">
+
+Ekonomik sonucu keskindir: Tip 2'nin çarpımsal koordinasyon maliyeti ortadan kalkar. Bu yüzden Tip 3 üç tip arasında **açık ara en zaman-etkin olanıdır**.
+
+Ve ekip kavramının içi boşalır.
+
+Artık bir feature üzerine spec yazıp her döngüde bir çıktı üreten “ekip” yoktur. Aynı ürün üzerinde çalışan bir grup insan vardır. Kimin hangi feature'ı sahiplendiği döngüden döngüye değişir. Sprint review'un yerini, döngü sonlarında yapılan **show-and-tell oturumları** alır; ve bu oturumların işlevi de değişmiştir. Artık paydaşa iş onaylatmak için değil, herkesin ürünün hangi yöne gittiğinden haberdar olması için yapılır. Tip 3'te en kıt kaynak, onay değil **durum farkındalığıdır**.
+
+AI-centric SDLC'nin sert disiplin uzmanlıkları yerine genel bilicileri değerli kılması tam olarak buradan gelir. Uzmanlık ölmez; **fiyatı düşer**, çünkü talep üzerine erişilebilir hale gelir. Değerli olan, sistemin bütününü zihninde tutup sınırlar arası çelişkileri fark edebilen kişidir; çünkü bu, talep üzerine erişilemeyen tek yetenektir.
+
+</section>
+
+{/* ================= 7 ================= */}
+<section class="col s-aidlc">
+
+## 7. AWS AI-DLC: en yakın komşu
+
+Tip 3'e bugün en yakın kurumsal öneri AWS'nin AI-DLC'si (AI-Driven Development Life Cycle). Kurallar [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) deposunda açık kaynak ve Claude Code, Kiro, Cursor, Codex CLI, opencode ya da GitHub Copilot gibi araçlara takılabiliyor. Ölçek fikri vermesi açısından: [v2 dalı](https://github.com/awslabs/aidlc-workflows/tree/v2), 11 alan uzmanı ve 2 salt-inceleme agent'ından oluşan 14 agent'lık bir kadroyla 33 aşamalı bir iş akışı tanımlıyor ve her kapıyı insanın onaylamasını bekliyor.
+
+**Ne yapıyor.** Üç faz var: Inception (ne ve neden), Construction (nasıl), Operations (dağıtım ve işletim). Her faz bir sonrakine bağlam besliyor ve artefaktlar depoda kalıcı tutuluyor; “agent'lar unutur, dosyalar unutmaz” mantığı. Sözlük bilinçli olarak değiştirilmiş: sprint yerine **bolt** (haftalar değil, saatler veya günler), epic yerine **Unit of Work**, en üstte ise **Intent**. İki ritüel var: Inception'da **Mob Elaboration** (ürün, geliştirici, QA ve operasyon birlikte AI'ın sorularını ve önerilerini gerçek zamanlı doğrular), Construction'da **Mob Construction** (teknik kararlar anlık netleştirilir). Çekirdek felsefe “AI önerir, insan onaylar” ve insanların pasif onaylayıcıya dönüşmemesi için zorunlu kontrol noktaları konmuş.
+
+Rakamlara gelince, dikkatli olmakta fayda var. re:Invent 2025'te AWS 10-15x verimlilik artışlarından ve Wipro'nun yaklaşık üç aylık planlanmış işi beş gün süren dört saatlik mob oturumlarıyla yaklaşık 20 saate sıkıştırmasından bahsetti. Aynı sunum karşı ağırlığı da taşıyordu: yapılandırılmamış AI asistan kullanımında ölçülen kazanç %10-15 bandında. Bunlar satıcı tarafından, satıcının yürüttüğü projelerde üretilmiş sayılar; yön gösterici, doğrulanmamış. Başarısızlık vakaları henüz yayımlanmadı.
+
+**AWS AI-DLC'ye katıldığım konular** Sabit iki haftalık ritmin reddi; disiplinlerin ayrı ayrı değil aynı oturumda çalışması; bağlamın kalıcı ve versiyonlanabilir olması; kararların sessizce koda gömülmek yerine açıkça yüzeye çıkarılması. Bunlar bu benim de savunduğu şeyler.
+
+**Nerede ayrışıyoruz; dört nokta.**
+
+</section>
+
+<AiDlcAyrimlari />
+
+<section class="col s-aidlc">
+
+**Birincisi, döngünün yönü.** AI-DLC döngüyü kısaltıyor: bolt saatler veya günler. Benim hedefim ve önerdiğim şey döngüyü kısaltmak değil, **çıktı ritmini spec olgunluğundan ayırmak**. Bir spec olgunlaşmadıysa döngü uzayabilmelidir; olgunlaştıysa uygulama zaten kısadır. “Bolt” kavramı, agile'ın sürekli çıktı beklentisini kısaltarak koruyor; benim teşhisine göre asıl sorun tam olarak o beklentiydi. AWS tarafı şöyle savunulabilir. Wğer saatler veya günler olgunlaşma için yeterli değilse muhtemelen spec kapsamı küçültülmeli gibi bir pencereden bakıyor olabilirler. Haklılık payı var.
+
+**İkincisi, AI'ın rolü.** AI-DLC'de AI önerir, insan onaylar. Bu yazıda insan çürütür. Fark retorik değil: onaylama modunda insanın varsayılan davranışı kabul etmektir ve AI-DLC'nin kendi tasarımı bu riski kabul edip zorunlu kontrol noktalarıyla telafi etmeye çalışıyor. Çürütme modunda varsayılan davranış itirazdır ve inceleme yükü daha az, daha isabetli olur. Nitekim Böckeler'in “sahte kontrol hissi” eleştirisi de tam bu ayrımı işaret ediyor. Burada AI önermesin insan önersin AI yapılandırsın yani AWS'nin tam zıttı bir yerde durmak da mantıklı değil. Frontier modellerin akıl yürütme kabiliyetleri günden güne artıyor. Ama bu tarafı formulize etmeye açıkça itiraz ediyorum. AI'ı bir contractor ya da supervisor olarak formulize etmek yanlış. Bir iş ortağı olarak görmek ve bu maddedeki rolü insan ile eşit tutmaluyız bazen insan önerir AI onaylar, bazen tersi.
+
+**Üçüncüsü, mob'un maliyeti.** Bağımsız bir denemenin gözlemi şuydu: dört kişiyle bolt temposunda mob doğrulama, bir sprint'in iki haftaya yaydığı iş için bütün bir öğleden sonrayı yiyor; daha hızlı, ama kıdemli dikkat açısından daha ucuz değil. Bu yazının Tip 2'si aynı maliyeti taşır ve bunu açıkça kabul eder; Tip 3 ise mob'u ortadan kaldırıp yerine **tek yazarlık artı asenkron inceleme** koyar. Mob, koordinasyon maliyetini görünür kılar ama ortadan kaldırmaz.
+
+**Dördüncüsü ve en önemlisi, tersinmezlik kapısı yok.** AI-DLC'de kararlar yüzeye çıkarılıyor ama tersinirliklerine göre sınıflandırılmıyor. Bölüm 1'deki organizasyonun en pahalı sorunu; “çalışan ama yanlış” ile “doğru ama yeniden yazım” ikilemi; tam olarak burada çözülmeden kalıyor. Bir kararın açıkça görünür olması, geri alınabilir olduğu anlamına gelmez.
+
+Özetle: AI-DLC, Tip 3'ün en olgun kurumsal ifadesi ve ciddiye alınmayı hak ediyor. Ama Tip 2'nin çürütme disiplinini ve tersinirlik kapısını içermediği için, hızı kararsızlıkla satın alma riski taşıyor.
+
+</section>
+
+{/* ================= 8 ================= */}
+<section class="col s-onk">
+
+## 8. Tip 3'ün ön koşulları; ve neden çoğu organizasyon oraya atlayamaz
+
+Tip 3 en zaman-etkin model, ama doğrudan geçilebilir bir yer değil. Üç ön koşulu var ve bunlar sağlanmadan yapılan geçiş, Tip 1'in daha kendine güvenen bir versiyonunu üretir.
+
+</section>
+
+<UcSutun />
+
+<section class="col s-onk">
+
+**Ön koşul 1: Kurum Hafızası: örtük bilginin dışsallaştırılmış olması.** Bir uzmanın gerçek değeri, sizin production trafiğinizi, on-call geçmişinizi, müşterinizin garip kullanım desenini ve üç yıl önce neden o migration'dan vazgeçildiğini bilmesidir. Frontier modeller bunu bilmez. Genel bilici de bilmez; *eğer bu bilgi bir yere yazılmadıysa*. Tip 3'ün gerçek gereksinimi budur: karar kayıtları, olay geçmişi, mimari değişmezler ve önceki spec'lerin makine tarafından okunabilir bir külliyat halinde tutulması. Bu külliyat yoksa genel bilici bilgisiz değil, **kendinden emin şekilde yanlıştır**; ki bu daha kötüdür.
+
+**Ön koşul 2: Modül Sınırları: mimari sınırların açıkça savunulması.** Conway yasası ters yönde de çalışır. Ekip sınırları yapaydı ama görünürdü; sistemin okunabilir belgesiydi. Bağımsız genel biliciler ayrı feature spec'leri üzerinde çalıştığında birleştirme problemi kaybolmaz, **katman değiştirir**: kontrat düzeyinden mimari düzeye çıkar. Buna karşı bir mimari değişmezler belgesi ve bunu sahiplenen bir rol (sistem yöneticisi, mimari kurul, adı önemli değil) gerekir. Aksi halde sonuç, hiçbir modül sınırının kimseyi rahatsız etmediği; dolayısıyla hiçbirinin savunulmadığı; dikişsiz bir monolittir.
+
+**Ön koşul 3: Genel bilici arzı.** Bu en az konuşulan ve en ciddi olanı. Genel biliciler nereden gelecek? Şimdiki genel bilicilerin çoğu, bir alanda uzmanlaşıp sonra yayılarak oluştu. Uzmanlık basamağını kaldırırsanız, on yıl sonra genel bilici üretecek boru hattını da kaldırmış olursunuz. Tip 3'e geçen bir organizasyonun, kıdemsiz mühendisleri için ayrı ve bilinçli bir derinleşme yolu tasarlaması gerekir; yoksa modelin yakıtı biter. Ama popülasyonların kendini dengelemesi de evrim yasasının bir sonucudur. Genel bilicilerin tükendiği noktada sistem genel bilici üretecek yeni bir boru hattını değerli kılacaktır. Bu, başka bir günün endişesi olarak altını çizdiğimiz birşey sadece.
+
+Bu üç ön koşul, Tip 2'nin neden atlanabilir bir aşama olmadığını da açıklıyor. Tip 2'nin K1 kısıt haritaları ve çürütme turları, aslında **örtük bilgiyi dışsallaştırma makinesidir**. Uzmanlar Tip 2'de yazdıkları kısıtlarla, Tip 3'ün ihtiyaç duyduğu külliyatı üretirler. Yani Tip 2, Tip 3'ün rakibi değil, ön hazırlığıdır.
+
+</section>
+
+{/* ================= 9 ================= */}
+<section class="col s-olcu">
+
+## 9. Ölçüm / Principal pozisyonun formüldeki yeri ve verimliliği nasıl ölçmesi gerekitği konusu
+
+Velocity bu modellerde anlamsızdır; ölçtüğü şey (üretilen kod hacmi) artık kıt kaynak değil. Önerilen metrikler:
+
+<ul class="metrik">
+<li>**Karar gecikmesi.** Ürün etkisi olan bir kararın alınması ile ürün tarafının haberdar olması arasındaki süre. Hedef sıfıra yakın.</li>
+<li>**Spec çalkantısı.** K3 sonrası spec'te yapılan değişiklik oranı. Yüksekse yakınsama sahteydi.</li>
+<li>**Yeniden yazım oranı.** Bir döngüde üretilip sonrakinde atılan production kodu. Iraksama modundaki atılan kod buna dahil değildir.</li>
+<li>**Çürütme sayısı.** Disiplinlerin veya inceleme turlarının ana spec'e getirdiği geçerli itirazlar. Sıfırsa oturum ritüele dönüşmüştür; sanılanın aksine bu metriğin düşük olması iyi haber değildir.</li>
+<li>**Külliyat kapsamı** (Tip 3 için). Tersinmez kararların ve elenen ıraksama seçeneklerinin ne kadarının yazılı kaydı var. Tip 3'e geçiş hazırlığının doğrudan göstergesi.</li>
+<li>**Tüketici grafiği yoğunluğu.** Bir spec sınırının dışında kaç tüketici olduğu. Bu sayı, hangi kapıların çalışacağını belirleyen girdi olduğu için ölçülmeye değer; aynı zamanda mimari sınırların nerede aşındığını gösterir.</li>
+</ul>
+
+</section>
+
+{/* ================= 10 ================= */}
+<section class="col s-yer">
+
+## 10. Nerede olduğunuzu nasıl anlarsınız
+
+Basit üç soru:
+
+**Tek bir olguyu productiona dahil etmek için kaç tane spec var?** Birden çoksa Tip 1'desiniz; organizasyon şemanız ne derse desin.
+
+**Tek spec var ama kaç kişinin uzlaşmasıyla yazılıyor?** Birden çoksa Tip 2. Tekse Tip 3.
+
+</section>
+
+<KararAgaci />
+
+{/* ================= 11 ================= */}
+<section class="col s-itiraz">
+
+## 11. Sınırlar ve karşı argümanlar
+
+**Uzmanlık gerçekten indirgenemez olduğunda tez zayıflar.** Derleyici, veritabanı iç mimarisi, kriptografi, gerçek zamanlı sistemler. Bu alanlarda talep üzerine derinlik yeterli değildir ve disiplin sınırı hâlâ ekonomiktir.
+
+**Regülasyon ayrımı zorunlu kılabilir.** Fintech, sağlık ve ödeme sistemlerinde görevler ayrılığı bir tercih değil, yasal yükümlülüktür. Tip 3 buralarda uygulanamaz.
+
+**Ama arada bir form var: Tip 2.5.** Yukarıdaki iki itiraz — indirgenemez uzmanlık ve regülasyon — Tip 3'ü çürütmez, sınırını çizer; ve o sınırın tam üstünde duran bir ara yapı vardır. Kuralı basittir: birleştirilebilecek her rol genel bilicide birleşir, dışarıda kalması *zorunlu* olanlar dışarıda kalır. Zorunluluğun üç kaynağı vardır — regülasyonun görevler ayrılığını dayattığı yerler, alan karmaşıklığının kendi başına bir uzmanlık olduğu yerler ve uzmanlığın gerçekten indirgenemez olduğu yerler — ve üçü de aynı testten geçer: bu derinliğe talep üzerine ulaşılabiliyor mu? Ulaşılabiliyorsa rol birleşir; ulaşılamıyorsa ayrı kalır. Ortaya n değil **1 + n** çıkar: spec'i tek bir genel bilici yazar, ama tersinmez kararların dokunduğu her alanın uzmanı onu çürütmek üzere okur.
+
+</section>
+
+<TipIkiBucuk />
+
+<section class="col s-itiraz">
+
+**Tip 2.5 iki komşusundan da ayrılır.** Tip 2'den farkı yazarlıktadır: spec çok yazarlı bir uzlaşmanın ürünü değil, tek yazarlı bir metnin uzman incelemesinden geçmiş halidir; koordinasyon maliyeti kişi sayısıyla çarpımsal değil, inceleme sayısıyla doğrusal büyür. Tip 3'ten farkı ise incelemenin devredilemezliğindedir: Tip 3 inceleme yükünün bir kısmını modele bırakabilir, Tip 2.5'te en az bir tur insana bağlıdır ve regülasyon söz konusuysa o tur imzalıdır. Pratikte, olgun bir ürün üzerinde çalışan çoğu ekibin gerçekçi hedefi Tip 3 değil burasıdır.
+
+**Doğrulama yeni darboğazdır.** Üretim on kat hızlandığında inceleme yükü büyür ve bunun ölçülmüş örnekleri var: Scott Logic CTO'su Colin Eberhardt'ın Spec Kit ile gerçek bir feature denemesinde 689 satır kod için 2.577 satır markdown çıkmış, incelemenin çoğu belgelere giden 3,5 saat sürmüş ve yine de bir hata üretime kaçmış. Böckeler'in “aşırı inceleme yükü” eleştirisi bu yazının önerisine de yöneliktir; Tip 2'nin K1 kısıt haritaları bu yükü azaltmak yerine öne çekmeyi hedefler. Tip 3'ün cevabı incelemenin bir kısmını modele devretmektir; ama bu cevabın kendisi Ön koşul 1'e bağımlıdır.
+
+<div class="chips tight">
+<div class="chip">689</div>
+<span class="sep">satır kod</span>
+<div class="chip bad">2.577</div>
+<span class="sep">satır markdown</span>
+<div class="chip bad">3,5</div>
+<span class="sep">saat inceleme</span>
+<div class="chip bad">1</div>
+<span class="sep">hata yine de kaçtı</span>
+<span class="lbl">Eberhardt'ın Spec Kit denemesi</span>
+</div>
+
+**Brooks hâlâ haklı olabilir.** Yazılımın karmaşıklığı arızi değil özsel bir özellikse, bir spec bunu tanımı gereği tam olarak yakalayamaz. Spec'i tek gerçeklik kaynağı ilan eden her yaklaşım bu duvara çarpar. Bu yazının cevabı, spec'i onay belgesi değil **sınanabilir hipotez** olarak tanımlamaktır: ıraksama modu tam olarak bu yüzden vardır.
+
+**Ve bir ironi.** Spec'i bütün tutmanın teknik gerekçelerinden biri, modelin parçayı değil bütünü gördüğünde daha iyi karar vermesidir. Ama belli bir ölçekten sonra bağlam penceresi ve dikkat kaybı spec'i bölmeyi zorunlu kılar. Yani ayrıştırma geri gelir; bu kez insan değil, makine nedenleriyle. Sınırları yok etmiyoruz; **kimin rahatsızlığına göre çizildiklerini değiştiriyoruz.**
+
+</section>
+
+{/* ================= 12 ================= */}
+<section class="col s-son">
+
+## 12. Sonuç
+
+Spec-driven development tartışması bugün büyük ölçüde araç tartışması: hangi CLI, kaç markdown dosyası, spec kod ile senkron mu kalıyor. Bu tartışmanın kendisi değerli, ama yanlış katmanda duruyor.
+
+Asıl soru şu: spec'i kim yazıyor, kaç tane var, ve ürün kararı kod katılaşmadan önce mi alınıyor. Bu üç soruya verdiğiniz cevap, aracınızdan bağımsız olarak hangi tipte olduğunuzu belirler. Rolleri sert sınırlarla bölüp herkese ayrı bir agent veren bir organizasyon Tip 1'dedir ve satın aldığı tek şey, uyumsuzluğu daha hızlı üretme kapasitesidir.
+
+</section>
+
+<KapananCember />
+
+<section class="col s-son">
+
+Yön açık: disiplinlerin ayrıştığı yapıdan, ortak spec'te yakınsayan yapıya; oradan da genel bilicilerin bağımsız yazarlığına. Bu, herkesin her şeyi yaptığı dönemden uzmanlaşmaya, oradan tekrar bütünlüğe dönen bir çemberin kapanması gibi görünüyor; ama aynı yere dönmüyoruz. Eskiden bütünlük, bir kişinin her şeyi bilmesiyle sağlanıyordu. Şimdi bütünlük, bir kişinin her şeyi *sorabilmesiyle* sağlanıyor.
+
+> Uzmanlık kaybolmuyor. Fiyatı düşüyor. Ve fiyatı düşmeyen tek şey, sistemin bütününü zihninde tutup sınırlar arasındaki çelişkiyi görebilmek.
+
+</section>
+
+<hr class="qz" />
+
+<section class="col refs">
+
+<h2>Kaynaklar</h2>
+
+### Spec-driven development: araçlar ve eleştiri
+
+- Birgitta Böckeler, [Understanding Spec-Driven-Development: Kiro, spec-kit, and Tessl](https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html), martinfowler.com; üç olgunluk seviyesi (spec-first / spec-anchored / spec-as-source), inceleme yükü ve “sahte kontrol hissi” eleştirisi, MDD paraleli.
+- François Zaninotto, [Spec-Driven Development: The Waterfall Strikes Back](https://marmelab.com/blog/2025/11/12/spec-driven-development-waterfall-strikes-back.html), Marmelab, 12 Kasım 2025; SDD'nin şelaleye geri dönüş eleştirisi ve “Natural Language Development” alternatifi. [Hacker News tartışması](https://news.ycombinator.com/item?id=45935763).
+- [github/spec-kit](https://github.com/github/spec-kit); GitHub'ın SDD araç seti (Eylül 2025).
+- [Spec-driven development](https://en.wikipedia.org/wiki/Spec-driven_development), Wikipedia; terimin genel çerçevesi ve kaynakçası.
+- [Spec Driven Development: When Architecture Becomes Executable](https://www.infoq.com/articles/spec-driven-development/), InfoQ, Ocak 2026.
+- [What is Spec-Driven Development?](https://www.ibm.com/think/topics/spec-driven-development), IBM.
+- Ian Xu, [agentic-engineering-field-study](https://github.com/ianhxu/agentic-engineering-field-study/blob/main/04-spec-driven-development.md), Temmuz 2026; alanın çok kaynaklı derlemesi.
+- [Spec-driven development works; until the spec stops](https://kanbento.dev/blog/spec-driven-development), kanbento.dev; Colin Eberhardt'ın Spec Kit ölçümünün (689 satır kod / 2.577 satır markdown / 3,5 saat inceleme) aktarıldığı kaynak.
+- Alex Punnen, [Why Specification-Driven Development is Not a Silver Bullet for AI-Assisted SDLC](https://pub.towardsai.net/why-specification-driven-development-sdd-is-not-a-silver-bullet-for-ai-assisted-sdlc-491c71bcf835), Towards AI; Brooks'un “özsel karmaşıklık” argümanı üzerinden eleştiri.
+- [The Spec Growth Engine](https://arxiv.org/pdf/2606.27045), arXiv; spec-anchored yaklaşımın akademik bir formülasyonu ve araçların Böckeler ekseninde konumlandırılması.
+
+### AWS AI-DLC
+
+- [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows); resmî kural deposu; [v2 dalı](https://github.com/awslabs/aidlc-workflows/tree/v2) (14 agent, 33 aşama).
+- [AI-DLC Explained: AWS's AI-Driven Development Lifecycle](https://www.exploreagentic.ai/insights/ai-dlc/), exploreagentic.ai; re:Invent 2025 (DVT214) rakamlarının ve mob doğrulamanın kıdemli dikkat maliyetine dair bağımsız gözlemin kaynağı.
+- [How AWS's AI-DLC defines an AI-Native methodology](https://ttpsc.com/en/blog/how-aws-ai-dlc-defines-an-ai-native-methodology/), TTPSC.
+- Michael Forrester, [Deep Dive: AWS AI Development Life Cycle](https://michaelrishiforrester.com/2026/03/11/deep-dive-aws-ai-development.html).
+- Micah Walter, [Notes on exploring the AI-Driven Development Life Cycle](https://www.micahwalter.com/posts/notes-on-exploring-ai-dlc).
+- Ran Isenberg, [AI-Driven SDLC](https://ranthebuilder.cloud/blog/ai-driven-sdlc/); yönetişim ve güvenlik kontrolleri açısından daha geniş çerçeve.
+
+### AI öncesi akrabalar
+
+- Ryan Singer, [Shape Up: Stop Running in Circles and Ship Work that Matters](https://basecamp.com/shapeup), Basecamp, 2019; shaping / betting / building ayrımı ve appetite kavramı.
+- Allen C. Ward, Jeffrey K. Liker, John J. Cristiano, Durward K. Sobek II, “The Second Toyota Paradox: How Delaying Decisions Can Make Better Cars Faster”, *Sloan Management Review*, 36(3), 1995; set-based concurrent engineering.
+- Jeff Bezos, Amazon 2015 hissedar mektubu; tip-1 ve tip-2 (tersinmez ve tersinir) kararlar.
+- Desirée Sy, “Adapting Usability Investigations for Agile User-Centered Design”, *Journal of Usability Studies*, 2007; dual-track yaklaşımın kökeni; Marty Cagan ve Jeff Patton ile yaygınlaştı.
+- Melvin E. Conway, “How Do Committees Invent?”, *Datamation*, 1968.
+- Matthew Skelton ve Manuel Pais, *Team Topologies*, IT Revolution, 2019; stream-aligned ekipler ve bilişsel yük.
+- Frederick P. Brooks, *The Mythical Man-Month* ve “No Silver Bullet”, 1975/1986; özsel ve arızi karmaşıklık ayrımı.
+
+<div class="not">
+
+Not: AI-DLC'ye ilişkin verimlilik rakamları AWS ve iş ortakları tarafından, AWS'nin yürütülmesine katkıda bulunduğu projelerde üretilmiştir. Bağımsız doğrulama ve yayımlanmış başarısızlık vakası bulunmadığından bu yazıda yön gösterici veri olarak ele alınmıştır.
+
+</div>
+
+</section>

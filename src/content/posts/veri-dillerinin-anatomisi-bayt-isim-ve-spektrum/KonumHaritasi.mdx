@@ -1,0 +1,51 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 720 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="İki eksenli konum haritası: yatay eksen isimlendirme derinliği, dikey eksen tutarlılık vaadi">
+  <g stroke="#EDECE7" stroke-width="1">
+    <path d="M190 300h490M190 220h490M190 140h490"/>
+    <path d="M312 60v320M435 60v320M557 60v320"/>
+  </g>
+  <path d="M190 60v320h490" stroke="#B9B7AF" stroke-width="1.5" fill="none"/>
+
+  <text x="182" y="384" font-size="11.5" text-anchor="end" fill="#8B8983">yok / en-iyi çaba</text>
+  <text x="182" y="64" font-size="11.5" text-anchor="end" fill="#8B8983">serileştirilebilir işlem</text>
+  <text x="24" y="220" font-size="12.5" fill="#55534E" transform="rotate(-90 24 220)" text-anchor="middle">Tutarlılık vaadi (TCL) →</text>
+
+  <text x="190" y="402" font-size="11.5" fill="#8B8983">opak bayt bloğu</text>
+  <text x="680" y="402" font-size="11.5" text-anchor="end" fill="#8B8983">hücre düzeyinde ad + cebir</text>
+  <text x="435" y="428" font-size="12.5" text-anchor="middle" fill="#55534E">İsimlendirme derinliği (DDL + DQL) →</text>
+
+  <g stroke="#FFFFFF" stroke-width="2">
+    <circle cx="317" cy="316" r="7" fill="#14724B"/>
+    <circle cx="259" cy="271" r="7" fill="#14724B"/>
+    <circle cx="337" cy="246" r="7" fill="#c47b00"/>
+    <circle cx="376" cy="169" r="7" fill="#14724B"/>
+    <circle cx="435" cy="194" r="7" fill="#c47b00"/>
+    <circle cx="484" cy="239" r="7" fill="#2733C9"/>
+    <circle cx="592" cy="143" r="7" fill="#2733C9"/>
+    <circle cx="611" cy="105" r="7" fill="#2733C9"/>
+    <circle cx="660" cy="92" r="7" fill="#2733C9"/>
+  </g>
+  <g font-size="12.5" fill="#141412">
+    <text x="305" y="320" text-anchor="end">ext4</text>
+    <text x="247" y="275" text-anchor="end">S3</text>
+    <text x="349" y="250">RabbitMQ</text>
+    <text x="364" y="173" text-anchor="end">ZFS · Btrfs</text>
+    <text x="447" y="198">Kafka</text>
+    <text x="496" y="243">Redis</text>
+    <text x="580" y="147" text-anchor="end">MongoDB</text>
+    <text x="599" y="109" text-anchor="end">SQLite</text>
+    <text x="660" y="76" text-anchor="middle">PostgreSQL</text>
+  </g>
+
+  <g transform="translate(190,450)">
+    <circle cx="0" cy="-4" r="5.5" fill="#14724B"/><text x="12" y="0" font-size="11.5" fill="#55534E">dosya sistemi</text>
+    <circle cx="102" cy="-4" r="5.5" fill="#2733C9"/><text x="114" y="0" font-size="11.5" fill="#55534E">veritabanı</text>
+    <circle cx="192" cy="-4" r="5.5" fill="#c47b00"/><text x="204" y="0" font-size="11.5" fill="#55534E">mesaj kuyruğu</text>
+  </g>
+</svg>
+</div>
+<figcaption>Etiketler (renk) eksenlerde net kümeler oluşturmaz: ZFS bir “dosya sistemi” olarak Redis'ten güçlü tutarlılık vaat eder, Kafka bir “kuyruk” olarak RabbitMQ'dan derin isimlendirir. *Yerleşimler nitel ve tartışmaya açıktır.*</figcaption>
+</figure>
+</div>

@@ -1,0 +1,14 @@
+<div class="tbl tbl-5">
+<table>
+<thead>
+<tr><th>Soru</th><th>SQL</th><th>MongoDB</th><th>POSIX dosya sistemi</th><th>Kafka</th><th>Amazon S3</th></tr>
+</thead>
+<tbody>
+<tr><td>**İsim tanımı** (DDL)</td><td class="mono">CREATE TABLE</td><td class="mono">createCollection</td><td class="mono">mkdir, creat</td><td>topic oluşturma</td><td>bucket oluşturma</td></tr>
+<tr><td>**Değiştirme** (DML)</td><td class="mono">INSERT/UPDATE</td><td class="mono">insertOne</td><td class="mono">write, unlink</td><td class="mono">produce</td><td class="mono">PutObject</td></tr>
+<tr><td>**Okuma** (DQL)</td><td class="mono">SELECT</td><td class="mono">find, aggregate</td><td class="mono">read, readdir</td><td>consume + offset</td><td class="mono">GetObject</td></tr>
+<tr><td>**Yetki** (DCL)</td><td class="mono">GRANT</td><td class="mono">grantRolesToUser</td><td class="mono">chmod, ACL</td><td>topic ACL</td><td>IAM politikası</td></tr>
+<tr><td>**Tutarlılık** (TCL)</td><td class="mono">COMMIT</td><td class="mono">commitTransaction</td><td class="mono">fsync, journal</td><td>idempotent producer</td><td>nesne başına atomiklik</td></tr>
+</tbody>
+</table>
+</div>

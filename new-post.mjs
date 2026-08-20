@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Yeni yazı iskeleti oluşturur:  npm run new -- "Yazının Başlığı"
 
-import { writeFile, access } from "node:fs/promises";
+import { writeFile, mkdir, access } from "node:fs/promises";
 import { join } from "node:path";
 
 const ROOT = import.meta.dirname;
@@ -23,16 +23,20 @@ const slug = title
   .replace(/^-|-$/g, "");
 
 const date = new Date().toISOString().slice(0, 10);
-const rel = `src/content/posts/${slug}.mdx`;
-const file = join(ROOT, rel);
+// Her yazı kendi klasörü: index.mdx metin, yanındaki .mdx dosyaları figür ve
+// tablo bileşenleri, style.css yazıya özel stil.
+const dir = join(ROOT, "src/content/posts", slug);
+const rel = `src/content/posts/${slug}/index.mdx`;
+const file = join(dir, "index.mdx");
 
-if (await access(file).then(() => true, () => false)) {
-  console.error(`${rel} zaten var.`);
+if (await access(dir).then(() => true, () => false)) {
+  console.error(`src/content/posts/${slug}/ zaten var.`);
   process.exit(1);
 }
 
 // Frontmatter alanları src/content.config.ts'teki şemayla doğrulanıyor.
-// Gövde markdown; figür/tablo gerekirse araya doğrudan HTML yazılabilir.
+// Gövde markdown. Figür ya da tablo gerekirse klasöre <Ad>.mdx olarak koy,
+// buradan import edip <Ad /> diye çağır.
 const template = `---
 title: ${JSON.stringify(title)}
 date: "${date}"
@@ -45,6 +49,7 @@ draft: true
 Buraya yaz.
 `;
 
+await mkdir(dir, { recursive: true });
 await writeFile(file, template);
 
 console.log(`${rel} oluşturuldu.`);

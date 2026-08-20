@@ -8,7 +8,22 @@ Astro + MDX ile kurulmuş, anasayfası ve beslemeleri otomatik üretilen blog.
 npm run new -- "Yazının Başlığı"
 ```
 
-`src/content/posts/<slug>.mdx` oluşur ve `draft: true` ile başlar.
+`src/content/posts/<slug>/index.mdx` oluşur ve `draft: true` ile başlar.
+Her yazı kendi klasörü:
+
+```
+src/content/posts/<slug>/
+  index.mdx        metin
+  style.css        yazıya özel stil (varsa)
+  UcTemelIhtiyac.mdx   figür bileşeni
+  TabloBesSoru.mdx     tablo bileşeni
+```
+
+Figür ve tablolar ayrı `.mdx` dosyalarında durur, `index.mdx`'ten import
+edilip `<UcTemelIhtiyac />` diye çağrılır. Bileşenler de MDX olduğu için
+figcaption içindeki markdown (`**kalın**`, bağlantı) çalışmaya devam eder —
+`.astro` olsalardı düz metne dönerlerdi. Koleksiyon yalnızca `index.mdx`
+dosyalarını yazı sayar, yanlarındaki bileşenler listeye girmez.
 
 Kural: **düz metin markdown yazılır.** Başlık `##`, vurgu `**`, bağlantı
 `[metin](url)`, liste `-`, alıntı `>`. HTML yalnızca markdown'ın karşılığı
@@ -59,7 +74,7 @@ klasörünü Pages'e deploy eder.
    kutusu), `.not` (uyarı kutusu), `.tbl` (kayan tablo sarmalayıcı), `.refs`
    (kaynakça), `.fig-narrow`, `.wide.flush`, `.fig-frame.tight`, `.g`/`.a`
    (konu kolu renkleri).
-2. **`src/styles/posts/<slug>.css`** — yalnızca o yazıya has olan: renk
+2. **`src/content/posts/<slug>/style.css`** — yalnızca o yazıya has olan: renk
    değişkenlerini tanımlayan `bodyClass` bloğu, hangi bölümün hangi rengi
    aldığı, ve o yazıya özgü bileşenler.
 3. **Inline `style`** — sadece *veri* için. Grafikteki bir çubuğun oranı
