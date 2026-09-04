@@ -1,12 +1,12 @@
 /* =========================================================
-   haandev — tek stil kaynağı
-   Anasayfa da yazılar da buradan besleniyor.
-   Yazıya özel olan şeyler (o yazıda bir kez kullanılan bir
-   demo, bir animasyon) yazının kendi <style> bloğunda kalır;
-   ama renk / tipografi / bileşen dili burada tanımlıdır.
+   haandev — the single source of style
+   Both the homepage and the posts are fed from here.
+   Post-specific things (a demo or an animation used once in a
+   single post) stay in that post's own <style> block; but the
+   colour / typography / component language is defined here.
    ========================================================= */
 
-/* ---------- 1. token'lar ---------- */
+/* ---------- 1. tokens ---------- */
 
 :root {
   --bg: #fbfbfa;
@@ -16,7 +16,7 @@
   --rule: #e2e1dd;
   --code-bg: #f2f1ed;
 
-  /* iki tematik renk: cebir (yeşil) ve geometri (mavi) */
+  /* two thematic colours: algebra (green) and geometry (blue) */
   --alg: #14724b;
   --geo: #2733c9;
   --alg-faint: #ebf4ef;
@@ -56,7 +56,7 @@
   }
 }
 
-/* ---------- 2. temel ---------- */
+/* ---------- 2. base ---------- */
 
 *,
 *::before,
@@ -91,7 +91,7 @@ body {
   padding-inline: 1.375rem;
 }
 
-/* içeriği kenar boşluğu olmadan tam ölçüye yaslar */
+/* stretches content to the full measure with no side padding */
 .wide.flush {
   padding-inline: 0;
 }
@@ -109,7 +109,7 @@ p {
   margin: 0 0 1.25rem;
 }
 
-/* Bir kabın son paragrafı fazladan boşluk bırakmasın. */
+/* Don't let a container's last paragraph leave extra space. */
 blockquote > p:last-child,
 .foot > p:last-child,
 figcaption > p:last-child {
@@ -128,7 +128,7 @@ h3 {
   letter-spacing: -0.02em;
 }
 
-/* ---------- 3. anasayfa ---------- */
+/* ---------- 3. homepage ---------- */
 
 .site-header {
   margin-bottom: 3.5rem;
@@ -218,7 +218,7 @@ h3 {
   padding: 1.5rem 0;
 }
 
-/* ---------- 4. yazı başlığı ve alt bilgi ---------- */
+/* ---------- 4. post header and footer ---------- */
 
 .back {
   font-family: var(--font-ui);
@@ -251,8 +251,8 @@ h3 {
   color: var(--muted);
 }
 
-/* Konu kolu renkleri. Metin içinde bir ibareyi ilgili renge bağlar;
-   inline style yerine bunları kullan. */
+/* Thematic strand colours. They tie a phrase in the text to its strand;
+   use these instead of an inline style. */
 .dek .g,
 figcaption .g {
   color: var(--geo);
@@ -263,7 +263,7 @@ figcaption .a {
   color: var(--alg);
 }
 
-/* spot yazısı italik; renkli ibareler düz kalsın */
+/* the dek is italic; coloured phrases stay upright */
 .dek .g,
 .dek .a {
   font-style: normal;
@@ -278,7 +278,7 @@ figcaption .a {
   font-size: 0.8125rem;
 }
 
-/* ---------- 5. yazı gövdesi ---------- */
+/* ---------- 5. post body ---------- */
 
 h2 {
   margin: 3.25rem 0 1rem;
@@ -291,7 +291,7 @@ h3 {
   font-size: 1.1875rem;
 }
 
-/* sahne rengi başlığın kenarına düşer */
+/* the scene colour falls on the edge of the heading */
 .s-alg h2 {
   border-left: 4px solid var(--alg);
   padding-left: 0.875rem;
@@ -411,7 +411,7 @@ td.mono {
   color: var(--muted);
 }
 
-/* ---------- 6. görseller ---------- */
+/* ---------- 6. figures ---------- */
 
 figure {
   margin: 2.375rem 0;
@@ -430,9 +430,9 @@ figure svg {
   display: block;
 }
 
-/* Şekiller kağıt üzerinde duruyor: SVG'lerin içindeki renkler sabit
-   olduğu için bu tabaka koyu temada da açık kalır. */
-/* küçük şemalar için dar kağıt */
+/* Figures sit on paper: the colours inside the SVGs are fixed, so this
+   layer stays light in the dark theme too. */
+/* narrow paper for small diagrams */
 .fig-frame.tight {
   max-width: 30rem;
   margin-inline: auto;
@@ -459,24 +459,24 @@ figcaption strong {
 }
 
 
-/* ---------- yazı bileşenleri ----------
-   Birden fazla yazının paylaştığı kutu/tablo/figür bileşenleri. Yazıya özel
-   CSS'te tekrarlanmasınlar; oradaki dosyalar yalnızca o yazıya has renk
-   değişkenlerini ve bileşenleri taşısın. */
+/* ---------- post components ----------
+   Box / table / figure components shared by more than one post. Don't repeat
+   them in post-specific CSS; those files should carry only the colour
+   variables and components particular to that post. */
 
-/* Not: "figure svg text { font-family }" bilerek burada değil. CSS, SVG'nin
-   font-family niteliğini her zaman ezer; qr yazısının figürleri kendi
-   serif/mono tipografisini taşıdığı için global bir kural onları bozar.
-   İhtiyacı olan yazı bu kuralı kendi CSS dosyasına koyar. */
+/* Note: "figure svg text { font-family }" is deliberately not here. CSS always
+   overrides an SVG's font-family attribute; the QR post's figures carry their
+   own serif/mono typography, so a global rule would break them. A post that
+   needs the rule puts it in its own CSS file. */
 
-/* dar figür kağıdı */
+/* narrow figure paper */
 .fig-narrow {
   max-width: 34rem;
   margin-inline: auto;
 }
 
-/* öz — yazının başındaki özet kutusu */
-.oz {
+/* abst — the abstract box at the top of a post */
+.abst {
   margin: 2.5rem 0 0;
   padding: 1.375rem 1.5rem;
   background: var(--code-bg);
@@ -484,7 +484,7 @@ figcaption strong {
   font-size: 1rem;
 }
 
-.oz .lbl {
+.abst .lbl {
   display: block;
   margin-bottom: 0.5rem;
   font-family: var(--font-ui);
@@ -495,12 +495,12 @@ figcaption strong {
   color: var(--muted);
 }
 
-.oz p {
+.abst p {
   margin: 0;
 }
 
-/* not — epistemik statü / kaynak uyarısı kutusu */
-.not {
+/* note — epistemic status / source caveat box */
+.note {
   margin: 2rem 0;
   padding: 1.125rem 1.375rem;
   border: 1px dashed var(--rule);
@@ -509,16 +509,16 @@ figcaption strong {
   color: var(--muted);
 }
 
-.not p {
+.note p {
   margin: 0;
 }
 
-.not strong {
+.note strong {
   color: var(--fg);
 }
 
-/* geniş tablolar dar ölçüye sığmaz: kendi içinde kaysınlar.
-   min-width tabloya göre değiştiği için yazıya özel CSS'te kalır. */
+/* wide tables don't fit the narrow measure: let them scroll inside themselves.
+   min-width varies per table, so it stays in post-specific CSS. */
 .tbl {
   margin: 1.625rem 0;
   overflow-x: auto;
@@ -534,7 +534,7 @@ figcaption strong {
   white-space: normal;
 }
 
-/* kaynakça — liste biçimi (numaralı / işaretli) yazıya göre değişir */
+/* references — the list style (numbered / bulleted) varies per post */
 .refs {
   font-size: 0.96875rem;
 }
@@ -549,7 +549,7 @@ figcaption strong {
   color: var(--muted);
 }
 
-/* ---------- 7. bölüm bantları ---------- */
+/* ---------- 7. section bands ---------- */
 
 .scene {
   margin: 5rem 0 2.5rem;
@@ -624,9 +624,9 @@ figcaption strong {
   color: var(--geo);
 }
 
-/* ---------- 8. vurgu bileşenleri ---------- */
+/* ---------- 8. emphasis components ---------- */
 
-/* numaralı not kutusu */
+/* numbered note box */
 .keep {
   display: flex;
   align-items: center;
@@ -653,7 +653,7 @@ figcaption strong {
   font-size: 1.0625rem;
 }
 
-/* yan yana iki renkli not */
+/* two coloured notes side by side */
 .reveal-note {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -704,7 +704,7 @@ figcaption strong {
   }
 }
 
-/* sayı kutucukları */
+/* number chips */
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -759,7 +759,7 @@ figcaption strong {
   color: var(--muted);
 }
 
-/* kapasite çubukları */
+/* capacity bars */
 .cap {
   margin: 1.625rem 0;
   font-family: var(--font-ui);
@@ -820,7 +820,7 @@ figcaption strong {
   vertical-align: -1px;
 }
 
-/* iki renkli künye işareti */
+/* two-colour colophon mark */
 .overprint {
   position: relative;
   width: 104px;

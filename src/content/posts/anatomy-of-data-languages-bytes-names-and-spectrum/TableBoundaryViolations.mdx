@@ -1,0 +1,41 @@
+<div class="tbl">
+<table>
+<thead>
+<tr><th>System</th><th>Its label</th><th>The violation</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>**Transactional NTFS**</td><td>file system</td>
+<td>Added full atomicity (question 5) to file operations — in the same transaction as the Registry and SQL. Microsoft now "strongly recommends" alternatives, citing the complexity and the low uptake. [↗](https://learn.microsoft.com/en-us/windows/win32/fileio/deprecation-of-txf)</td>
+</tr>
+<tr>
+<td>**ZFS**</td><td>file system</td>
+<td>The DMU layer at the heart of its architecture is, by definition, **a general-purpose transactional object store**; the POSIX file system (ZPL) is only *one* view laid over it. [↗](https://gwern.net/doc/cs/end-to-end-principle/2007-05-04-jeffbonwickzfsrampantlayeringviolation.html)</td>
+</tr>
+<tr>
+<td>**Btrfs**</td><td>file system</td>
+<td>Built directly on a database technique: shadowing (copy-on-write) B-trees and clones. [↗](https://dl.acm.org/doi/10.1145/1326542.1326544)</td>
+</tr>
+<tr>
+<td>**SQLite**</td><td>database</td>
+<td>A single file from outside; but by its own measurements it is **35% faster** at reading and writing \~10 KB blobs than keeping them as separate files, and takes \~20% less space. Which is to say it does "the file system's job" better than the file system. [↗](https://www.sqlite.org/fasterthanfs.html)</td>
+</tr>
+<tr>
+<td>**Kafka**</td><td>message queue</td>
+<td>Writes messages to disk, retains them indefinitely, replays them by offset, and lets you run SQL queries over them. "Is Kafka a database?" has been debated in earnest in the industry. [↗](https://martin.kleppmann.com/2018/10/17/kafka-summit.html)</td>
+</tr>
+<tr>
+<td>**PostgreSQL**</td><td>database</td>
+<td>Run as a queue with `LISTEN/NOTIFY` and `SKIP LOCKED`. Postgres's own documentation explicitly recommends `SKIP LOCKED` for the multiple-consumer scenario on "queue-like tables". [↗](https://www.postgresql.org/docs/current/sql-select.html)</td>
+</tr>
+<tr>
+<td>**WinFS**</td><td>file system</td>
+<td>Microsoft's attempt (2003–2006) to build the file system directly on a relational database. Abandoned, but the intent was plain. [↗](https://en.wikipedia.org/wiki/WinFS)</td>
+</tr>
+<tr>
+<td>**BeFS**</td><td>file system</td>
+<td>Indexed attributes and query support — DQL embedded in a file system in the nineties. [↗](https://www.nobius.org/dbg/practical-file-system-design.pdf)</td>
+</tr>
+</tbody>
+</table>
+</div>

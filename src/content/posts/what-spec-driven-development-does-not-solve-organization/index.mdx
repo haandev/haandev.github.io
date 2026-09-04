@@ -1,0 +1,522 @@
+---
+title: "What Spec-Driven Development Doesn't Solve: The Organization"
+date: "2026-08-19"
+description: "The spec-driven development debate is stuck at the tooling layer. The real questions are: who writes the spec, how many of them are there, and is the product decision made before the code sets. Three organizational types, a gate formula, and a real definition of reversibility."
+ogDescription: "From AI-coded to AI-centric: the return of the generalists. Three organizational types, a gate formula, and a real definition of reversibility."
+bodyClass: "s-sdd"
+dek: "From <span class=\"g\">AI-coded</span> to <span class=\"a\">AI-centric</span>: the return of the generalists"
+tags:
+  - "ai"
+  - "sdlc"
+  - "spec-driven development"
+  - "organization"
+  - "agile"
+  - "software engineering"
+---
+
+import "./style.css";
+
+import SprintDistribution from "./SprintDistribution.mdx";
+import CostOfReversal from "./CostOfReversal.mdx";
+import MaturityLevels from "./MaturityLevels.mdx";
+import VerticalHorizontalSplit from "./VerticalHorizontalSplit.mdx";
+import AiCodedAiCentric from "./AiCodedAiCentric.mdx";
+import PreAiAncestors from "./PreAiAncestors.mdx";
+import FourStructures from "./FourStructures.mdx";
+import DriftCone from "./DriftCone.mdx";
+import AbandonedCode from "./AbandonedCode.mdx";
+import SixGates from "./SixGates.mdx";
+import ReversibilityOverTime from "./ReversibilityOverTime.mdx";
+import SyncChannels from "./SyncChannels.mdx";
+import AiDlcDistinctions from "./AiDlcDistinctions.mdx";
+import ThreePillars from "./ThreePillars.mdx";
+import DecisionTree from "./DecisionTree.mdx";
+import TypeTwoAndAHalf from "./TypeTwoAndAHalf.mdx";
+import ClosingCircle from "./ClosingCircle.mdx";
+import TableRoleTransformation from "./TableRoleTransformation.mdx";
+
+{/* ================= 1 ================= */}
+<section class="col s-anat">
+
+## 1. The anatomy of the problem
+
+Picture an organization. Senior management is pushing hard for a move to an AI-centric SDLC. The same organization has divided in-team roles along hard boundaries: analyst, backend, frontend, QA, PO. A sprint runs like this:
+
+The analyst defines a feature and hands it to the team. That definition is a statement of the problem; it is not engineering analysis. Even so, the moment the sprint starts, backend and frontend begin developing in parallel, because output is expected by the end of the sprint. QA sits idle throughout. On the last weekend of the sprint the disciplines' outputs are merged, contract mismatches are patched up, one or two days are left for QA — and for those two days engineering is the one sitting idle. The product impact of decisions taken during the sprint only becomes discussable with the PM and PO in the *next* sprint, because the daily stand-up is capped at two-minute slots per person. The team, meanwhile, is compelled to stick to agile ritual and avoids doing anything it cannot put on a timesheet, so as not to look bad in a performance report. Impromptu meetings and knowledge transfers become difficult. For a simple decision you wait for a free slot in a colleague's calendar, and sometimes you just take the decision yourself to avoid being blocked.
+
+</section>
+
+<SprintDistribution />
+
+<section class="col s-anat">
+
+The retrospective usually ends in the same dilemma: on one side, code that works but contradicts the product decision; on the other, work that matches the product decision but needs rewriting from scratch. Because the cost of reversal is high in a large codebase, the choice usually falls to the first. The product accumulates against its own decisions.
+
+What makes this picture absurd is not that any role is doing its job badly. Everyone is playing their role correctly. What is absurd is that the process requires it. And more importantly: give this organization the most advanced code generation tools available and the only thing that emerges is the capacity to produce the same mismatches faster.
+
+</section>
+
+{/* ================= 2 ================= */}
+<section class="col s-diag">
+
+## 2. Diagnosis
+
+**The mini-waterfall inside the sprint.** Agile promised to rescue us from a waterfall model spread over months. We did not escape the waterfall; most teams simply compressed the same stages into two weeks. The sequence analysis → development → integration → test → product feedback was preserved, only the box got smaller. The result: the waterfall's worst property (feedback arriving last) was preserved, and its best (enough time to think before entering a stage) was lost.
+
+**Capacity theatre.** QA sitting idle for the first eight days of the sprint looks like a resource planning error, and is usually "solved" by finding QA something to do. That is a misdiagnosis. QA is not idle; **it is in the wrong position in the order**. QA's real output is not executing tests but defining how a solution will be falsified. That is an input to the spec, not an output of the code.
+
+The same goes for contract mismatches. Backend and frontend reconciling contracts on the last weekend of the sprint is not an integration problem but the consequence of the contract having been produced at the wrong time. The contract emerges as the residue of two parties' independent decisions; it should have been a joint design decision.
+
+**Decision latency.** An engineering decision with product impact is taken on a Tuesday and the product team learns about it a fortnight later. In those two weeks the decision sets as code. The cost of reversal makes the decision defensible regardless of its quality. Bad decisions beat good ones on cost.
+
+</section>
+
+<CostOfReversal />
+
+{/* ================= 3 ================= */}
+<section class="col s-lit">
+
+## 3. The literature's blind spot
+
+None of these problems are new, but the 2025–2026 wave of spec-driven development (SDD) does not answer them either, because it operates at a different layer.
+
+The modern wave of the term is mostly attributed to [GitHub Spec Kit](https://github.com/github/spec-kit), open-sourced in September 2025; AWS's Kiro and Tessl spread the phrase. The reference text in the field is Birgitta Böckeler's analysis for Thoughtworks on martinfowler.com: [Understanding Spec-Driven-Development: Kiro, spec-kit, and Tessl](https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html). Böckeler separates three maturity levels:
+
+- **Spec-first:** the spec is written, it guides the initial generation, and is abandoned once the work is done. The spec is scaffolding.
+- **Spec-anchored:** the spec continues as a living document across the feature's evolution.
+- **Spec-as-source:** the spec is the primary artefact; humans never touch the generated code.
+
+</section>
+
+<MaturityLevels />
+
+<section class="col s-lit">
+
+The criticisms in the same piece matter at least as much as its classification: current tools produce an excessive review burden and a false sense of control, and they don't scale well across problem sizes. When Böckeler gave Kiro a small bugfix she got back four user stories and sixteen acceptance criteria. And she draws a sharp parallel between the spec-as-source goal and the historical failure of model-driven development. François Zaninotto's November 2025 piece [Spec-Driven Development: The Waterfall Strikes Back](https://marmelab.com/blog/2025/11/12/spec-driven-development-waterfall-strikes-back.html) points the same way, and harder: SDD revives the idea of heavy documentation before coding and risks burying agility under layers of markdown. What he proposes instead is "Natural Language Development": breaking the hard problem into many small, testable pieces and having the agent take small steps.
+
+All of these criticisms land. But notice: **every one of them is about the workflow between a single developer and an agent.** Which markdown file, in what order, with which tool, at what level of detail. That was not the problem of the organization in section 1. Its problem was who writes the spec, how many specs there are, which role enters when, and whether the product decision is taken before or after the code sets.
+
+The SDD literature has solved the tooling layer. The organizational layer is largely empty. This piece is an attempt to fill that gap.
+
+### Where Zaninotto and I are on the same line
+
+I don't reject Zaninotto's criticism; I largely share it. Splitting a problem into small, testable pieces is right — but that requires approaching each piece **as a whole**. Vertical splitting (a small but end-to-end slice) and horizontal splitting (a separate backend spec and a separate frontend spec) are not the same thing. My objection in this piece is to the second. The principle "a spec is whole" requires not that the spec be large, but that it be undivided; a small spec can be whole too.
+
+</section>
+
+<VerticalHorizontalSplit />
+
+<section class="col s-lit">
+
+On two points we diverge, and both show not that Zaninotto's method is wrong but that **its scope is left undeclared**.
+
+**First, where the learning code goes.** Zaninotto advocates iterating from mistakes; so does this piece. The difference is whether that code lands on the main branch. Experimental code accumulating on main produces the dirty context that is the single most expensive source of error in LLM generation. I set out the reasoning in the Type 2 section.
+
+**Second, taking reversibility for granted.** Zaninotto's model operates in a world where everything can be redone cheaply — and his example gives it away: a 3D sculpting tool built with Claude Code in roughly ten hours. A single developer, a straight production line, zero consumers, no migrations, no deprecation schedule, no market to persuade. Under those conditions everything really is reversible, and building a gate (separating approaches by whether they are reversible or not; Bezos, 2015 shareholder letter; type-1 and type-2 doors) is waste. But as the work branches, and as parts of the product outside the spec's scope and other consumers come to depend on that decision, irreversibility is born and undoing it now means touching a consumer.
+
+So Zaninotto's approach is correct under the conditions of a single product, a linear production line and usually a single developer. It has a counterpart in the model below too: **Type 2's K2 divergence phase** artificially reconstructs exactly those conditions; since the code never lands on main, the consumer graph is empty by definition, and fast iteration there is not merely legitimate but preferred.
+
+</section>
+
+{/* ================= 4 ================= */}
+<section class="col s-axis">
+
+## 4. The critical distinction: AI-coded and AI-centric
+
+There is one axis that clarifies the whole debate, and most enterprise "AI transformation" programmes never see it.
+
+**AI-coded** is AI entering *after* the spec is complete. Humans think, argue, decide, mature the spec; AI writes the code. AI here is a very fast implementer and nothing else.
+
+**AI-centric** is AI participating in the *formation* of the spec. Research partner, question generator, contradiction finder, first-pass reviewer. Writing code is secondary to that function.
+
+</section>
+
+<AiCodedAiCentric />
+
+<section class="col s-axis">
+
+The difference may look trivial, but it is exactly what determines the org chart. In an AI-coded world the cost of producing a spec still depends on human coordination; whoever writes the spec needs another human for everything they don't know. In an AI-centric world that isn't true: one person can reach sufficient depth in an unfamiliar area *on demand*.
+
+Let's separate expertise into two kinds:
+
+<div class="reveal-note">
+<div class="cell g">
+<div class="t">Resident depth:</div>
+
+Depth held permanently in a person, earned with years and scar tissue.
+
+</div>
+<div class="cell a">
+<div class="t">On-demand depth:</div>
+
+Depth reached when needed, through AI-assisted research and review.
+
+</div>
+</div>
+
+Hard disciplinary boundaries are an institution of the world in which resident depth was the only option. Once on-demand depth becomes good enough, that institution's economic rationale evaporates. That is this piece's thesis.
+
+</section>
+
+{/* ================= 5 ================= */}
+<section class="col s-kin">
+
+## 5. Pre-AI relatives
+
+Every mechanism in the proposal has an ancestor from before AI, and naming them doesn't weaken the thesis; it armours it against the "shiny new thing syndrome" objection.
+
+</section>
+
+<PreAiAncestors />
+
+<section class="col s-kin">
+
+**Set-based concurrent engineering** (Toyota; Ward, Liker, Cristiano and Sobek, *Sloan Management Review*, 1995). Instead of picking a single solution early and iterating on it, developing several competing solutions in parallel and eliminating them as the constraints become clear. The finding, known as "The Second Toyota Paradox", was this: deciding late, properly understood, is faster. The "divergence mode" in this piece is a direct descendant; and its importance is here: elimination by evidence is the opposite of big design up front. The answer to Zaninotto's waterfall objection lies here.
+
+**[Shape Up](https://basecamp.com/shapeup)** (Ryan Singer, Basecamp, 2019; free online). Shaping, betting and building as separate activities; "appetite" instead of estimates; a betting table instead of a backlog. The critical detail: shaping is done by a small senior group working in parallel to the cycle teams, and a pitch is never discussed with build teams before it has been bet on. Its critique of sprints is nearly identical to this piece's: a fixed cadence pushes unripe work into production.
+
+**Dual-track agile** (grown out of Desirée Sy's 2007 work and spread by Marty Cagan and Jeff Patton). Running discovery and delivery as separate tracks. This piece's proposal is a radicalised version: not two parallel tracks, but the delivery track subordinated to the discovery track.
+
+**Reversible and irreversible decisions** (Bezos, 2015 shareholder letter; type-1 and type-2 doors). The direct basis for gate K3 in the formula.
+
+**Conway's law** (1968) and **Team Topologies** (Skelton and Pais, 2019). Team boundaries determining architecture, and the idea of the stream-aligned team. The transformation proposed here can also be read as an accelerated version of what Team Topologies has been saying for a decade: the axis of division turns from horizontal (layer) to vertical (stream).
+
+So LLMs are not inventing a new direction. They are removing the cost barrier in front of an existing one. That direction had been described before, but the cost of producing code pushed us away from it.
+
+</section>
+
+{/* ================= 6 ================= */}
+<section class="col s-tip">
+
+## 6. Three organizational types after SDD
+
+Organizations that adopt SDD do not turn into one thing. They split into three distinct structures, and the difference between them accounts for the entire difference in efficiency.
+
+**The starting point (before SDD):** classic agile, where discipline specialists produce both the design and the code. The organization in "The anatomy of the problem" is here.
+
+</section>
+
+<FourStructures />
+
+<section class="col s-tip">
+
+<h3 class="t1"><span class="k">Type 1;</span> Fragmented specs: the drift factory</h3>
+
+Discipline specialists each write their own spec separately, and AI produces the code.
+
+This is the most common and most dangerous form of the transition, because it can be adopted without changing the org chart at all. Everyone writes the spec for their own area, everyone runs their own agent, everyone speeds up. On the management dashboard everything looks fine.
+
+The problem: specs written at different times, by different professionals, with different contexts are by definition mismatched. That mismatch used to be produced at human speed; now it is produced at machine speed. The three pathologies of section 2 do not disappear, they **intensify**:
+
+- Contract mismatches accrete over more code, because each side is faithful to its own spec and extremely productive.
+- Decision latency stays the same, but the volume of code that sets grows, so the cost of reversal rises.
+- The same problem gets solved in two places at once: backend ships a codemod while the product team plans to educate the market; frontend masks a state while backend fixes the same state a different way.
+
+</section>
+
+<DriftCone />
+
+<section class="col s-tip">
+
+The distinguishing feature of Type 1 is this: it doesn't remove old agile, it **forces it to become the backbone of the SDLC**. The expectation of continuous output now becomes a live pressure on spec production too, and each discipline produces solutions on its own side that will survive until tomorrow. This is the real source of drift; and plenty of organizations are standing exactly here, saying "we've done our AI transformation". I regard Type 1 as an organizational target one should never settle at.
+
+</section>
+
+<section class="col s-tip">
+
+<h3 class="t2"><span class="k">Type 2;</span> A shared spec: the convergence-focused hybrid</h3>
+
+Discipline specialists come together and work on **a single spec**. The parts of agile that work are kept, but the cycles are run to produce a spec rather than to produce code. Code generation is left to the LLM as a cheap implementation step.
+
+This is a purely AI-coded model: until the spec matures, AI is not in play except as a PoC factory or a research resource.
+
+**The unit of work.** A cycle's definition of "done" is not a feature in the field but a converged spec. Converged means: every stakeholder discipline has read it and tried to refute it from their own side and failed; falsifiability criteria are written down; contracts are part of the spec; decisions with product impact are flagged and approved.
+
+A spec is whole. A feature, a bugfix and a behaviour change have different scopes but are subject to the same wholeness rule. Behaviour changes especially: because the product is in the market, backfill, codegen, deprecation and persuading the market are the body of the spec, not "side work to think about later".
+
+**Two modes (a relative of dual-track agile's discovery/delivery pair).** In discovery mode the aim is to generate options; code is cheap and written to be thrown away. **No code produced in discovery mode lands on the main branch.**
+
+That rule solves two separate problems, and the second is one that arrived in our lives with the LLM.
+
+The first is the cost of reversal: the price of trying an approach should not include the price of abandoning it. This is the classic argument and has been known since set-based engineering.
+
+The second, and more critical today, is **context pollution**. Abandoned code sitting on main used to be untidiness; now it is an input actively steering generation. Because the codebase is no longer merely an artefact — it is also a prompt. A human developer has out-of-band memory; "don't look in that folder, it's dead" lives in tribal knowledge. An agent has no such memory; **the repo is the memory.** When an abandoned approach stays in the tree, the agent reads it not as "tried, didn't work" but as "the established pattern of this project", and makes it the template for the next generation. Classic technical debt accumulates linearly; context debt replicates itself, because every generation reinforces it one turn further. "We'll clean it up later" used to be a cheap promise; it isn't any more.
+
+> People have been talking about technical debt for a long time. But now we have a brand-new credit card here that is going to allow us to accumulate technical debt in ways we were never able to do before.
+>
+>
+>     <a href="https://www.wsj.com/articles/ai-is-writing-code-now-for-companies-that-is-good-and-bad-6f19ecdc" class="lbl">Armando Solar-Lezama, professor at MIT's Computer Science and Artificial Intelligence Laboratory, interviewed by The Wall Street Journal.</a>
+
+</section>
+
+<AbandonedCode />
+
+<section class="col s-tip">
+
+**The output of discovery mode is not a deleted branch but a decision record.** If the rule is applied only as "throw the code away", the learning is thrown away too and the same experiment gets run again six months later. The code is discarded, the finding stays: which approach was tried, on what measurement it was eliminated, which constraint surfaced. These records are the raw material for the corpus Type 3 needs.
+
+In decision mode the aim is to eliminate options and settle on a single whole. The mistake of the traditional sprint was running both modes at once and in the same codebase: we were writing production code while doing discovery, so the result of the discovery bound us.
+
+**Roles: from implementer to constraint supplier.** The disciplines don't disappear; their function changes.
+
+<TableRoleTransformation />
+
+The critical point: a frontend engineer saying "infinite scroll isn't possible with this pagination model" is not a detail but a constraint that invalidates the main spec.
+
+**The formula.** The sprint is replaced not by a timebox but by an evidence box:
+
+<ul class="gates">
+<li>**K0; Statement of the problem.** What is changing, for whom, which measure will improve. No solution.</li>
+<li>**K1; Constraint map.** Each discipline puts down its constraints and refutations; QA writes the falsifiability criteria. No production code.</li>
+<li>**K2; Discovery.** Rounds of PoCs for the open questions, throwaway code, measurement. Output: evidence.</li>
+<li>**K3; Decision + spec.** A single, whole spec including the contracts. Gate criterion: no discipline can refute it.</li>
+<li>**K4; Implementation.** Largely LLM-driven generation. Done right, this is the shortest phase; if it drags, K3 had not converged.</li>
+<li>**K5; Verification.** Evidence against the criteria written at K1. QA gets no surprises.</li>
+</ul>
+
+</section>
+
+<SixGates />
+
+<section class="col s-tip">
+
+**The reversibility rule.** Reversible decisions (type-2) are deferred to K4 and not debated. Irreversible decisions (type-1) — the data schema, the public API contract, pricing, migrations, the deprecation schedule — **cannot pass K3**.
+
+But the word "irreversible" needs a careful definition here, because its common usage misleads. Reversibility is not a property of a decision; it is a property of **the decision plus whatever has come to depend on it**. The same decision is reversible on day one and irreversible on day four hundred, and in between the decision itself has not changed at all. What creates irreversibility is not writing code but someone becoming dependent on it — and those dependants are often outside the spec's scope: other parts of the product, other teams' code, integrators, customer behaviour written into a contract.
+
+</section>
+
+<ReversibilityOverTime />
+
+<section class="col s-tip">
+
+This gives the K3 gate a test that isn't subjective. The question is not "is this an important decision" — that is arguable, and arguments are won by seniority. The question is: **does this decision have a consumer outside the spec boundary?** If zero, it is reversible; defer it, don't debate it, change it if it turns out wrong. If greater than zero, it is irreversible; it cannot pass K3, because undoing it now means touching a consumer. The backfill, codegen, deprecation management and market persuasion listed at the start of section 6 are exactly the invoice for that consumer graph.
+
+The principle that falls out of this may be the most practical sentence in this piece: **reversibility is an initial condition, not a permanent property.** It decreases monotonically as the product ages and branches. On a project's day zero everything is reversible, which is why building gates is waste. The problem with the organization in section 1 was that it was still operating on a day-zero assumption in a codebase where reversibility had long since run out.
+
+**The scaling rule.** Gates scale with the consumer graph, not with the size of the feature. Work with no consumer outside the spec boundary — most bugfixes, most internal improvements — goes straight from K0 to K4 and the gate ritual never runs. Without this rule the model falls into the same error as tools that generate four user stories for a one-line null check.
+
+Type 2 delivers a real gain. But it has a ceiling, and the ceiling is this: **coordination cost still grows multiplicatively with headcount.** Five disciplines converging on the same spec means synchronising five calendars, five contexts and five egos. Type 2 solves mismatch; it does not solve coordination.
+
+</section>
+
+<section class="col s-tip">
+
+<h3 class="t3"><span class="k">Type 3;</span> Generalist authorship: the AI-centric model</h3>
+
+Here the org chart itself changes.
+
+A single **generalist** writes the spec. Not in one sitting; across several, elaborating meticulously. Alongside them is AI-assisted research: in areas they don't know, they reach on-demand depth through rounds of question-and-answer and argument. The technical decisions they establish are put through a first-pass review by frontier models. What emerges is a spec built by a single mind but tested many times over, and whole.
+
+The subtlety here: **a spec having a single author does not mean it is written from a single point of view.** On the contrary, the plurality of views has been moved inside the author. In Type 2 the tension between the backend and frontend specialists was a meeting between two people; in Type 3 the same tension is a list of contradictions produced by one person across several rounds of review. Wholeness is now achieved by authorship rather than by consensus.
+
+</section>
+
+<SyncChannels />
+
+<section class="col s-tip">
+
+The economic consequence is sharp: Type 2's multiplicative coordination cost disappears. This makes Type 3 **by far the most time-efficient** of the three types.
+
+And the notion of a team is hollowed out.
+
+There is no longer a "team" that writes a spec for a feature and produces an output every cycle. There is a group of people working on the same product. Who owns which feature changes from cycle to cycle. The sprint review is replaced by **show-and-tell sessions** at the end of cycles — and the function of those sessions has changed too. They are no longer held to get work signed off by a stakeholder, but so that everyone is aware of the direction the product is taking. In Type 3 the scarcest resource is not approval but **situational awareness**.
+
+This is exactly where the AI-centric SDLC's preference for generalists over hard disciplinary specialists comes from. Expertise doesn't die; **its price falls**, because it becomes reachable on demand. What is valuable is the person who can hold the whole system in their head and notice contradictions across boundaries; because that is the one capability not available on demand.
+
+</section>
+
+{/* ================= 7 ================= */}
+<section class="col s-aidlc">
+
+## 7. AWS AI-DLC: the nearest neighbour
+
+The closest enterprise proposal to Type 3 today is AWS's AI-DLC (AI-Driven Development Life Cycle). The rules are open source in the [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) repository and can be plugged into tools such as Claude Code, Kiro, Cursor, Codex CLI, opencode or GitHub Copilot. To give a sense of scale: the [v2 branch](https://github.com/awslabs/aidlc-workflows/tree/v2) defines a 33-stage workflow with a cast of 14 agents — 11 domain specialists and 2 review-only agents — and waits for a human to approve every gate.
+
+**What it does.** There are three phases: Inception (what and why), Construction (how), Operations (deployment and running). Each phase feeds context to the next and the artefacts are kept persistently in the repository; the logic is "agents forget, files don't". The vocabulary has been changed deliberately: **bolt** instead of sprint (hours or days, not weeks), **Unit of Work** instead of epic, and **Intent** at the top. There are two rituals: **Mob Elaboration** in Inception (product, developer, QA and operations together validate the AI's questions and proposals in real time) and **Mob Construction** in Construction (technical decisions clarified on the spot). The core philosophy is "AI proposes, human approves", with mandatory checkpoints placed so that humans don't degrade into passive approvers.
+
+As for the numbers, some care is warranted. At re:Invent 2025 AWS spoke of 10–15x efficiency gains and of Wipro compressing roughly three months of planned work into about 20 hours through four-hour mob sessions over five days. The same presentation carried its counterweight: the measured gain from unstructured AI assistant use sits in the 10–15% band. These are numbers produced by the vendor, on projects run by the vendor; indicative, not verified. No failure cases have been published yet.
+
+**Where I agree with AWS AI-DLC.** The rejection of a fixed two-week cadence; disciplines working in the same session rather than separately; context being persistent and versionable; decisions being surfaced explicitly rather than buried silently in code. These are things I argue for too.
+
+**Where we diverge; four points.**
+
+</section>
+
+<AiDlcDistinctions />
+
+<section class="col s-aidlc">
+
+**First, the direction of the cycle.** AI-DLC shortens the cycle: a bolt is hours or days. What I am after is not shortening the cycle but **decoupling the rhythm of output from the maturity of the spec**. If a spec hasn't matured, the cycle should be able to lengthen; if it has, implementation is short anyway. The "bolt" concept preserves agile's expectation of continuous output by shortening it; on my diagnosis that expectation was precisely the problem. The AWS side can be defended, though: they may be looking through a window where, if hours or days aren't enough for maturity, the spec's scope should probably be reduced. There is something to that.
+
+**Second, AI's role.** In AI-DLC, AI proposes and the human approves. In this piece, the human refutes. The difference isn't rhetorical: in approval mode a human's default behaviour is to accept, and AI-DLC's own design concedes the risk and tries to compensate with mandatory checkpoints. In refutation mode the default behaviour is objection, and the review burden is lighter and better aimed. Böckeler's "false sense of control" criticism points at exactly this distinction. That said, standing at the exact opposite of AWS — let AI not propose, let the human propose and AI structure — makes no sense either. Frontier models' reasoning capabilities improve by the day. But I explicitly object to formalising this side of it. Casting AI as a contractor or a supervisor is wrong. We should see it as a working partner and keep its role here equal to the human's: sometimes the human proposes and AI approves, sometimes the reverse.
+
+**Third, the cost of the mob.** One independent trial observed that mob validation at bolt tempo with four people eats an entire afternoon for work a sprint would spread over two weeks; faster, but no cheaper in senior attention. This piece's Type 2 carries the same cost and admits it openly; Type 3 removes the mob and replaces it with **single authorship plus asynchronous review**. The mob makes coordination cost visible but does not remove it.
+
+**Fourth and most important, there is no irreversibility gate.** In AI-DLC decisions are surfaced but not classified by their reversibility. The most expensive problem of the organization in section 1 — the "works but wrong" versus "right but needs rewriting" dilemma — is left unsolved right here. A decision being plainly visible does not mean it is reversible.
+
+In short: AI-DLC is the most mature enterprise expression of Type 3 and deserves to be taken seriously. But because it contains neither Type 2's discipline of refutation nor the reversibility gate, it risks buying speed with instability.
+
+</section>
+
+{/* ================= 8 ================= */}
+<section class="col s-prereq">
+
+## 8. Type 3's preconditions; and why most organizations can't jump there
+
+Type 3 is the most time-efficient model, but it isn't somewhere you can go directly. It has three preconditions, and a transition made without them produces a more self-assured version of Type 1.
+
+</section>
+
+<ThreePillars />
+
+<section class="col s-prereq">
+
+**Precondition 1: institutional memory — tacit knowledge externalised.** A specialist's real value is knowing your production traffic, your on-call history, your customer's odd usage pattern and why that migration was abandoned three years ago. Frontier models don't know that. Nor does the generalist; *if the knowledge was never written down anywhere*. This is Type 3's real requirement: decision records, incident history, architectural invariants and previous specs kept as a machine-readable corpus. Without that corpus the generalist is not uninformed but **confidently wrong**, which is worse.
+
+**Precondition 2: module boundaries — architectural boundaries explicitly defended.** Conway's law works in reverse too. Team boundaries were artificial but visible; they were the system's legible documentation. When independent generalists work on separate feature specs the merge problem doesn't vanish, it **changes layer**: it moves up from the contract level to the architectural level. Against that you need a document of architectural invariants and a role that owns it (systems steward, architecture board, the name doesn't matter). Otherwise the result is a seamless monolith in which no module boundary bothers anyone and therefore none is defended.
+
+**Precondition 3: a supply of generalists.** This is the least discussed and the most serious. Where will the generalists come from? Most of today's generalists formed by specialising in one area and then spreading out. Remove the specialisation rung and you have also removed the pipeline that produces generalists ten years from now. An organization moving to Type 3 needs to design a separate, deliberate path to depth for its junior engineers, or the model runs out of fuel. Then again, populations balancing themselves is also a consequence of the laws of evolution. At the point where generalists run out, the system will make a new pipeline for producing them valuable. This is something we simply flag as another day's worry.
+
+These three preconditions also explain why Type 2 is not a stage you can skip. Type 2's K1 constraint maps and rounds of refutation are, in effect, **a machine for externalising tacit knowledge**. Through the constraints they write in Type 2, the specialists produce the corpus that Type 3 needs. Type 2 is not Type 3's rival but its preparation.
+
+</section>
+
+{/* ================= 9 ================= */}
+<section class="col s-metrics">
+
+## 9. Measurement / where the principal position sits in the formula, and how it should measure efficiency
+
+Velocity is meaningless in these models; what it measures — the volume of code produced — is no longer the scarce resource. The metrics I'd propose:
+
+<ul class="metric">
+<li>**Decision latency.** The time between a decision with product impact being taken and the product side hearing about it. Target: close to zero.</li>
+<li>**Spec churn.** The rate of change in the spec after K3. High means the convergence was fake.</li>
+<li>**Rewrite rate.** Production code produced in one cycle and discarded in the next. Code discarded in divergence mode doesn't count.</li>
+<li>**Refutation count.** Valid objections brought against the main spec by disciplines or review rounds. Zero means the session has become a ritual; contrary to intuition, a low figure here is not good news.</li>
+<li>**Corpus coverage** (for Type 3). How much of the irreversible decisions and the eliminated divergence options is written down. A direct indicator of readiness for Type 3.</li>
+<li>**Consumer graph density.** How many consumers there are outside a spec boundary. Worth measuring because it is the input that decides which gates will run; it also shows where architectural boundaries are eroding.</li>
+</ul>
+
+</section>
+
+{/* ================= 10 ================= */}
+<section class="col s-locate">
+
+## 10. How to tell where you are
+
+Three simple questions:
+
+**How many specs does it take to get a single phenomenon into production?** More than one and you are in Type 1, whatever your org chart says.
+
+**There's a single spec, but how many people's consensus writes it?** More than one, Type 2. One, Type 3.
+
+</section>
+
+<DecisionTree />
+
+{/* ================= 11 ================= */}
+<section class="col s-objections">
+
+## 11. Limits and counter-arguments
+
+**Where expertise really is irreducible, the thesis weakens.** Compilers, database internals, cryptography, real-time systems. On-demand depth is not enough in these areas and the disciplinary boundary is still economic.
+
+**Regulation may make separation mandatory.** In fintech, healthcare and payment systems, segregation of duties is not a preference but a legal obligation. Type 3 is not applicable there.
+
+**But there is a form in between: Type 2.5.** The two objections above — irreducible expertise and regulation — don't refute Type 3, they draw its boundary; and there is an intermediate structure sitting right on that boundary. Its rule is simple: every role that can be merged is merged into the generalist, and the ones that *must* stay outside stay outside. Necessity has three sources — where regulation imposes segregation of duties, where domain complexity is an expertise in itself, and where expertise really is irreducible — and all three take the same test: can this depth be reached on demand? If yes, the role merges; if not, it stays separate. What comes out is not n but **1 + n**: a single generalist writes the spec, but a specialist from every area an irreversible decision touches reads it in order to refute it.
+
+</section>
+
+<TypeTwoAndAHalf />
+
+<section class="col s-objections">
+
+**Type 2.5 differs from both of its neighbours.** It differs from Type 2 in authorship: the spec is not the product of a multi-author consensus but a single-authored text that has been through specialist review; coordination cost grows linearly with the number of reviews rather than multiplicatively with headcount. It differs from Type 3 in that the review cannot be delegated: Type 3 can leave part of the review burden to the model, whereas in Type 2.5 at least one round depends on a human, and where regulation is involved that round is signed. In practice this, not Type 3, is the realistic target for most teams working on a mature product.
+
+**Verification is the new bottleneck.** When generation gets ten times faster the review burden grows, and there are measured examples: in Scott Logic CTO Colin Eberhardt's trial of a real feature with Spec Kit, 689 lines of code came with 2,577 lines of markdown, review took 3.5 hours — most of it spent on the documents — and a bug still escaped to production. Böckeler's "excessive review burden" criticism applies to this piece's proposal too; Type 2's K1 constraint maps aim to front-load that burden rather than reduce it. Type 3's answer is to delegate part of the review to the model; but that answer is itself dependent on Precondition 1.
+
+<div class="chips tight">
+<div class="chip">689</div>
+<span class="sep">lines of code</span>
+<div class="chip bad">2,577</div>
+<span class="sep">lines of markdown</span>
+<div class="chip bad">3.5</div>
+<span class="sep">hours of review</span>
+<div class="chip bad">1</div>
+<span class="sep">bug escaped anyway</span>
+<span class="lbl">Eberhardt's Spec Kit trial</span>
+</div>
+
+**Brooks may still be right.** If software's complexity is essential rather than accidental, a spec cannot by definition capture it fully. Every approach that declares the spec the single source of truth hits this wall. This piece's answer is to define the spec not as a document of approval but as **a testable hypothesis**: that is precisely why divergence mode exists.
+
+**And an irony.** One of the technical justifications for keeping a spec whole is that a model decides better when it sees the whole rather than a part. But past a certain scale, the context window and loss of attention make splitting the spec unavoidable. So decomposition returns; this time for machine reasons rather than human ones. We are not abolishing boundaries; **we are changing whose discomfort they are drawn around.**
+
+</section>
+
+{/* ================= 12 ================= */}
+<section class="col s-close">
+
+## 12. Conclusion
+
+The spec-driven development debate today is largely a debate about tools: which CLI, how many markdown files, does the spec stay in sync with the code. That debate has value, but it is standing at the wrong layer.
+
+The real questions are: who writes the spec, how many of them there are, and whether the product decision is taken before the code sets. Your answers to those three questions determine which type you are in, regardless of your tooling. An organization that divides roles along hard boundaries and gives everyone their own agent is in Type 1, and the only thing it has bought is the capacity to produce mismatch faster.
+
+</section>
+
+<ClosingCircle />
+
+<section class="col s-close">
+
+The direction is clear: from a structure where the disciplines diverge, to one that converges on a shared spec; and from there to the independent authorship of generalists. It looks like the closing of a circle that ran from the era when everyone did everything, through specialisation, and back to wholeness; but we are not returning to the same place. Wholeness used to be achieved by one person knowing everything. Now it is achieved by one person being able to *ask* about everything.
+
+> Expertise isn't disappearing. Its price is falling. And the one thing whose price isn't falling is the ability to hold a whole system in your head and see the contradiction across its boundaries.
+
+</section>
+
+<hr class="qz" />
+
+<section class="col refs">
+
+<h2>Sources</h2>
+
+### Spec-driven development: tools and criticism
+
+- Birgitta Böckeler, [Understanding Spec-Driven-Development: Kiro, spec-kit, and Tessl](https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html), martinfowler.com; the three maturity levels (spec-first / spec-anchored / spec-as-source), the review burden and the "false sense of control" criticism, the MDD parallel.
+- François Zaninotto, [Spec-Driven Development: The Waterfall Strikes Back](https://marmelab.com/blog/2025/11/12/spec-driven-development-waterfall-strikes-back.html), Marmelab, 12 November 2025; the criticism that SDD is a return to waterfall, and the "Natural Language Development" alternative. [Hacker News discussion](https://news.ycombinator.com/item?id=45935763).
+- [github/spec-kit](https://github.com/github/spec-kit); GitHub's SDD toolkit (September 2025).
+- [Spec-driven development](https://en.wikipedia.org/wiki/Spec-driven_development), Wikipedia; the general framing of the term and its bibliography.
+- [Spec Driven Development: When Architecture Becomes Executable](https://www.infoq.com/articles/spec-driven-development/), InfoQ, January 2026.
+- [What is Spec-Driven Development?](https://www.ibm.com/think/topics/spec-driven-development), IBM.
+- Ian Xu, [agentic-engineering-field-study](https://github.com/ianhxu/agentic-engineering-field-study/blob/main/04-spec-driven-development.md), July 2026; a multi-source survey of the field.
+- [Spec-driven development works; until the spec stops](https://kanbento.dev/blog/spec-driven-development), kanbento.dev; the source for Colin Eberhardt's Spec Kit measurement (689 lines of code / 2,577 lines of markdown / 3.5 hours of review).
+- Alex Punnen, [Why Specification-Driven Development is Not a Silver Bullet for AI-Assisted SDLC](https://pub.towardsai.net/why-specification-driven-development-sdd-is-not-a-silver-bullet-for-ai-assisted-sdlc-491c71bcf835), Towards AI; a critique via Brooks's "essential complexity" argument.
+- [The Spec Growth Engine](https://arxiv.org/pdf/2606.27045), arXiv; an academic formulation of the spec-anchored approach and a positioning of the tools along Böckeler's axis.
+
+### AWS AI-DLC
+
+- [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows); the official rules repository; [v2 branch](https://github.com/awslabs/aidlc-workflows/tree/v2) (14 agents, 33 stages).
+- [AI-DLC Explained: AWS's AI-Driven Development Lifecycle](https://www.exploreagentic.ai/insights/ai-dlc/), exploreagentic.ai; the source for the re:Invent 2025 (DVT214) figures and for the independent observation about mob validation's cost in senior attention.
+- [How AWS's AI-DLC defines an AI-Native methodology](https://ttpsc.com/en/blog/how-aws-ai-dlc-defines-an-ai-native-methodology/), TTPSC.
+- Michael Forrester, [Deep Dive: AWS AI Development Life Cycle](https://michaelrishiforrester.com/2026/03/11/deep-dive-aws-ai-development.html).
+- Micah Walter, [Notes on exploring the AI-Driven Development Life Cycle](https://www.micahwalter.com/posts/notes-on-exploring-ai-dlc).
+- Ran Isenberg, [AI-Driven SDLC](https://ranthebuilder.cloud/blog/ai-driven-sdlc/); a wider frame in terms of governance and security controls.
+
+### Pre-AI relatives
+
+- Ryan Singer, [Shape Up: Stop Running in Circles and Ship Work that Matters](https://basecamp.com/shapeup), Basecamp, 2019; the shaping / betting / building distinction and the notion of appetite.
+- Allen C. Ward, Jeffrey K. Liker, John J. Cristiano, Durward K. Sobek II, "The Second Toyota Paradox: How Delaying Decisions Can Make Better Cars Faster", *Sloan Management Review*, 36(3), 1995; set-based concurrent engineering.
+- Jeff Bezos, Amazon 2015 shareholder letter; type-1 and type-2 (irreversible and reversible) decisions.
+- Desirée Sy, "Adapting Usability Investigations for Agile User-Centered Design", *Journal of Usability Studies*, 2007; the origin of the dual-track approach; spread by Marty Cagan and Jeff Patton.
+- Melvin E. Conway, "How Do Committees Invent?", *Datamation*, 1968.
+- Matthew Skelton and Manuel Pais, *Team Topologies*, IT Revolution, 2019; stream-aligned teams and cognitive load.
+- Frederick P. Brooks, *The Mythical Man-Month* and "No Silver Bullet", 1975/1986; the distinction between essential and accidental complexity.
+
+<div class="note">
+
+Note: the efficiency figures relating to AI-DLC were produced by AWS and its partners, on projects AWS contributed to running. As there is no independent verification and no published failure case, they are treated here as indicative data only.
+
+</div>
+
+</section>

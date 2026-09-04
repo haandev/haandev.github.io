@@ -20,7 +20,7 @@ const year = new Date().getUTCFullYear();
 
   <main class="col">
     <ul class="post-list">
-      {posts.length === 0 && <li class="empty">Henüz yazı yok.</li>}
+      {posts.length === 0 && <li class="empty">No posts yet.</li>}
       {posts.map((p) => (
         <li class="post-item">
           <a class="post-link" href={postPath(p.id)}>

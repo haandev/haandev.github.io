@@ -1,0 +1,110 @@
+/* What Spec-Driven Development Doesn't Solve: The Organization — post-specific style, imported from the MDX. */
+/* Post-specific style. The three organizational types carry three colours;
+   their counterparts in the figures sit on the .fig-frame paper as fixed hex
+   values (because the paper stays white in the dark theme too). */
+.s-sdd {
+  --t1: var(--danger);   /* Type 1 — fragmented specs */
+  --t2: var(--geo);      /* Type 2 — shared spec      */
+  --t3: var(--alg);      /* Type 3 — the generalist   */
+  --ai: #c47b00;         /* the AI axis               */
+}
+@media (prefers-color-scheme: dark) {
+  .s-sdd { --ai: #e0a94e; }
+}
+
+/* the edge colour of section headings follows the subject */
+.s-anat h2,
+.s-lit h2,
+.s-tip h2,
+.s-metrics h2,
+.s-locate h2,
+.s-objections h2,
+.s-close h2   { border-left: 4px solid var(--fg);    padding-left: 0.875rem; }
+.s-diag h2  { border-left: 4px solid var(--t1);    padding-left: 0.875rem; }
+.s-axis h2 { border-left: 4px solid var(--ai);    padding-left: 0.875rem; }
+.s-kin h2   { border-left: 4px solid var(--muted); padding-left: 0.875rem; }
+.s-aidlc h2 { border-left: 4px solid var(--ai);    padding-left: 0.875rem; }
+.s-prereq h2   { border-left: 4px solid var(--t3);    padding-left: 0.875rem; }
+
+/* headings for the three types */
+.s-tip h3 {
+  margin-top: 3.25rem;
+  padding-left: 0.875rem;
+  border-left: 5px solid var(--rule);
+  font-size: 1.3125rem;
+}
+.s-tip h3 .k {
+  font-family: var(--font-ui);
+  letter-spacing: 0.06em;
+}
+.s-tip h3.t1 { border-color: var(--t1); }
+.s-tip h3.t2 { border-color: var(--t2); }
+.s-tip h3.t3 { border-color: var(--t3); }
+.s-tip h3.t1 .k { color: var(--t1); }
+.s-tip h3.t2 .k { color: var(--t2); }
+.s-tip h3.t3 .k { color: var(--t3); }
+
+/* the gate list — K0…K5 */
+.gates {
+  list-style: none;
+  margin: 1.75rem 0;
+  padding: 0;
+  counter-reset: kapi;
+}
+.gates li {
+  position: relative;
+  margin: 0;
+  padding: 0.75rem 0 0.75rem 1.25rem;
+  border-left: 3px solid var(--t2);
+  font-size: 1rem;
+}
+.gates li + li { margin-top: 0.125rem; }
+.gates li strong { font-family: var(--font-ui); }
+
+/* metric listesi */
+.metric { list-style: none; margin: 1.75rem 0; padding: 0; }
+.metric li {
+  padding: 0.75rem 0 0.75rem 1.125rem;
+  border-left: 3px solid var(--rule);
+  font-size: 1rem;
+}
+.metric li + li { margin-top: 0.125rem; }
+.metric li strong { font-family: var(--font-ui); }
+
+.refs ul { padding-left: 1.25rem; margin: 0; list-style: none; }
+.refs li {
+  position: relative;
+  margin-bottom: 0.625rem;
+  line-height: 1.55;
+}
+.refs li::before {
+  content: "·";
+  position: absolute;
+  left: -1rem;
+  color: var(--muted);
+}
+
+/* number chips: the global .chip is display-sized; here it is a line of
+   measurements read inside the prose, so we scale it down. */
+.chips.tight { gap: 0.4rem; margin: 1.5rem 0; }
+.chips.tight .chip {
+  min-width: 0;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.9375rem;
+  border-width: 1.5px;
+  border-radius: 5px;
+}
+.chips.tight .sep {
+  padding: 0;
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+.chips.tight .lbl { margin-top: 0.3rem; font-size: 0.6875rem; }
+
+/* measurements particular to this post; the components live in style.css */
+.tbl table { min-width: 40rem; }
+.note { margin: 2.5rem 0 0; }
+
+/* this post's figures don't declare their own font; tie them to the UI font */
+figure svg text { font-family: var(--font-ui); }

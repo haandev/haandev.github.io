@@ -26,17 +26,17 @@ const { title, date, description, ogDescription, dek, headerExtra, bodyClass } =
     {headerExtra && <Fragment set:html={headerExtra} />}
     <h1>{title}</h1>
     <time datetime={date}>{humanDate(date)}</time>
-    {/* dek markup taşıyor (span.g, span.a …), o yüzden ham HTML. */}
+    {/* The dek carries markup (span.g, span.a …), hence raw HTML. */}
     {dek && <p class="dek" set:html={dek} />}
   </header>
 
-  {/* .col max-width veriyor; yazılar onu kendi section'larına koyuyor,
-      main'e koyarsak ölçü iki kez daralıyor. */}
+  {/* .col sets the max-width; posts apply it to their own sections, so
+      putting it on main would narrow the measure twice. */}
   <main>
     <slot />
   </main>
 
   <footer class="site-footer col">
-    <a class="back" href="/">← tüm yazılar</a>
+    <a class="back" href="/">← all posts</a>
   </footer>
 </Base>

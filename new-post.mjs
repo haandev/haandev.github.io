@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Yeni yazı iskeleti oluşturur:  npm run new -- "Yazının Başlığı"
+// Scaffolds a new post:  npm run new -- "Title Of The Post"
 
 import { writeFile, mkdir, access } from "node:fs/promises";
 import { join } from "node:path";
@@ -8,14 +8,11 @@ const ROOT = import.meta.dirname;
 const title = process.argv.slice(2).join(" ").trim();
 
 if (!title) {
-  console.error('Kullanım: node new-post.mjs "Yazının Başlığı"');
+  console.error('Usage: node new-post.mjs "Title Of The Post"');
   process.exit(1);
 }
 
-const TR = { ı: "i", İ: "i", ğ: "g", Ğ: "g", ü: "u", Ü: "u", ş: "s", Ş: "s", ö: "o", Ö: "o", ç: "c", Ç: "c" };
-
 const slug = title
-  .replace(/[ıİğĞüÜşŞöÖçÇ]/g, (c) => TR[c])
   .toLowerCase()
   .normalize("NFD")
   .replace(/[̀-ͯ]/g, "")
@@ -23,20 +20,20 @@ const slug = title
   .replace(/^-|-$/g, "");
 
 const date = new Date().toISOString().slice(0, 10);
-// Her yazı kendi klasörü: index.mdx metin, yanındaki .mdx dosyaları figür ve
-// tablo bileşenleri, style.css yazıya özel stil.
+// Every post gets its own folder: index.mdx is the prose, the .mdx files next
+// to it are figure and table components, style.css is post-specific styling.
 const dir = join(ROOT, "src/content/posts", slug);
 const rel = `src/content/posts/${slug}/index.mdx`;
 const file = join(dir, "index.mdx");
 
 if (await access(dir).then(() => true, () => false)) {
-  console.error(`src/content/posts/${slug}/ zaten var.`);
+  console.error(`src/content/posts/${slug}/ already exists.`);
   process.exit(1);
 }
 
-// Frontmatter alanları src/content.config.ts'teki şemayla doğrulanıyor.
-// Gövde markdown. Figür ya da tablo gerekirse klasöre <Ad>.mdx olarak koy,
-// buradan import edip <Ad /> diye çağır.
+// Frontmatter fields are validated against the schema in src/content.config.ts.
+// The body is markdown. If you need a figure or a table, drop it in the folder
+// as <Name>.mdx, import it here and call it as <Name />.
 const template = `---
 title: ${JSON.stringify(title)}
 date: "${date}"
@@ -46,11 +43,11 @@ tags: []
 draft: true
 ---
 
-Buraya yaz.
+Write here.
 `;
 
 await mkdir(dir, { recursive: true });
 await writeFile(file, template);
 
-console.log(`${rel} oluşturuldu.`);
-console.log(`URL: /posts/${slug}.html  —  yayına almak için draft: true satırını sil.`);
+console.log(`Created ${rel}.`);
+console.log(`URL: /posts/${slug}.html  —  delete the draft: true line to publish.`);

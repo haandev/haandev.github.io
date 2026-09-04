@@ -1,0 +1,319 @@
+---
+title: "The anatomy of data languages: bytes, names and a spectrum"
+date: "2026-08-08"
+description: "There is no such thing as a file on a disk. File, row, document, message — all of them are names given by programs looking at bytes. This small dislocation reframes both SQL's five sublanguages and the categories we sort systems into."
+ogDescription: "There is no such thing as a file on a disk. File, row, document, message — all of them are names given by programs looking at bytes."
+bodyClass: "s-dl"
+dek: "There is <span class=\"a\">no such thing as a file on a disk</span>. File, row, document, message — all of them are <span class=\"g\">names given by programs looking at bytes</span>. This small dislocation reframes both SQL's five sublanguages and the categories we sort systems into."
+tags:
+  - "databases"
+  - "file systems"
+  - "sql"
+  - "abstraction"
+  - "systems design"
+---
+
+import "./style.css";
+
+import ThreeInterpreters from "./ThreeInterpreters.mdx";
+import NamingLayers from "./NamingLayers.mdx";
+import TripolarSpectrum from "./TripolarSpectrum.mdx";
+import PositionMap from "./PositionMap.mdx";
+import TableFiveQuestions from "./TableFiveQuestions.mdx";
+import TableSystemComparison from "./TableSystemComparison.mdx";
+import TableBoundaryViolations from "./TableBoundaryViolations.mdx";
+import TableChecklist from "./TableChecklist.mdx";
+
+<div class="col">
+<div class="abst">
+<span class="lbl">Abstract</span>
+
+The standard opening line of a database course — "SQL consists of five sublanguages" — carries three conceptual errors stacked on top of one another. This piece tries to resolve all three with a single thesis: *on a disk there are only bytes; file, row, document and message are names given by the programs looking at those bytes; and the distinction between "file system / database / message queue" is not a difference in kind but a difference in the degree of that naming.* The thesis is not new — it is a generalised reading of the literature on data independence (Codd, 1970; ANSI/SPARC, 1975) and "one size does not fit all" (Stonebraker &amp; Çetintemel, 2005). The contribution is not in the claim but in the framing: turning the five language categories from a *taxonomy* into a *measuring instrument*.
+
+</div>
+</div>
+
+{/* ================= 1 ================= */}
+<section class="col s-byte">
+
+## 1. The wrong opening line
+
+The classic opening of a database course is a known quantity: **"SQL consists of five sublanguages — DDL, DML, DQL, DCL and TCL."** The sentence is not technically wrong, but historically it is upside down.
+
+<div class="claim">
+<div class="t">Evidence 1 — the terms are older than SQL</div>
+
+The terms "Data Description Language" and "Data Manipulation Language" were set out by CODASYL's [Data Base Task Group](https://en.wikipedia.org/wiki/Data_Base_Task_Group) in its **April 1971 report**; the same report introduces the concepts of *schema* and *subschema*. They were defined not for the relational but for the **network data model**. Chamberlin and Boyce's SEQUEL paper, meanwhile, is dated **1974**. So DDL and DML were invented three years before SQL was born, for a model that was SQL's rival.
+
+</div>
+
+<div class="claim">
+<div class="t">Evidence 2 — the standard does not use this taxonomy</div>
+
+[ISO/IEC 9075-2](https://www.iso.org/standard/63556.html), the official definition of SQL, sorts statements not into "DDL/DML" but into classes such as *SQL-schema statements*, *SQL-data statements*, *SQL-transaction statements* and *SQL-session statements*. "DQL" does not appear in the standard at all; in the standard's text `SELECT` is a data statement. The fivefold taxonomy is a product of **pedagogy**, not of the standard.
+
+</div>
+
+<div class="claim">
+<div class="t">Evidence 3 — non-SQL systems use the same labels</div>
+
+Apache Cassandra's official documentation has separate sections for [Data Definition](https://cassandra.apache.org/doc/latest/cassandra/developing/cql/ddl.html) and [Data Manipulation](https://cassandra.apache.org/doc/latest/cassandra/developing/cql/dml.html). Transaction theory ([Gray, 1981](https://jimgray.azurewebsites.net/papers/thetransactionconcept.pdf)) and access control ([Saltzer &amp; Schroeder, 1975](https://web.mit.edu/Saltzer/www/publications/protection/)) were formulated independently of any language from the very beginning.
+
+</div>
+
+These three pieces of evidence point the same way: **the five categories do not belong to SQL.** But the correction doesn't end there, because two further errors sit underneath it. The second: system categories such as "database", "file system" and "message queue" are not as sharp as they are taken to be. The third and deepest: the units these systems claim to operate on — file, row, document, message — are not real entities either.
+
+Below we start at the very bottom and climb: first the **byte**, then the **names**, then the **boundary violations**, and finally the **spectrum**.
+
+## 2. Layer zero: there is no such thing as a "file"
+
+### 2.1 The thesis
+
+The only thing that physically exists on a disk is bytes — addressed, ordered, uninterpreted bytes. What we call a "file" is **a group name given to some of those bytes by a computer program called a file system.** A file does not live on the disk; it lives in the file system's interpretation. A program that reads the same disk without a file system driver sees no files at all; it sees only bytes.
+
+The same operation repeats at every layer. MongoDB takes a group of bytes and calls it a "document", and groups of documents a "collection". A SQL engine calls a group of bytes a "cell", arrays of cells "rows", and sets of rows a "table". Kafka calls the same bytes a "message" and a "topic". None of these add anything to the bytes; every one of them is nothing but a naming. **Ontologically, document, row, file and message have the same status:** labels an interpreting program has stuck onto bytes.
+
+</section>
+
+<ThreeInterpreters />
+
+<section class="col s-byte">
+
+### 2.2 The interpretation stack is recursive
+
+This view makes a beautifully nested picture visible. In the eyes of the file system, SQLite is **a single file**. But look at the same bytes through SQLite's eyes and the file disappears; tables and rows appear in its place. A row inside it plays exactly the role in SQLite's universe that the file plays in the file system's: an addressable, named group of bytes.
+
+The question of which name is "real" has no answer, because **neither is real** — what is real are the bytes underneath; the names belong to the program doing the looking.
+
+</section>
+
+<NamingLayers />
+
+<section class="col s-byte">
+
+### 2.3 Historical evidence: disks without files really do exist
+
+Let's take the thought experiment one step further: if we formatted a disk with no file system on it, laid out to store rows and columns directly, that disk would contain no files at all. Not from the *absence* of files, but from the absence of a program to call those bytes files.
+
+This did not stay a thought experiment:
+
+- **Raw devices.** For decades Oracle kept database files directly on raw block devices, with the file system out of the picture. The capability was only removed from the installation tools in 11g Release 2 ([Oracle 12c deprecated &amp; desupported features](https://docs.oracle.com/database/121/UPGRD/deprecated.htm)). Those disks, running in production for years, by definition contained no files.
+- **IBM System/38 (1978).** In Frank Soltis's [single-level store](https://en.wikipedia.org/wiki/Frank_Soltis) architecture there was no file system on the disk in the conventional sense: there were named *objects* inside libraries, and a relational database embedded in the operating system — before SQL/DS and DB2, no less ([IT Jungle](https://www.itjungle.com/2023/10/02/40-years-of-db2-but-even-more-for-that-no-name-database-embedded-in-system-38/)).
+- **Unix's contribution was precisely to "empty out" the file.** The radical part of Ritchie and Thompson's 1974 paper [The UNIX Time-Sharing System](https://dl.acm.org/doi/10.1145/361011.361061) was that it abandoned the record-oriented file models that came before it and defined a file as **an uninterpreted sequence of bytes**. "Everything is a file" is not a philosophy but a *name space* strategy — and Plan 9 formulated it that way explicitly ([Pike et al., *The Use of Name Spaces in Plan 9*](https://9p.io/sys/doc/names.html)).
+
+> A file is not a property of the disk but a property of **the looking**.
+
+### 2.4 How new is this thesis, really? (Not at all)
+
+What is being said here has an academic name: **data independence.** It is the very heart of Codd's 1970 paper [*A Relational Model of Data for Large Shared Data Banks*](https://dl.acm.org/doi/10.1145/362384.362685) and of the [ANSI/SPARC three-schema architecture (1975)](https://en.wikipedia.org/wiki/ANSI-SPARC_Architecture) that followed it: the internal layer — bytes, pages, indexes — the conceptual layer — tables, rows — and the external view layer are independent of one another.
+
+"There is no such thing as a row on the disk; it is a concept of the logical schema" has been the first chapter of database textbooks for fifty years. The only thing this piece does is generalise the sentence by one step: **a file has exactly the same status.**
+
+That generalisation is not foreign either. In the operating systems literature the file system is already described plainly as "an abstraction layer over a block device". Its counterpart in programming language theory is direct: the separation of data from its interpretation, the principle that *bits have no meaning without a type or an interpretation*. The matter of naming and binding is a subject in its own right in the systems literature — Saltzer's [*Naming and Binding of Objects*](https://web.mit.edu/Saltzer/www/publications/nbo/nbo.pdf) (1978) is the canonical text.
+
+So the thesis isn't original; it has been **moved**. It applies what the database community says about its own layers to the whole storage stack.
+
+### 2.5 Objection: isn't a byte an interpretation too?
+
+Yes. Magnetic flux transitions, charge levels in NAND cells, error correcting codes, 512B/4K sector translations — a "byte" is an abstraction too, and there are further layers beneath it. The turtles go all the way down.
+
+The reason this piece stops at the byte is not ontological but **pragmatic**: the byte is the lowest level below the software layer, and it offers *a universal, stable, addressable frame of reference*. Every interpreting program in the stack looks at the same byte space; the layers underneath it vary with the hardware and are inaccessible to software. The byte is chosen as the zero point because it is the *common denominator* of the discussion — not because it is absolute reality.
+
+</section>
+
+{/* ================= 3 ================= */}
+<section class="col s-name">
+
+## 3. The grammar of naming: five questions
+
+So how do these interpreting programs differ from one another? This is where the five layers come in — but now we can define them from the right place. DDL, DML, DQL, DCL and TCL are **the five questions every program that puts names on bytes is obliged to answer.**
+
+</section>
+
+<div class="wide">
+<TableFiveQuestions />
+</div>
+
+<section class="col s-name">
+
+The detail in the answer to the fourth question is the whole thesis in miniature: **permission is granted to a name, not to an address.** Because the protection system, too, sees names rather than bytes.
+
+These questions do not belong to SQL, because they belong to **the act of naming itself**:
+
+</section>
+
+<div class="wide">
+<TableSystemComparison />
+</div>
+
+<section class="col s-name">
+
+SQL is merely **the first widespread standard to stick academic labels on these questions.** The layers are universal, because any program that names bytes and operates through those names must, willingly or not, have an answer for defining, changing, reading, authorising and keeping consistent — even if the answer is "hardly at all".
+
+<div class="note">
+
+**The epistemic status of this section.** The historical evidence in section 1 is solid: the CODASYL origin of the DDL/DML terms is documented, and the standard's taxonomy is a matter of record. But as far as I know there is **no** canonical paper that explicitly declares the five an "anatomy of universal data languages". The generalisation here is a theorising of de facto practice: the industry does this (Cassandra's DDL/DML sections, MongoDB's transaction API, Kafka's ACLs) but rarely names it as such.
+
+</div>
+
+</section>
+
+{/* ================= 4 ================= */}
+<section class="col s-bound">
+
+## 4. Boundary violations: the empirical evidence
+
+Once the foundation is laid this way, why the system categories cannot be sharp follows by itself: if a file system, a database and a message queue are naming programs of **equal standing** working on the same bytes, then the difference between them is not one of kind but of degree — the richness of the answers they give to the five questions.
+
+This is an old argument in the data systems literature too. Stonebraker and Çetintemel's [*"One Size Fits All": An Idea Whose Time Has Come and Gone*](https://cs.brown.edu/research/db/publications/fits_all.pdf) (ICDE 2005) argues that these categories are an **engineering trade-off**, not a law of nature. Martin Kleppmann's [*Turning the Database Inside-Out*](https://www.confluent.io/blog/turning-the-database-inside-out-with-apache-samza/) and Jay Kreps's [*The Log*](https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying) both work through explicitly how the log/queue/database distinction is a set of different views onto the same underlying structure — an ordered log of bytes. Kafka's own self-description as a "distributed commit log" comes straight from this line of thought.
+
+Boundary violations are a constant reminder:
+
+</section>
+
+<div class="wide">
+<TableBoundaryViolations />
+</div>
+
+<section class="col s-bound">
+
+Look at it from the other end: pull transaction support out of a graph database, and what is left is a program that gives names to groups of bytes joined by pointers and promises no atomicity — functionally, a file system. **Databases that behave like queues and queues that behave like databases exist at the same time** — because they are all doing the same thing: putting names on bytes and producing answers to the five questions.
+
+The question "is this still a file system, or a database with hierarchical names?" has no answer, because it is **badly posed.** What changes is not the *kind* of system but the strength of its answer to the fifth question.
+
+</section>
+
+{/* ================= 5 ================= */}
+<section class="col s-spec">
+
+## 5. Ideal poles and a spectrum
+
+Rather than throwing the categories out altogether, we can use them the way physics uses the **ideal gas**: poles that do not exist in reality but that serve to measure what does. The counterpart in the social sciences is Max Weber's notion of the [*ideal type* (Idealtypus)](https://en.wikipedia.org/wiki/Ideal_type) — a pure form constructed not to describe but as a yardstick for comparison.
+
+- **The ideal file system** keeps naming to a *minimum*: it gives bytes an address and a name and loads no meaning onto the content. The name scheme is shallow, reading is closer to the address than to the name, and the consistency promise is weak.
+- **The ideal database** takes naming to a *maximum*: it reaches inside the bytes, names every part (row, column, cell), builds a rich algebra over those names, and offers fine-grained permissions and strict consistency at the level of names.
+- **The ideal message queue** ties naming to *time*: the name of a group of bytes (a message) finds its real meaning in the journey between the moment it is produced and the moment it is consumed; conveying matters rather than storing, querying is deliberately weak, and consistency takes the form of "how many times was it delivered".
+
+Real systems sit **inside** the surface these three corners span.
+
+</section>
+
+<TripolarSpectrum />
+
+<section class="col s-spec">
+
+SQLite leans from the DB corner towards the FS corner: a single file from outside, a full universe of names from within. ZFS reaches its consistency arm from the FS corner towards DB. Kafka has travelled a fair way from the MQ corner towards DB. Redis wanders in the middle of all three.
+
+No real system sits exactly on a corner; the ones that try usually turn out useless, because real workloads are not pure. That was precisely Stonebraker's argument.
+
+## 6. The five questions as a measuring instrument
+
+The real value of the five layers lies in using them not as a taxonomy but as a **measuring instrument**. How deep is a system's name scheme (DDL), how rich its algebra over names (DQL), how strict its consistency promise (TCL) — these answers give the system's coordinates on the spectrum far more reliably than its marketing label does.
+
+</section>
+
+<PositionMap />
+
+<section class="col s-spec">
+
+**"Is this a database?"** thereby stops being a yes/no question and turns into this:
+
+> **How deeply does it name** the bytes, and **what does it promise** those names?
+
+In practice you can use this as a checklist:
+
+<TableChecklist />
+
+</section>
+
+<section class="col s-close">
+
+## 7. Objections and limits
+
+This framework does not explain everything; if it claimed more than it explains it would be wrong.
+
+1. **The risk of reductionism.** "It's all naming bytes" is true but *insufficient*. A system's performance characteristics — access patterns, index structure, cache behaviour, the cost of durability — cannot be derived from the answers to the five questions. The difference between a B-tree and an LSM-tree is invisible in this framework, and in production it determines everything.
+2. **The distributed dimension is missing.** The five questions assume a single node. Replication, partitioning and the CAP trade-offs are a separate axis; the "TCL" heading is not broad enough to carry them.
+3. **We are not saying the categories are useless.** The word "database" is a useful shorthand pointing at a region of the spectrum. The problem is not the word itself but its being mistaken for a *natural kind*.
+4. **Section 3 has a different status.** The universality of the five questions is defended here by induction, not by a historical document. It may be possible to find a counterexample — and if one is found, the framework should be corrected.
+
+## 8. Practical value
+
+This three-storey view — *the byte is what is real, names are interpretation, categories are a spectrum* — has concrete returns.
+
+**First, it produces transferable knowledge.** Someone who has grasped the five questions knows what to look for when they open the documentation of a system they have never seen: what names does it give the bytes, how does it change and read those names, who may touch them, what does it promise. Whatever the system calls itself, the questions are the same.
+
+**Second, it frees the mind during debugging and data recovery.** In the byte view, "the file is corrupted" means *"the naming program can no longer interpret these bytes"* — the bytes are still there. Opening a corrupted SQLite file in a hex editor and pulling the rows out by hand, or recovering a deleted file by reading the disk raw, comes naturally only to someone who knows that the names are interpretation and the bytes are real.
+
+**Third, it frees system selection from labels.** "We need a message queue" is an incomplete sentence; what it should say is "we need a point that names bytes to this depth, retains them for this long, and gives this delivery guarantee". Once that description is made, it becomes visible that the answer need not come from a product labelled MQ — that perhaps the PostgreSQL you already have, with `SKIP LOCKED`, already sits at that point.
+
+**Fourth, it is a design guide.** If you are designing your own data layer, the job is clear: dress the bytes in a naming scheme and give conscious answers to the five questions. Writing down from the outset which corner you will sit near and which question you will **deliberately** answer weakly lets you own being "a bit of this and a bit of that" as a *design decision* rather than a defect.
+
+## 9. Conclusion
+
+Taking DDL, DML, DQL, DCL and TCL for sublanguages of SQL is like taking the alphabet for an invention of the English language — and the historical evidence here is clear-cut: the terms were born in 1971, three years before SQL, for a different data model.
+
+But the chain of corrections doesn't end there. The layers belong not to SQL but to the act of naming itself. The categories are not a law of nature but lines drawn across a spectrum. And the work every system on that spectrum does is, at bottom, one and the same: **giving a name to a group of bytes at known addresses, and producing answers to five questions through those names.**
+
+File, row, document, message — all of them are in the eye of the program doing the looking. None of them are on the disk.
+
+> On a disk there are only bytes; and **the byte is what is real**.
+
+</section>
+
+<hr class="qz" />
+
+<section class="col refs">
+
+<h2>References</h2>
+
+### Foundational texts
+
+1. Codd, E. F. (1970). *A Relational Model of Data for Large Shared Data Banks*. CACM 13(6), 377–387. [doi:10.1145/362384.362685](https://dl.acm.org/doi/10.1145/362384.362685)
+2. CODASYL Data Base Task Group (1971). *April 1971 Report* — the source of the DDL/DML terms and of the *schema*/*subschema* concepts. [Overview](https://en.wikipedia.org/wiki/Data_Base_Task_Group) · [ACM reprint](https://dl.acm.org/doi/10.1145/2579329.2579336)
+3. Chamberlin, D. D. &amp; Boyce, R. F. (1974). *SEQUEL: A Structured English Query Language*. SIGFIDET '74. [doi:10.1145/800296.811515](https://dl.acm.org/doi/10.1145/800296.811515)
+4. ANSI/X3/SPARC Study Group on DBMS (1975). *Interim Report* — the three-schema architecture. [Overview](https://en.wikipedia.org/wiki/ANSI-SPARC_Architecture)
+5. ISO/IEC 9075-2:2016, *Database languages — SQL — Part 2: Foundation*. [ISO entry](https://www.iso.org/standard/63556.html) · [the standard's 16 parts](https://modern-sql.com/standard/parts)
+
+### Naming, files and abstraction
+
+<ol start="6">
+<li>Ritchie, D. M. &amp; Thompson, K. (1974). *The UNIX Time-Sharing System*. CACM 17(7). [doi:10.1145/361011.361061](https://dl.acm.org/doi/10.1145/361011.361061)</li>
+<li>Saltzer, J. H. (1978). *Naming and Binding of Objects*. LNCS 60. [PDF](https://web.mit.edu/Saltzer/www/publications/nbo/nbo.pdf)</li>
+<li>Pike, R. et al. (1993). *The Use of Name Spaces in Plan 9*. [Text](https://9p.io/sys/doc/names.html)</li>
+<li>Soltis, F. — IBM System/38 and single-level store. [Biography](https://en.wikipedia.org/wiki/Frank_Soltis) · [System/38's embedded database](https://www.itjungle.com/2023/10/02/40-years-of-db2-but-even-more-for-that-no-name-database-embedded-in-system-38/)</li>
+</ol>
+
+### Transactions and protection
+
+<ol start="10">
+<li>Gray, J. (1981). *The Transaction Concept: Virtues and Limitations*. Tandem TR 81.3. [PDF](https://jimgray.azurewebsites.net/papers/thetransactionconcept.pdf)</li>
+<li>Saltzer, J. H. &amp; Schroeder, M. D. (1975). *The Protection of Information in Computer Systems*. Proc. IEEE 63(9). [Text](https://web.mit.edu/Saltzer/www/publications/protection/)</li>
+</ol>
+
+### The blurring of boundaries
+
+<ol start="12">
+<li>Stonebraker, M. &amp; Çetintemel, U. (2005). *“One Size Fits All”: An Idea Whose Time Has Come and Gone*. ICDE 2005. [PDF](https://cs.brown.edu/research/db/publications/fits_all.pdf)</li>
+<li>Kreps, J. (2013). *The Log*. [LinkedIn Engineering](https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying)</li>
+<li>Kleppmann, M. (2015). *Turning the Database Inside-Out*. [Confluent](https://www.confluent.io/blog/turning-the-database-inside-out-with-apache-samza/)</li>
+<li>Kleppmann, M. (2018). *Is Kafka a Database?* Kafka Summit SF. [Talk notes](https://martin.kleppmann.com/2018/10/17/kafka-summit.html)</li>
+<li>Rodeh, O. (2008). *B-trees, shadowing, and clones*. ACM TOS 3(4). [doi:10.1145/1326542.1326544](https://dl.acm.org/doi/10.1145/1326542.1326544)</li>
+<li>Rodeh, O., Bacik, J. &amp; Mason, C. (2013). *BTRFS: The Linux B-Tree Filesystem*. ACM TOS 9(3). [doi:10.1145/2501620.2501623](https://dl.acm.org/doi/10.1145/2501620.2501623)</li>
+<li>Bonwick, J. (2007). *ZFS: Rampant Layering Violation?* [Archived copy](https://gwern.net/doc/cs/end-to-end-principle/2007-05-04-jeffbonwickzfsrampantlayeringviolation.html)</li>
+<li>Giampaolo, D. (1999). *Practical File System Design with the Be File System*. [PDF](https://www.nobius.org/dbg/practical-file-system-design.pdf)</li>
+</ol>
+
+### Product documentation
+
+<ol start="20">
+<li>Microsoft. *Alternatives to using Transactional NTFS*. [MS Learn](https://learn.microsoft.com/en-us/windows/win32/fileio/deprecation-of-txf)</li>
+<li>SQLite. [*35% Faster Than The Filesystem*](https://www.sqlite.org/fasterthanfs.html) · [*SQLite As An Application File Format*](https://www.sqlite.org/appfileformat.html)</li>
+<li>PostgreSQL. [*SELECT — The Locking Clause*](https://www.postgresql.org/docs/current/sql-select.html) · [*NOTIFY*](https://www.postgresql.org/docs/current/sql-notify.html)</li>
+<li>Apache Cassandra. [*Data Definition*](https://cassandra.apache.org/doc/latest/cassandra/developing/cql/ddl.html) · [*Data Manipulation*](https://cassandra.apache.org/doc/latest/cassandra/developing/cql/dml.html)</li>
+<li>Oracle. [*Deprecated and Desupported Features for Oracle Database 12c*](https://docs.oracle.com/database/121/UPGRD/deprecated.htm)</li>
+<li>Microsoft. [*WinFS*](https://en.wikipedia.org/wiki/WinFS)</li>
+<li>Weber, M. — [*ideal type* (Idealtypus)](https://en.wikipedia.org/wiki/Ideal_type)</li>
+</ol>
+
+</section>

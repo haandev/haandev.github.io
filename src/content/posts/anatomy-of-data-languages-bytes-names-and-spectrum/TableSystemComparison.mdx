@@ -1,0 +1,14 @@
+<div class="tbl tbl-5">
+<table>
+<thead>
+<tr><th>Question</th><th>SQL</th><th>MongoDB</th><th>POSIX file system</th><th>Kafka</th><th>Amazon S3</th></tr>
+</thead>
+<tbody>
+<tr><td>**Defining names** (DDL)</td><td class="mono">CREATE TABLE</td><td class="mono">createCollection</td><td class="mono">mkdir, creat</td><td>creating a topic</td><td>creating a bucket</td></tr>
+<tr><td>**Changing** (DML)</td><td class="mono">INSERT/UPDATE</td><td class="mono">insertOne</td><td class="mono">write, unlink</td><td class="mono">produce</td><td class="mono">PutObject</td></tr>
+<tr><td>**Reading** (DQL)</td><td class="mono">SELECT</td><td class="mono">find, aggregate</td><td class="mono">read, readdir</td><td>consume + offset</td><td class="mono">GetObject</td></tr>
+<tr><td>**Permission** (DCL)</td><td class="mono">GRANT</td><td class="mono">grantRolesToUser</td><td class="mono">chmod, ACL</td><td>topic ACL</td><td>IAM policy</td></tr>
+<tr><td>**Consistency** (TCL)</td><td class="mono">COMMIT</td><td class="mono">commitTransaction</td><td class="mono">fsync, journal</td><td>idempotent producer</td><td>per-object atomicity</td></tr>
+</tbody>
+</table>
+</div>

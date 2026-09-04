@@ -5,7 +5,7 @@ export type Post = CollectionEntry<"posts">;
 
 export const baseUrl = site.url.replace(/\/$/, "");
 
-/** Yayındaki yazılar, en yeni önce. Taslaklar sadece dev'de görünür. */
+/** Published posts, newest first. Drafts show up only in dev. */
 export async function getPosts(): Promise<Post[]> {
   const posts = await getCollection("posts", ({ data }) =>
     import.meta.env.PROD ? !data.draft : true,
@@ -18,7 +18,7 @@ export async function getPosts(): Promise<Post[]> {
   );
 }
 
-/** Eski build'in ürettiği URL biçimi — .html uzantısı korunuyor. */
+/** URL shape the old build produced — the .html extension is preserved. */
 export const postPath = (id: string) => `/posts/${id}.html`;
 
 const dateFmt = new Intl.DateTimeFormat(site.lang, {

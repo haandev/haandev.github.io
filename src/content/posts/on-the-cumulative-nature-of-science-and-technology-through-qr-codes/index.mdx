@@ -1,0 +1,450 @@
+---
+title: "on the cumulative nature of science and technology, through the example of the qr code"
+date: "2026-07-29"
+description: "Repairing a corrupted list and looking at a square from an angle: two branches of mathematics, unaware of each other, meet in a QR code in 1994."
+dek: "One of them <span class=\"a\">tried to repair a corrupted list</span>, the other <span class=\"g\">looked at a square from the side</span>. Two questions, unaware of each other, ended up in the same place."
+headerExtra: "<div class=\"overprint\" aria-hidden=\"true\">\n    <div class=\"sq g1\"></div>\n    <div class=\"sq g2\"></div>\n  </div>"
+tags:
+  - "qr"
+  - "mathematics"
+  - "history of science"
+---
+
+import VanishingPoints from "./VanishingPoints.mdx";
+import ClockArithmetic from "./ClockArithmetic.mdx";
+import AffineTransform from "./AffineTransform.mdx";
+import PerspectiveTransform from "./PerspectiveTransform.mdx";
+import KleinHierarchy from "./KleinHierarchy.mdx";
+import QrStructure from "./QrStructure.mdx";
+import FinderPatternRatio from "./FinderPatternRatio.mdx";
+import Timeline from "./Timeline.mdx";
+import TableAlignmentPatterns from "./TableAlignmentPatterns.mdx";
+import TableErrorCorrectionLevels from "./TableErrorCorrectionLevels.mdx";
+
+{/* ================= SCENE 1 ================= */}
+<div class="col scene alg">
+<div class="strip">
+<div class="eyebrow">Scene One</div>
+<div class="name">Algebra</div>
+</div>
+</div>
+
+<section class="col s-alg">
+
+## A list of four numbers
+
+I have four numbers here. I am going to send them to you, but one of them may get corrupted on the way.
+
+<div class="chips">
+<div class="chip">3</div><div class="chip">7</div><div class="chip">2</div><div class="chip">5</div>
+</div>
+
+**Step one: write the sum at the end.**
+
+<div class="chips">
+<div class="chip">3</div><div class="chip">7</div><div class="chip">2</div><div class="chip">5</div>
+<div class="sep">|</div><div class="chip ctrl">17</div>
+<div class="lbl">last box: the check number (the sum)</div>
+</div>
+
+Say the second number is erased on the way:
+
+<div class="chips">
+<div class="chip">3</div><div class="chip q">?</div><div class="chip">2</div><div class="chip">5</div>
+<div class="sep">|</div><div class="chip ctrl">17</div>
+</div>
+
+Easy. 3 + 2 + 5 = 10, the sum should be 17, so the missing number is 7. With a single extra number I brought back a lost one. I didn't have to send the list twice.
+
+**Step two: what if I don't know it was lost?**
+
+That is the genuinely hard case. The number doesn't disappear — it *arrives wrong*:
+
+<div class="chips">
+<div class="chip">3</div><div class="chip bad">9</div><div class="chip">2</div><div class="chip">5</div>
+<div class="sep">|</div><div class="chip ctrl">17</div>
+<div class="lbl">everything looks to be in its place — but the sum doesn't add up</div>
+</div>
+
+Adding them gives 19, while the check says 17. There is an error somewhere and I don't know where.
+
+The fix: a second check number. This time let me multiply each number by its position before adding:
+
+<pre><code>{`1×3 + 2×7 + 3×2 + 4×5 = 43`}</code></pre>
+
+What I send is now:
+
+<div class="chips">
+<div class="chip">3</div><div class="chip">7</div><div class="chip">2</div><div class="chip">5</div>
+<div class="sep">|</div><div class="chip ctrl">17</div><div class="chip ctrl">43</div>
+</div>
+
+When the faulty list arrives I have two clues:
+
+<pre><code>{`received list:  3   9   2   5
+
+sum            : 19   should have been 17  →  2 too high
+weighted sum   : 47   should have been 43  →  4 too high`}</code></pre>
+
+Now look: **4 ÷ 2 = 2.** The error is in position 2. And it is 2 too high: 9 − 2 = 7.
+
+The list is repaired. I found both the location of the error and its correct value — with just two extra numbers.
+
+## The rule in one sentence
+
+Every extra check number buys you one answer:
+
+If you know **where** the error is, 1 check number = 1 recovered value. If you don't, 2 check numbers = 1 corrected error — one finds its position, the other its value. If you want to correct five errors, you add ten check numbers. That's all there is to it.
+
+And the beautiful part: had the list been four hundred numbers instead of four, two check numbers would still be enough to correct one error.
+
+> The cost of the check numbers depends not on the length of the list but on how many errors you want to correct.
+
+Sending the list three times meant tripling the space; here the redundancy drops to almost nothing.
+
+Another way to see it: a single line passes through two points. Let me send you five points on a line. Let three of them be lost on the way — join the two that remain and the same line comes back. Which two survive makes no difference at all.
+
+<VanishingPoints />
+
+Finding the industrial version of this seemingly simple trick took until the middle of the twentieth century. In 1948 **Claude Shannon** proved that error-free communication over a noisy channel is possible — but he didn't say how to do it. Rather like proving something exists without handing it over. For decades people tried to approach the limit Shannon had drawn.
+
+**Reed and Solomon** found the answer in 1960: a generalisation of the trick above — longer lists, more check numbers, cleverer multipliers. The paper was five pages long, it was beautiful, and it was unusable: there was no efficient way to decode. The theory was right, the arithmetic never finished in practice. It waited another eight years, until **Berlekamp's** algorithm arrived in 1968. Only then could it go into a machine.
+
+And on the way into the machine there was one more obstacle — one that will take us to the oldest name on this branch.
+
+## But this arithmetic won't fit in a byte
+
+The pretty trick has a practical problem. Computers carry data in bytes — numbers from 0 to 255. In ordinary arithmetic the weighted sum of a 255-byte block is at most:
+
+<pre><code>{`1×255 + 2×255 + ... + 255×255 = 8,323,200`}</code></pre>
+
+That is 23 bits. Which means you would write a 3-byte check number to protect 1 byte of data. The longer the block, the longer that number gets. The system collapses before it has started.
+
+**"Let's take it mod 256" doesn't work either.** That is the most natural reflex: throw away the overflow, keep the remainder. Fine for addition, but multiplication breaks:
+
+<pre><code>{`mod 256:
+  2 × 128 = 0        ← the information vanished entirely
+  2 × 200 = 144
+  2 × 72  = 144      ← two different inputs, the same result`}</code></pre>
+
+When the result is 144 you cannot tell whether the input was 200 or 72. You cannot divide.
+
+And the trick for locating an error rested on exactly that division: `4 ÷ 2 = position 2`. If division doesn't work, the trick doesn't work.
+
+## The fix: designing the arithmetic from scratch
+
+**GF(256)** is a world of numbers that satisfies all of these at once: it has exactly 256 elements and every one of them fits in a byte; addition, subtraction, multiplication and division are all defined; no result ever exceeds 255; and every non-zero number has an inverse — multiplication can always be undone.
+
+<ClockArithmetic />
+
+**Addition = XOR.** There is no carry, so there is no overflow:
+
+<pre><code>{`200 = 11001000
+100 = 01100100
+XOR   10101100 = 172   ✓ a single byte`}</code></pre>
+
+Subtraction is the same operation. `a XOR b XOR b = a`.
+
+**Multiplication** is a little more involved: you multiply the numbers as polynomials, divide the result by a fixed polynomial and take the remainder. The result is again guaranteed to be one byte:
+
+<pre><code>{`in GF(256):
+  200 × 100 = 79
+  172 × 231 = 159
+  2 × 128   = 29     ← no longer zero, no information is lost
+  2 × 200   = 141
+  2 × 72    = 144    ← different results, no collision
+
+  maximum over all 65,536 products: 255`}</code></pre>
+
+And division really works:
+
+<pre><code>{`79 ÷ 100 = 200   ✓ we're back`}</code></pre>
+
+So who built this world of numbers? Here is the oldest name I promised. **Évariste Galois** died in a duel in 1832, at the age of twenty. The question he was working on was, by today's lights, entirely abstract: which equations can be solved by taking roots, and which cannot? To answer it he saw that one had to study the structure not of numbers but of *symmetries*. Finite fields — GF standing for *Galois Field* — were a by-product of that study. The tool Reed and Solomon took off the shelf in 1960 had been sitting there for 128 years.
+
+The man had neither scratched plastic nor signals from space in mind. Only a question about an equation.
+
+*Let's freeze this scene here. We have an algebra that can rescue corrupted data — but nothing to read. Now we go somewhere else entirely.*
+
+</section>
+
+{/* ================= SCENE 2 ================= */}
+<div class="col scene geo">
+<div class="strip">
+<div class="eyebrow">Scene Two</div>
+<div class="name">Geometry</div>
+</div>
+</div>
+
+<section class="col s-geo">
+
+## What is lost and what remains
+
+There is a square in front of you. You are looking at it straight on: four equal sides, four right angles.
+
+Now tilt your head.
+
+It is no longer a square. The sides aren't equal, the angles aren't right. And yet you still know it is "that square". So what exactly is it that you know? Among all the things that changed in the image, what is left in your hands?
+
+What survives when you tilt, rotate, stretch and scale a shape is **parallelism**. If the opposite sides of the square are parallel, they are parallel in the skewed image too. The square becomes a parallelogram — but it stays a parallelogram.
+
+In 1748 Euler gave this kinship a name: *affinis*. Latin for "related". You can distort a shape beyond recognition and the kinship holds.
+
+<AffineTransform />
+
+The algebra of this transformation looks like this:
+
+<pre><code>{`x' = a·x + b·y + c
+y' = d·x + e·y + f`}</code></pre>
+
+Six coefficients. Which is to say six unknowns.
+
+And now the good part: if you know where a point ends up in the distorted image, that gives you two equations — one for x, one for y. **Three points = six equations.** An exact fit. Nothing missing, nothing spare.
+
+<div class="keep">
+<div class="num">3</div>
+
+Three reference points are enough to undo an affine distortion. Note that number down.
+
+</div>
+
+## The one thing affine cannot do
+
+An affine transformation does a great deal, but there is one thing it cannot do: **depth**.
+
+Looking straight on, there is no problem. But if you really are looking from an angle — from above, from the side, from below — the far edge appears shorter than the near one. Parallel lines are no longer parallel; they converge towards a vanishing point.
+
+Railway tracks. An affine transformation cannot draw railway tracks.
+
+<PerspectiveTransform />
+
+For that you need one rung up: a **homography**, that is, a projective transformation.
+
+<pre><code>{`x' = (a·x + b·y + c) / (g·x + h·y + 1)
+y' = (d·x + e·y + f) / (g·x + h·y + 1)`}</code></pre>
+
+A denominator has appeared. And with it two new unknowns: `g` and `h`. Eight in total.
+
+Eight unknowns, two equations per point → **four points are needed.** Three won't do.
+
+<div class="keep">
+<div class="num">4</div>
+
+Four points are needed to undo a perspective distortion. Note that second number down too.
+
+</div>
+
+Before anyone could write these equations, someone had to take perspective seriously — and the first to do so were not mathematicians. In the 1400s **Brunelleschi and Alberti** solved perspective not for theory but in order to paint. How do you draw a three-dimensional scene correctly on a wall? The first practical use of a homography happened in an artist's workshop.
+
+It took mathematics four centuries to reclaim the subject, and it happened in a thoroughly unexpected place. **Jean-Victor Poncelet** was taken prisoner during Napoleon's Russian campaign. With no books, in prison, starting from nothing but the geometry he could remember, he rebuilt projective geometry from the ground up. The book he published in 1822 — after his release — is the one that turned these transformations into a discipline.
+
+## Klein's question, asked backwards
+
+Fifty years later, in the field Poncelet had opened, **Felix Klein** asked what geometry is by turning the question around.
+
+Until then geometry was defined by asking "what is space, what is a point, what is a line". In 1872 Klein proposed this instead:
+
+> A geometry is defined by **what does not change** under a given set of transformations.
+
+<KleinHierarchy />
+
+In projective geometry length is gone, angle is gone, even parallelism is gone. But this is not a list of losses — it is a ranking by power. The geometry at the top is the one that can still rescue something from even the wildest distortion.
+
+You may recognise the shape of that question from somewhere. We asked the same thing in scene one while building GF(256): *which rules do I have to preserve for the numbers to fit in a byte?* There, overflow was sacrificed and division was rescued. Klein's hierarchy is the same bargain — give up length, keep parallelism; give that up too, keep straightness. The two scenes know nothing of each other — but they are asking the same kind of question.
+
+Klein turned this idea into a programme in 1872. But its first instance had been written 1550 years earlier. Around AD 320 **Pappus of Alexandria** knew that the **cross-ratio** formed by four points on a line does not change under perspective. The idea that "the image may change, but some ratios stay fixed" is nearly 1700 years old.
+
+From Pappus to Klein, not one person on this branch had an application in mind. What could there have been? There were no cameras.
+
+*The second scene freezes here too. We have two numbers — three and four — and an idea that says what matters is what does not change.*
+
+</section>
+
+{/* ================= MERGE ================= */}
+<div class="col merge">
+<div class="strip">
+<div class="eyebrow">The merge</div>
+<div class="name">1994: <span class="a">two scenes</span> <span class="g">in the same room</span></div>
+</div>
+</div>
+
+<section class="col s-mix">
+
+Japan. Denso Wave — a subsidiary of Denso, part of the Toyota group — is looking for something to track automotive parts with. A barcode holds about \~20 characters, and that is not enough.
+
+The engineers design a square pattern: a grid of black and white modules. It will be called the **QR code**.
+
+And look at the corners of the design:
+
+<QrStructure />
+
+A large nested square in three corners. A smaller one at the bottom right. **Three plus one.**
+
+<div class="reveal-note">
+<div class="cell g">
+<div class="t">The numbers from the geometry scene</div>
+
+The three large squares are the three points that solve affine's six unknowns. The small square at the bottom right is the **fourth point** needed to step up to a homography.
+
+</div>
+<div class="cell a">
+<div class="t">The numbers from the algebra scene</div>
+
+Inside the squares, scattered among the data, are the check bytes — the **grandchildren of the 17 and the 43** at the end of that four-number list.
+
+</div>
+</div>
+
+The shapes in the corners are not aesthetics. They are the dimensions of a system of equations.
+
+One branch puts the grid in place, the other repairs the damage in the grid. **Projective geometry makes it readable, finite fields make it recoverable.** Both were taken ready-made off the shelf — the engineers needed to concern themselves with neither Galois's equations nor Poncelet's captivity.
+
+## The thirteen things that happen in half a second
+
+There is a laminated sheet of paper on a street vendor's stall. The edge is torn, there is a grease stain on it, it has faded in the sun. You hold your phone at an angle — nobody holds it straight — and half a second later the payment screen opens.
+
+Here is what happens in that half second:
+
+<pre><code>{` 1. Greyscale
+ 2. Thresholding                ← the contrast decision happens here
+ 3. Find the 3 finder squares   (the 1:1:3:1:1 ratio)
+ 4. Orientation / rotation
+ 5. Timing pattern              → how many modules there are
+ 6. Alignment patterns          → perspective correction
+ 7. Build the grid, read the centre of each module
+
+────────────  the geometry scene ends here  ────────────
+
+ 8. Format information
+ 9. Remove the mask
+10. Read the data modules in zigzag order
+11. De-interleave the blocks
+12. Reed-Solomon
+13. Decode the text
+
+────────────  this is the algebra scene  ────────────`}</code></pre>
+
+Now let's look a little more closely inside these steps — because the fingerprints of both scenes are everywhere.
+
+## Small code, small error
+
+**Version 1 (21×21) has no alignment pattern at all.** The code is so small that the error made by an affine fit doesn't exceed half a module even in the furthest corner. The grid still lands on the right cell. Adding a fourth point would be wasting space.
+
+As the code grows, the drift accumulates:
+
+<TableAlignmentPatterns />
+
+In large codes the patterns form a grid of their own. At that point even a single global homography is no longer enough — a separate local transformation is computed for each region. The reason is practical: the code may not be flat. It may be printed on a bottle label, on crumpled paper, on curved packaging. No single transformation can flatten a curved surface — but approximating it piece by piece works.
+
+**And the reader climbs Klein's hierarchy one rung at a time.** In real decoders such as ZXing the order goes: first find the three finder squares; fit an affine transform and predict where the fourth corner *ought* to be; search a small area around that prediction for the alignment pattern; once found, step up to a homography.
+
+Affine isn't an intermediate step that gets thrown away. You need a rough map before you can find the fourth point.
+
+## Pappus's grandchild
+
+There is a chicken-and-egg problem here: to find the finder squares you need to know the transformation, and to compute the transformation you need to find the finder squares.
+
+The answer is hidden in the geometry itself. Along **any** line through the centre of a finder square, the run lengths of the colours are always in the same ratio:
+
+<FinderPatternRatio />
+
+Which is to say: the pattern is designed to be recognisable before the transformation is known. The scanner sweeps the image line by line looking for that ratio — whether the code is upside down, skewed or far away makes no difference at all. The ratio is there.
+
+"The image may change, but some ratios stay fixed." Pappus wrote that in 320. In 1994 someone turned the same idea into a design decision: *what matters is not how this shape looks, but which of its properties stays fixed.*
+
+## What is inside the squares
+
+The grid is fitted; now for the reading. One square carries exactly **one bit**: black is 1, white is 0. There are two points where people get stuck.
+
+**Pixel ≠ square.** The smallest unit is called a *module*, and on screen or in print it is usually more than one pixel:
+
+<pre><code>{`1 module (1 bit) =  ████
+                    ████    ← may be 16 pixels on screen
+                    ████
+                    ████`}</code></pre>
+
+The reason is simple: so the camera can tell them apart comfortably. So it isn't that "one pixel carries more than one bit" — **many pixels come together to carry a single bit.** Exactly the opposite direction.
+
+**Bit ≠ letter.** A letter doesn't fit in one square:
+
+<pre><code>{`"A" =  01000001
+       ░█░░░░░█   ← 8 separate squares`}</code></pre>
+
+A code holding a 100-letter address needs at least 800 squares. The smallest QR code is 21×21 = 441 squares; once the fixed markers are taken out, 26 bytes are left for data, and 7 of those are check bytes. What remains: around 19 letters. The largest code is 177×177 = a little over 31 thousand squares, and can still only carry a few thousand characters.
+
+## Why is the format information read first?
+
+Another chicken-and-egg problem. To read the data modules you need to know which mask was used; to learn the mask you have to read something.
+
+The answer: a small 15-bit area sitting right beside the top-left finder square. It holds only **5 bits** of real information — 2 bits of error correction level, 3 bits of mask number. The remaining 10 bits are pure protection. This area uses a BCH code rather than Reed-Solomon and can correct a 3-bit error. On top of that it is copied to two separate places. It looks excessive for 5 bits — but if this area goes, the whole code dies.
+
+**The mask's job is visual.** The data area isn't written raw; it is XORed with a fixed pattern. The aim: to stop large flat black or white areas forming inside the code (the camera would lose the grid) and to stop a shape resembling a finder square appearing in the data area by accident. The encoder tries all eight masks, picks the most balanced image and writes its number into the format bits.
+
+The data modules are then read in two-module-wide columns, starting at the bottom right and zigzagging up and down. The resulting byte sequence doesn't go straight to Reed-Solomon — it is *de-interleaved* first: in large codes the data is split into blocks and the blocks are written interleaved with one another. The aim: a large stain in one place should take one byte from many blocks rather than killing a single block outright.
+
+Incidentally, the GF(256) polynomial QR uses is `0x11D` — the multiplication tables in the algebra scene were computed with that polynomial.
+
+## How much protection, at what price
+
+<TableErrorCorrectionLevels />
+
+What you give up in return is space. The check numbers live in squares too. In the smallest code (26 bytes in total) the split goes like this:
+
+<div class="cap">
+<div class="row"><div class="lv">L</div><div class="bar"><div class="data" style="flex:19"></div><div class="ec" style="flex:7"></div></div><div class="tag">19 data · 7 check</div></div>
+<div class="row"><div class="lv">M</div><div class="bar"><div class="data" style="flex:16"></div><div class="ec" style="flex:10"></div></div><div class="tag">16 data · 10 check</div></div>
+<div class="row"><div class="lv">Q</div><div class="bar"><div class="data" style="flex:13"></div><div class="ec" style="flex:13"></div></div><div class="tag">13 data · 13 check</div></div>
+<div class="row"><div class="lv">H</div><div class="bar"><div class="data" style="flex:9"></div><div class="ec" style="flex:17"></div></div><div class="tag">9 data · 17 check</div></div>
+<div class="legend"><span><i class="data"></i>data</span><span><i class="ec"></i>Reed-Solomon check</span></div>
+</div>
+
+At level H two thirds of the code is check bytes. This table also explains why codes with a logo in the middle are always at level H: the logo is deliberate damage eating the centre of the code.
+
+## Why it won
+
+Denso Wave took out the patent — **and chose not to enforce it.** Anyone who follows the standard can generate them for free and read them for free. No licence, no royalties, no permission. Most rival 2D barcodes were not this open. A thing that is free almost always beats a thing that is good.
+
+The technical decisions were right too. **It reads from any angle:** thanks to the three finder squares you can hold the code upside down; a barcode you have to line up. **Capacity:** thousands of characters instead of twenty. **It survives rough handling:** a dirty, crumpled, scratched code still reads. **It scales:** the same pattern prints at the size of a fingernail or across the side of a building.
+
+But the real force is economic:
+
+<pre><code>{`Generating a code : free, a few milliseconds
+Printing a code   : ink, a few mm²
+On the code's side: no power, no battery, no chip, no network
+The reader        : already in everybody's pocket`}</code></pre>
+
+It is the cheapest known way to bridge the physical world and the digital one. NFC wants a chip, an app, a compatible phone. QR wants only ink. It can be printed on paper, on a screen, on glass, on fabric, on bread.
+
+Two waves turned it into infrastructure. **China:** from 2014 onwards WeChat and Alipay built payments entirely on QR — the street vendor needs no card terminal, a laminated sheet of paper is enough. **The pandemic:** in 2020 menus, entry logs and vaccination certificates moved to QR, and the rest of the world made scanning a code a reflex too.
+
+</section>
+
+<hr class="qz" />
+
+<section class="col s-mix">
+
+## Closing: 1674 years and 162 years
+
+Let's put the two scenes on a single timeline:
+
+<Timeline />
+
+The geometry branch starts with Pappus in 320 and ends in 1994: **1674 years.** The algebra branch starts with Galois in 1832 and ends in 1994: **162 years.**
+
+Things look to have sped up recently. But it is the length of the geometry branch that says the real thing:
+
+> Nobody knows when an idea will turn out to be useful.
+
+There was no camera when Pappus wrote down the cross-ratio. Poncelet had no application in mind while rebuilding geometry in prison. There was no digital communication when Galois built finite fields — there was no electricity. When Reed and Solomon wrote their paper there wasn't even an algorithm that could decode their own code.
+
+Not one of them had to defend "what this will one day be good for" — or if they did, they could not have given the right answer. The answer turned up centuries later, in a Japanese car factory, on plastic parts.
+
+Back to the beginning. A list arrives corrupted; two extra numbers bring the truth back. You look at a square from an angle; nothing stays where it was, and yet something remains. Two questions, two separate centuries, two separate traditions.
+
+The grease-stained sheet of paper opens in half a second. Both of them are in there.
+
+<div class="foot">
+The GF(256) multiplication examples and capacity tables in this piece have been verified. If you want to try them: the reduction polynomial is `0x11D`.
+</div>
+
+</section>

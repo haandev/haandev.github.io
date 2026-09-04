@@ -1,0 +1,39 @@
+<div class="tbl">
+<table>
+<thead>
+<tr><th>\#</th><th>Question</th><th>SQL label</th><th>Theoretical basis</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>**How are names defined?** Which groups of bytes get called what — table, collection, topic, directory. It changes not the data but the naming scheme; it establishes a name space.</td>
+<td class="mono">CREATE ALTER DROP</td>
+<td>The notion of a schema — CODASYL DBTG (1971); ANSI/SPARC conceptual layer (1975)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>**How are the named bytes changed?** The transition from one state to another.</td>
+<td class="mono">INSERT UPDATE DELETE</td>
+<td>State transformation — Gray (1981)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>**How are the bytes reached through a name?** What we call a query is a description of the path from a name to bytes.</td>
+<td class="mono">SELECT</td>
+<td>Data independence and relational algebra — Codd (1970)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>**Who may touch which names?** Permission is always granted at the level of names; nobody defines a permission over "512 bytes starting at 0x4A3F".</td>
+<td class="mono">GRANT REVOKE</td>
+<td>The access matrix — Saltzer &amp; Schroeder (1975)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>**When do changes become "real"?** The guarantee that the bytes a name points at look the same, and consistent, to everyone looking at the same moment.</td>
+<td class="mono">COMMIT ROLLBACK</td>
+<td>The transaction concept, ACID — Gray (1981)</td>
+</tr>
+</tbody>
+</table>
+</div>

@@ -5,19 +5,20 @@ const posts = defineCollection({
   loader: glob({ base: "./src/content/posts", pattern: "**/index.{md,mdx}" }),
   schema: z.object({
     title: z.string(),
-    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date YYYY-MM-DD olmalı"),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
     description: z.string().default(""),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
-    // Liste ve OG için ayrı, daha kısa bir özet gerekirse.
+    // For when the list and OG need a separate, shorter summary.
     ogDescription: z.string().optional(),
-    // Başlık altındaki spot yazısı; içinde <span class="g"> gibi markup
-    // olabildiği için ham HTML olarak basılıyor.
+    // The standfirst under the title; rendered as raw HTML because it may
+    // contain markup such as <span class="g">.
     dek: z.string().optional(),
-    // Header'a giren yazıya özel dekorasyon (ör. QR yazısındaki overprint).
+    // Post-specific decoration injected into the header (e.g. the overprint
+    // in the QR post).
     headerExtra: z.string().optional(),
-    // <body>'ye eklenen sınıf. Yazıya özel renk değişkenlerini tanımlayan
-    // kural buna bağlı olduğu için düşerse figür renkleri tanımsız kalır.
+    // Class added to <body>. The rule defining the post's own colour
+    // variables hangs off it, so without it figure colours are undefined.
     bodyClass: z.string().optional(),
   }),
 });
