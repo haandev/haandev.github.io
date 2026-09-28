@@ -1,0 +1,75 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 404" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The hidden context card for the incomplete spec. One sentence, six mines: what delete means, which data is the user's, what cannot be deleted, where the data lives, what the 30 days count from, and whether the purge needs proof. The weak candidate writes a single DELETE and opens none of them; the strong candidate's first question, what does delete mean, opens the first and the rest follow.">
+   <text x="20" y="22" font-size="13" font-weight="700" fill="#141412">One sentence, six mines</text>
+   <text x="740" y="22" font-size="11.5" text-anchor="end" fill="#8B8983">the interviewer's hidden card</text>
+
+   <rect x="20" y="36" width="720" height="64" rx="6" fill="#F4F3EF" stroke="#C9C7C0" stroke-width="1.5"/>
+   <text x="40" y="62" font-size="14" fill="#141412">“We want you to write a job that <tspan fill="#c47b00" font-weight="700">permanently purges</tspan><tspan font-size="10" dy="-6" fill="#c47b00" font-weight="700"> 3 6</tspan><tspan dy="6"> </tspan><tspan fill="#c47b00" font-weight="700">the data</tspan><tspan font-size="10" dy="-6" fill="#c47b00" font-weight="700"> 2 4</tspan><tspan dy="6"> of users who</tspan></text>
+   <text x="40" y="84" font-size="14" fill="#141412"><tspan fill="#c47b00" font-weight="700">deleted their accounts</tspan><tspan font-size="10" dy="-6" fill="#c47b00" font-weight="700"> 1</tspan><tspan dy="6">, </tspan><tspan fill="#c47b00" font-weight="700">30 days after deletion</tspan><tspan font-size="10" dy="-6" fill="#c47b00" font-weight="700"> 5</tspan><tspan dy="6">.”</tspan></text>
+
+   <g font-size="11.5" fill="#55534E">
+     <rect x="20" y="116" width="232" height="94" rx="6" fill="#FFFFFF" stroke="#c47b00" stroke-width="1.25"/>
+     <circle cx="38" cy="136" r="10" fill="#c47b00"/>
+     <text x="38" y="140" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">1</text>
+     <text x="56" y="140" font-size="12.5" font-weight="700" fill="#141412">What does “delete” mean?</text>
+     <text x="32" y="164">It's a soft delete: logging in</text>
+     <text x="32" y="180">within 30 days restores the</text>
+     <text x="32" y="196">account. 30 days is a window.</text>
+
+     <rect x="264" y="116" width="232" height="94" rx="6" fill="#FFFFFF" stroke="#c47b00" stroke-width="1.25"/>
+     <circle cx="282" cy="136" r="10" fill="#c47b00"/>
+     <text x="282" y="140" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">2</text>
+     <text x="300" y="140" font-size="12.5" font-weight="700" fill="#141412">Which data is “theirs”?</text>
+     <text x="276" y="164">Messages they sent sit in</text>
+     <text x="276" y="180">other users' inboxes. Do</text>
+     <text x="276" y="196">those go too?</text>
+
+     <rect x="508" y="116" width="232" height="94" rx="6" fill="#FFFFFF" stroke="#c47b00" stroke-width="1.25"/>
+     <circle cx="526" cy="136" r="10" fill="#c47b00"/>
+     <text x="526" y="140" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">3</text>
+     <text x="544" y="140" font-size="12.5" font-weight="700" fill="#141412">What can't be deleted?</text>
+     <text x="520" y="164">Invoices must be kept by law.</text>
+     <text x="520" y="180">Anonymise the personal</text>
+     <text x="520" y="196">fields, keep the record.</text>
+
+     <rect x="20" y="220" width="232" height="94" rx="6" fill="#FFFFFF" stroke="#c47b00" stroke-width="1.25"/>
+     <circle cx="38" cy="240" r="10" fill="#c47b00"/>
+     <text x="38" y="244" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">4</text>
+     <text x="56" y="244" font-size="12.5" font-weight="700" fill="#141412">Where does the data live?</text>
+     <text x="32" y="268">Search index, analytics</text>
+     <text x="32" y="284">warehouse, object storage,</text>
+     <text x="32" y="300">nightly backups.</text>
+
+     <rect x="264" y="220" width="232" height="94" rx="6" fill="#FFFFFF" stroke="#c47b00" stroke-width="1.25"/>
+     <circle cx="282" cy="240" r="10" fill="#c47b00"/>
+     <text x="282" y="244" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">5</text>
+     <text x="300" y="244" font-size="12.5" font-weight="700" fill="#141412">30 days from what?</text>
+     <text x="276" y="268">From the request, or the last</text>
+     <text x="276" y="284">login? Does deleting again</text>
+     <text x="276" y="300">reset the clock?</text>
+
+     <rect x="508" y="220" width="232" height="94" rx="6" fill="#FFFFFF" stroke="#c47b00" stroke-width="1.25"/>
+     <circle cx="526" cy="240" r="10" fill="#c47b00"/>
+     <text x="526" y="244" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">6</text>
+     <text x="544" y="244" font-size="12.5" font-weight="700" fill="#141412">Does it need proof?</text>
+     <text x="520" y="268">Audit wants a record that the</text>
+     <text x="520" y="284">purge happened, with no</text>
+     <text x="520" y="300">personal data in it.</text>
+   </g>
+
+   <rect x="20" y="330" width="352" height="58" rx="6" fill="#FBEDEC" stroke="#b3261e" stroke-width="1.5"/>
+   <text x="36" y="352" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#b3261e">THE WEAK CANDIDATE WRITES</text>
+   <text x="36" y="374" font-size="12" fill="#141412" class="mono">DELETE FROM users WHERE …</text>
+   <text x="356" y="374" font-size="12" font-weight="700" text-anchor="end" fill="#b3261e">0 of 6</text>
+
+   <rect x="388" y="330" width="352" height="58" rx="6" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <text x="404" y="352" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#14724B">THE STRONG CANDIDATE ASKS FIRST</text>
+   <text x="404" y="374" font-size="12.5" fill="#141412">“What does ‘delete’ mean here?”</text>
+   <text x="724" y="374" font-size="12" font-weight="700" text-anchor="end" fill="#14724B">opens 1 →</text>
+ </svg>
+</div>
+<figcaption>None of the six needs special knowledge to find. It takes only **curiosity about how many things “the user's data” can mean**.</figcaption>
+</figure>
+</div>

@@ -1,0 +1,468 @@
+---
+title: "The job description is a spec written before the job"
+date: "2026-09-28"
+description: "When access to knowledge becomes cheap, knowledge stops being scarce. What becomes scarce is asking the right question and understanding the answer. An archaeology of the job description, what the selection research actually says, three interview formats that measure questioning instead of knowing, and an answer to the junior paradox."
+ogDescription: "When knowing becomes cheap, asking and understanding become scarce. Three interview formats that measure the question, not the answer."
+bodyClass: "s-jd"
+dek: "When access to knowledge becomes cheap, knowledge stops being scarce. What becomes scarce is <span class=\"a\">asking the right question</span> and <span class=\"a\">understanding the answer</span>. An organization that still writes its job ads as a list of skills is <span class=\"r\">hiring for a job that no longer exists</span>."
+tags:
+  - "hiring"
+  - "recruitment"
+  - "ai"
+  - "leadership"
+  - "organization"
+  - "interviewing"
+---
+
+import "./style.css";
+
+import AdArchaeology from "./AdArchaeology.mdx";
+import CostCurves from "./CostCurves.mdx";
+import ValidityShift from "./ValidityShift.mdx";
+import TableThreeFormats from "./TableThreeFormats.mdx";
+import SixMines from "./SixMines.mdx";
+import TwoRubrics from "./TwoRubrics.mdx";
+import ErrorMatrix from "./ErrorMatrix.mdx";
+import TwoLadders from "./TwoLadders.mdx";
+
+{/* ================= 1 ================= */}
+<section class="col s-open">
+
+## 1. The wrong opening line
+
+The classic opening of a software job ad is a known quantity: **"5+ years of React. Kafka, Kubernetes, PostgreSQL. AWS certification is a plus."** The sentence isn't technically wrong, but its accuracy is not the question to ask. The question to ask is: *who wrote this list, when, and assuming what job?*
+
+The answer is usually this: the list is an inventory of the work the hiring team did *last year*. A position has opened because someone left or because a team is growing, and the ad is filled with a list of the tools that person or that team has used so far. The ad doesn't describe the job; it describes the job's *past*.
+
+This is a mistake a software team knows very well. If a spec is written before the product decision is made, the code faithfully implements the spec and produces the wrong product. That is exactly what a job description is: **a spec written before the job.** While the job was stable, this spec worked, because the past was a good predictor of the future. As the job became uncertain, the ad stopped measuring the candidate and started measuring the organization's past assumptions.
+
+Below I will argue three things. Skill-list hiring is not natural; it is the product of a particular mode of production. That mode of production is changing. And the direction of the change makes not *knowing* but *asking* and *understanding* the scarce resource. This is a claim about what "will happen" as much as a claim about what "has to happen", and I will try to keep the two apart throughout.
+
+</section>
+
+{/* ================= 2 ================= */}
+<section class="col s-arch">
+
+## 2. An archaeology of the job ad
+
+The idea of a "position" is not as old as it looks: a unit of work that is defined in advance, independently of any person, and into which a person is then placed. Its history can be told in three stops.
+
+**Taylor, 1911.** The founding move of [*The Principles of Scientific Management*](https://www.gutenberg.org/ebooks/6435) is the separation of the person who thinks about the work from the person who does it. The work is broken into measurable tasks; management determines "the one best way" for each; the worker is fitted to that way. In Taylor's famous shovelling study at Bethlehem Steel, what matters is not what the worker knows but how consistently he repeats the standard motion. The position is born here: the job exists before the person.
+
+**Job evaluation, 1950s.** Post-war organizations grew large enough that thousands of positions had to be ranked against each other. In 1951 Edward N. Hay and Dale Purves introduced the [Guide Chart-Profile method](https://www.thrivesparrow.com/blog/hay-system), which scores a job, *not the person in it*, on three factors (Know-How, Problem Solving, Accountability) and ties the score to a pay band. The method makes positions *comparable*: two jobs in two different departments sit on the same points table. Comparability is the oxygen of bureaucracy, and to be comparable a position has to be defined independently of whoever fills it. The skill list is the most easily measured part of that definition.
+
+**The applicant tracking system, 1988 onwards.** When résumés went digital and applications went from hundreds to thousands, the first cut was handed to a machine. Resumix, one of the first such systems, was deployed at Sun Microsystems in January 1989; it read résumés with OCR and matched them against a "skills database" ([Tokuda, IAAI 1990](https://cdn.aaai.org/IAAI/1990/IAAI90-014.pdf)). From then on, the machine reads the ad as a *query*: `React AND Kafka AND (Kubernetes OR K8s)`. The language of the ad is now written for the filter, not for the human. The skill list is query syntax.
+
+</section>
+
+<AdArchaeology />
+
+<section class="col s-arch">
+
+These three stops show one thing: **skillset seeking is not human nature; it is a technology stack.** Taylor's task decomposition, Hay's points table and the ATS's boolean query sit on top of each other. Each layer inherits the assumption of the one below: the job is known in advance, it can be defined without reference to a person, and the definition can be expressed as keywords.
+
+All three assumptions rest on the same thing: a working environment in which the past predicts the future. Let us look at what that environment is.
+
+</section>
+
+{/* ================= 3 ================= */}
+<section class="col s-env">
+
+## 3. Kind and wicked environments
+
+In [*Educating Intuition*](https://en.wikipedia.org/wiki/Robin_M._Hogarth) (2001), Robin Hogarth splits learning environments in two. In a **kind** environment the rules are stable, situations repeat, and feedback is fast and accurate: chess, golf, the cockpit of an airliner. Repetition there produces expertise; ten thousand hours really do work. In a **wicked** environment the rules shift, situations don't repeat, and feedback is late, missing or misleading: investment forecasting, organizational design, hard-to-diagnose diseases. Repetition there can produce not expertise but *false confidence*. Hogarth's best-known example is an early-twentieth-century New York physician celebrated for diagnosing typhoid by palpating patients' tongues, who, it turned out, was spreading the disease with the same hands. Nothing in his environment gave him the feedback that could have told him. Hogarth later returned to the distinction with his colleagues and formalised it ([Hogarth, Lejarraga &amp; Soyer, 2015](https://journals.sagepub.com/doi/abs/10.1177/0963721415591878)).
+
+The job ad is a tool designed for a kind environment. The skill list is the assumption "this job will look like last year's" written down on paper, and in a kind environment that assumption is true. The problem is that software work is sliding from the kind end towards the wicked end.
+
+AI didn't start that slide on its own, but it made it irreversible. I want to show why by splitting the work into layers.
+
+</section>
+
+{/* ================= 4 ================= */}
+<section class="col s-layers">
+
+## 4. Three layers and their cost curves
+
+I split the cognitive work needed to do a job into three layers. The layers don't replace each other; they are stacked, and the cost of each behaves differently over time.
+
+<h3 class="t-l1">Layer 1 · <span class="en">Knowing</span></h3>
+
+Carrying knowledge in your head: knowing an API's signature, an algorithm's complexity, a framework's lifecycle by heart. The cost of this layer is tied to the person. Learning takes time, it is forgotten, and it loses its value when the technology changes.
+
+<h3 class="t-l2">Layer 2 · <span class="en">Accessing</span></h3>
+
+Finding knowledge: the library, the manual, a colleague, Google, Stack Overflow, an LLM. The cost of this layer has fallen steadily for thirty years and in the last three it has approached zero. The answer to a question now arrives in seconds, adapted to your context, as working code.
+
+<h3 class="t-l3">Layer 3 · <span class="en">Asking and understanding</span></h3>
+
+Knowing what you are looking for; telling whether the answer you got is correct, in which context it holds, whether it fits your problem. The cost of this layer is not falling. It may even be rising: the more answers are produced, the greater the burden of checking them. Accepting a fluent but wrong answer without knowing it is wrong costs more than never finding the answer at all.
+
+</section>
+
+<CostCurves />
+
+<section class="col s-layers">
+
+Now the critical observation. **The job ad measures Layer 1.** "5 years of React" is a measure of knowing. Layer 2 isn't measured, because everyone has access. Layer 3 isn't measured, because it is hard to measure and the ad format isn't built for it.
+
+While scarcity sat in Layer 1 this was not a problem; you were measuring the scarcest thing. Once scarcity moves to Layer 3, the ad still measures Layer 1. In other words, **the ad is an instrument that measures a resource that is no longer scarce.** It is scarcity pricing in a market of abundance.
+
+An objection arrives immediately: "Doesn't Layer 3 need Layer 1? How can you ask without knowing?" The objection is fair and it is the most important question in this essay; I will take it up separately in section 8. For now, note this: Layer 1 is necessary, but it is not *the thing to measure*. A surgeon needs hands; nobody counts hands at the interview.
+
+</section>
+
+{/* ================= 5 ================= */}
+<section class="col s-evid">
+
+## 5. The evidence: what actually predicts performance?
+
+I don't want to proceed on "I think". The selection literature has something to say here.
+
+**Schmidt and Hunter, 1998.** This meta-analysis [summarises 85 years of research](https://doi.org/10.1037/0033-2909.124.2.262) on how well selection methods predict job performance. It became the most cited table in personnel psychology: work sample tests at .54, general mental ability at .51, structured interviews at .51, unstructured interviews at .38, years of job experience at .18, years of education at .10.
+
+**Sackett, Zhang, Berry and Lievens, 2022.** Twenty-four years later [the same table was re-examined](https://doi.org/10.1037/apl0000994). The authors showed that earlier meta-analyses had systematically over-corrected for range restriction, and recomputed the estimates. Almost everything fell. But the order changed in an instructive way: **structured interviews moved to first place (.42)**, and years of job experience fell from .18 to **.07**, which is practically nothing.
+
+</section>
+
+<ValidityShift />
+
+<section class="col s-evid">
+
+Two things in this picture matter for my argument.
+
+First, years of experience, the item job ads ask for most, sits at the bottom of both columns, and the correction pushed it lower still. Structured interviews, which put a candidate in front of a problem and look at what they do, now sit at the top. This finding belongs to the pre-AI world. The ad format had diverged from the best available evidence long before AI; AI only enlarged the bill.
+
+Second, and I have to be honest about this: **job knowledge tests remain strong, at .40.** Doesn't that contradict the thesis that knowing isn't predictive? I don't think it does. A job knowledge test doesn't ask "how many years have you used Kafka"; it puts the knowledge the job requires to work and checks it. And it is strongest exactly where the job is kind, where the body of knowledge is stable and well defined. That is the boundary condition of my thesis, and I return to it in section 9. What the evidence speaks against is not knowledge; it is the *claim* of knowledge, measured by years and keywords.
+
+**Bock, 2013 and 2014.** In an [interview with Adam Bryant](https://www.nytimes.com/2013/06/20/business/in-head-hunting-big-data-may-not-be-such-a-big-deal.html) in *The New York Times*, Laszlo Bock, then Google's head of people operations, described what the company found when it mined its own hiring data. Brainteasers predicted nothing. GPAs and test scores were worthless as hiring criteria, except slightly for new graduates. What worked were structured behavioural interviews, validated to check they were predictive. A few months later, in a [column by Thomas Friedman](https://www.nytimes.com/2014/02/23/opinion/sunday/friedman-how-to-get-a-job-at-google.html), Bock named the first thing Google looks for: general cognitive ability, which he said is not IQ but learning ability, the ability to process on the fly and pull together disparate bits of information.
+
+The sources point the same way: **claimed knowledge doesn't predict; being able to learn, and what you do in front of a problem, does.** Not Layer 1, but Layer 3.
+
+</section>
+
+{/* ================= 6 ================= */}
+<section class="col s-formats">
+
+## 6. How do you measure the ability to ask?
+
+"We are looking for people who can ask questions" is easy to say, but you can't put that sentence in an ad, because it can't be measured. What can't be measured is ignored by a hiring process. So this is the most practical section of the essay: making Layer 3 as concrete as Layer 1.
+
+Layer 3 had two halves: *asking* and *understanding*. Understanding itself splits in two: **understanding something unfamiliar** and **noticing something wrong.** The three formats below measure those three parts in turn:
+
+</section>
+
+<TableThreeFormats />
+
+<section class="col s-formats">
+
+These three situations make up almost the whole day of an engineer who works with AI. The request arrives incomplete; the generated code often uses a library or a pattern they don't know; and some of that code is fluent but wrong. A skill list measures none of these, because all three happen *outside* what the candidate already knows.
+
+### 6.1 The common skeleton
+
+Before the details, four principles tie all three formats together.
+
+**You measure the trace, not the answer.** Where the candidate ends up is secondary. What is measured is the trace they leave on the way: which questions they asked and in which order, what they assumed, and whether they *said* what they assumed. So the candidate is invited to think aloud from the start, and the interviewer notes the process, not the result.
+
+**The hidden context card.** In every format the interviewer holds a card the candidate doesn't see: the answers to the incomplete spec, the code's real behaviour, the location of the error in the AI answer. The card reveals only what the candidate *asks* for. This is a model of real life: in organizations the information usually exists, but it lives in someone's head and only comes out if asked for.
+
+**The interviewer is an information source, not a jury.** The interviewer's job is not to pressure the candidate but to answer every question honestly and only as far as it was asked. Extra hints corrupt the measurement; dodging a question punishes the candidate. The role itself is a skill that has to be taught; the formats don't work without interviewer training.
+
+**The rubric is written in advance and anchored to behaviour.** "Asked good questions" is not a score. "Asked whether the deletion is reversible" is a score. Each format's rubric is tied to the items on the hidden card and to the three-rung questioning ladder I describe in section 8: *accept → question → choose what is worth asking.*
+
+### 6.2 The incomplete spec interview
+
+**Setup.** The candidate gets a one-sentence task that looks ordinary. The sentence is deliberately incomplete, but the gap isn't obvious. The test of a good incomplete spec: on first reading it should make you think "what's hard about this?", and on second reading at least five separate mines should surface. The answers to those mines are on the interviewer's card.
+
+**Example.**
+
+<div class="prompt">
+
+"We want you to write a job that permanently purges the data of users who deleted their accounts, 30 days after deletion."
+
+</div>
+
+On the surface, this is a cron job and a single `DELETE`. The weak candidate writes exactly that:
+
+```sql
+DELETE FROM users
+WHERE deleted_at < now() - interval '30 days';
+```
+
+</section>
+
+<SixMines />
+
+<section class="col s-formats">
+
+The strong candidate asks before writing code. Their first question is usually: *"What does 'delete' mean here? Can it be undone?"* That single question reveals that this is not a `DELETE` but a data lifecycle problem. The questions that follow open the card item by item.
+
+Here is the striking part: opening the whole card requires no special knowledge. You don't need to know [Article 17 of the GDPR](https://gdpr-info.eu/art-17-gdpr/) by heart, including its exception for data that must be kept to comply with a legal obligation. What you need is curiosity about how many different things "the user's data" might refer to. In this format Layer 1 is almost useless; Layer 3 is everything.
+
+**What is measured?**
+
+- **How many mines were opened by a question?** Every mine passed over by assumption is a future production incident.
+- **The order of the questions.** The strong candidate asks about meaning first ("what does delete mean?"), then scope ("which data?"), and implementation last ("what time should it run?"). The order shows how they grasp the problem.
+- **Assumptions spoken aloud.** Under time pressure you can't ask everything. The strong candidate states what they didn't ask: *"I'm assuming backups are out of scope, but that needs its own conversation."* A spoken assumption is a decision; an unspoken one is a defect.
+- **Knowing when to stop.** A candidate who asks questions forever also fails. Telling that enough is now clear and the rest can be settled during the work is the top rung of the ladder: choosing what is *worth* asking.
+
+### 6.3 Reading unfamiliar code
+
+**Setup.** The candidate gets 10–15 lines of code in a language that isn't on their CV and that they have probably never seen. If they do know it, the code is swapped. The question is simple: *"What does this do?"* Layer 1 has been deliberately reset to zero. What remains is the ability to make sense of something unfamiliar by likening it to familiar things, and to see where the likeness breaks.
+
+**Example.** A candidate with a JavaScript, Java or Python background is given this Erlang code:
+
+```erlang
+loop(Balance) ->
+    receive
+        {deposit, Amount, From} ->
+            From ! {ok, Balance + Amount},
+            loop(Balance + Amount);
+        {withdraw, Amount, From} when Amount =< Balance ->
+            From ! {ok, Balance - Amount},
+            loop(Balance - Amount);
+        {withdraw, _Amount, From} ->
+            From ! {error, insufficient_funds},
+            loop(Balance)
+    end.
+```
+
+The first round is the reading round. A strong candidate leaves a trace like this:
+
+<div class="trace">
+
+"`Balance` must be a balance. `receive` looks like it's waiting for something; the three blocks under it all start with curly braces and their first elements are `deposit`, `withdraw`… This could be a `switch`, branching on the shape of whatever arrives. `From ! {...}` appears in every branch and seems to go to `From`. I think it's a *send*, it's sending the reply back. I'm not sure; I'd want to check. `when Amount =< Balance` is a condition; if the balance isn't enough it falls through to the third branch. Order must matter, otherwise the third branch would catch every `withdraw`. The most interesting part: there's no loop, but the function calls itself. The balance is never *modified*; the new value is passed to the next call. The state doesn't live in a variable, it lives in the call."
+
+</div>
+
+Three things stand out in that trace. The candidate builds every inference on an analogy (`switch`, send, loop). They mark the inference they aren't sure of as *not sure*. And they note the place where the analogy breaks, the absence of mutation, as an oddity. Noticing that oddity is the most valuable moment of the reading.
+
+The second round is the striking one. The interviewer asks:
+
+<div class="prompt">
+
+"What happens if two people try to withdraw from this account at the same time?"
+
+</div>
+
+For a candidate with a Java or Python background, the reflex answer is a *race condition*: two threads read the balance at once, both see enough, the account goes negative; so you need a lock. There is no lock in the code. The candidate either proposes adding one, or stalls.
+
+The real answer on the card: **there is no race condition.** This function is the body of an Erlang process. The process takes messages from its mailbox [*one at a time*](https://www.erlang.org/doc/system/expressions.html#receive); even if two `withdraw` messages arrive at the same moment, they are handled in turn. There is no lock because there is no shared variable. Safety comes from the architecture, not from a lock.
+
+The candidate can't know this; their Layer 1 has been reset. What is measured is not whether they know it but whether they can get there *by asking*. The strong candidate suspends the reflex and asks: *"Can this code run on more than one thread at once? Does `receive` take messages one at a time?"* When that question is asked, the card opens, and the candidate sees that their reflex was an assumption from another world.
+
+The third round is for the top of the ladder:
+
+<div class="prompt">
+
+"Is anything missing from this code?"
+
+</div>
+
+The card has two answers. First: an unrecognised message, say `{balance, From}`, matches no branch and [stays in the mailbox](https://www.erlang.org/doc/system/expressions.html#receive) forever. The mailbox grows silently. Second: nothing checks that `Amount` is positive for a `withdraw`. Withdrawing a negative amount increases the balance. Finding the second answer needs no Erlang at all; it only needs asking about the gap between what the code *intends* and what it *does*.
+
+**What is measured?**
+
+- **The quality of the analogy.** Can the candidate tie the unknown to the known? While doing so, can they see where the tie is weak?
+- **Marking uncertainty.** Not every inference is stated with the same confidence. A candidate who can separate "this is certain", "this is a guess" and "I need to check this" will make the same separation when working with AI output.
+- **Suspending the reflex.** Can they question an assumption from their own world (you need a lock) before carrying it into a new one? This is the format's most discriminating measure.
+- **Knowing what to look up.** A variation: tell the candidate "you can now ask an LLM or the documentation exactly one question; what would it be?" The quality of that question summarises the quality of the reading. *"How does `receive` work?"* is a middling question. *"Does an Erlang process handle the messages in its mailbox one at a time or concurrently?"* is a much better one, because it goes like a needle to the single critical unknown.
+
+### 6.4 Auditing AI output
+
+**Setup.** The candidate is shown a question and the answer an LLM gave to it. The answer is fluent and confident, the code runs and passes the tests; but it contains an error that will blow up silently in production. The framing: *"A teammate sent you this and is about to merge it. What do you say?"*
+
+The choice of error is the heart of the format. It mustn't be a syntax error; the compiler finds those anyway. It should be the kind of error where **the code's correctness depends on something outside the code**: the data, the schema, time, scale.
+
+**Example.** The question and the answer:
+
+<div class="llm">
+
+<span class="lbl">Question</span>
+
+I want to list the customers who have never placed an order. PostgreSQL.
+
+<span class="lbl">Answer</span>
+
+You can use a subquery with `NOT IN` for this:
+
+```sql
+SELECT id, email
+FROM customers
+WHERE id NOT IN (SELECT customer_id FROM orders);
+```
+
+This query returns the customers who have no rows in the `orders` table. Because the subquery runs only once, it is more readable than the `LEFT JOIN` alternative and generally more performant. For large tables, I recommend making sure there is an index on `orders.customer_id`.
+
+</div>
+
+Everything in the answer looks right. The index advice is sensible, the query is readable, and it returns the correct result on the test database.
+
+The error on the card: `orders.customer_id` is **nullable**, because six months ago the company launched guest checkout. Guest orders have no `customer_id`. In SQL's three-valued logic, `x NOT IN (1, 2, NULL)` is never *true*; at best it is *unknown*. If the subquery returns a single `NULL`, the query [**returns no rows at all**](https://wiki.postgresql.org/wiki/Don%27t_Do_This#Don.27t_use_NOT_IN).
+
+No error. No warning. An empty list. The marketing team uses the query to send a campaign to "customers who have never ordered"; the list is empty; nobody notices anything went wrong; the campaign reaches no one. It is a small-scale rehearsal of the *silent failure* I describe in section 7.
+
+The answer also contains a second, shallower problem: the claim that it is "generally more performant" is unfounded. PostgreSQL can turn `NOT EXISTS` into an anti-join, and in most cases it does at least as well. This problem is a deliberately planted **decoy**: a shallow audit stops here, corrects the performance claim, and approves the answer. The real error stays underneath.
+
+This example separates the three rungs of the ladder in section 8 almost exactly:
+
+- **The candidate who accepts:** "Looks clean, the index advice is good too. Approved." The answer's confidence becomes the candidate's confidence.
+- **The candidate who questions:** catches the performance claim, or remembers that `NOT IN` misbehaves with `NULL`s and proposes `NOT EXISTS`. They have found the error; but they found it as a *rule*.
+- **The candidate who chooses what is worth asking:** asks first, *"Is `customer_id` nullable? Is there any case where an order has no customer?"* When the answer comes, they find the error, but they don't stop there: *"This query's correctness depends on the schema. The schema changed six months ago and nobody noticed. Who is going to notice the next change?"* Besides fixing the query, they propose a test containing an order with a `NULL` customer. They protect not the query but the *condition under which it can be wrong*.
+
+Notice the difference between these three responses. The second candidate used Layer 1: they knew a rule. The third used Layer 3: even without the rule they would have reached the same place with the right question, and once there they drew the lesson not from the error itself but from *how the error was possible*.
+
+**What is measured?**
+
+- **Where did they start looking?** In the syntax, the logic, or the assumptions outside the code? The strong candidate starts with "what does this code assume?"
+- **Resistance to confidence.** Fluent, self-assured text pushes the reader towards approval. How well the candidate holds out against that pressure is the best indicator of how reliable an auditor they will be when working with AI.
+- **Did they stop at the decoy?** A candidate who ends the audit at the first problem found will stop at the first problem found in real life too.
+- **Fix, or protect?** Fixing the error is one rung; making its recurrence impossible or visible is the rung above.
+
+### 6.5 Design risks
+
+These formats have weaknesses too; applying them without knowing those weaknesses can do worse than a skill list.
+
+**Leakage.** Once the formats are known, candidates prepare. That is not a problem but the point: a candidate who prepares by building the habit of asking first in an incomplete spec has already acquired the skill being sought. The real problem is leakage of *content*. The `NOT IN` example burned the moment it was published, as it has in this essay. So the format stays fixed and the content rotates. A good team extracts a new example from its own production incidents every quarter. There is no better interview material than your own mistakes.
+
+**Interviewer load.** An ATS can check a skill list. Only a trained human can run these formats. An interviewer who doesn't know the card well, gives too many hints, or can't tolerate silence corrupts the measurement. This is the formats' cost, and a genuine source of the resistance I describe in section 7.
+
+**Anxiety and language.** Thinking aloud is not equally easy for everyone. A candidate whose first language differs from the interview's, or who freezes under pressure, can look weak in Layer 3 while being strong. The mitigation is to prepare the candidate for the format in advance and to start with a warm-up question. The format doesn't need to be a surprise; only the content does.
+
+**Calibration.** Whether different interviewers using the same card give the same candidate the same score has to be measured. If they don't, the problem is not the candidate but the rubric.
+
+</section>
+
+<TwoRubrics />
+
+<section class="col s-formats">
+
+All three formats are structured, and that is no accident. Asked without structure, "does this person ask good questions?" turns into the interviewer choosing the candidate they like. That is why structured interviews came out on top in both 1998 and 2022, and why unstructured interviews fell to .19 in the revision. Measuring Layer 3 takes more discipline than measuring Layer 1, not less.
+
+</section>
+
+{/* ================= 7 ================= */}
+<section class="col s-fail">
+
+## 7. Why HR resists, and how it fails
+
+None of what I have said so far is new; Schmidt and Hunter wrote it twenty-eight years ago. So why are job ads still skill lists? The resistance isn't irrational; its mechanisms can be listed.
+
+**The ad is a legal document.** When you reject a candidate you have to be able to defend why. "Didn't know Kafka" is defensible; "didn't ask good questions" is a hard sentence to defend. The skill list is HR's promise to the legal department.
+
+**The infrastructure is built around positions.** Budget lines, headcount tables, pay bands, ATS schemas: all of them are Hay's legacy, and all of them assume the position is defined in advance. "A person who can be deployed across a wide spectrum" fits none of those tables. What the system can't accept doesn't exist in the system.
+
+**The measurability fallacy.** Layer 1 is easy to measure, Layer 3 is hard. Organizations measure what is easy to measure and then believe that what they measure is what matters. It is the story of the man who dropped his keys in the dark and searches for them under the streetlight.
+
+Now the mechanism of failure. When I say this resistant organization will "eventually" fail, I don't mean a collapse; I mean a **silent failure**.
+
+An organization that filters by skill list makes two kinds of error. *The first:* it hires a candidate who matches the list but is weak in Layer 3. That error is visible; the candidate underperforms and six months later everyone knows. *The second:* it rejects a candidate who doesn't match the list but is strong in Layer 3. That error is **invisible.** The rejected candidate's performance is never measured; even when they shine somewhere else, that information never comes back to the organization that rejected them. The organization never learns it made the second kind of error.
+
+</section>
+
+<ErrorMatrix />
+
+<section class="col s-fail">
+
+That is why the failure is slow and unnoticed. The organization doesn't understand why its competitors learn faster; it doesn't see that its own ads are systematically filtering out the right people, because the filtered-out appear in no report. The competitor hired them. The difference shows up not in the quarterly results but in the product portfolio three years later; and even then it isn't traced back to hiring but to "market conditions".
+
+</section>
+
+{/* ================= 8 ================= */}
+<section class="col s-ladder">
+
+## 8. The junior paradox, and the new direction of judgement
+
+Now the question I deferred in section 4. "You need to know in order to ask. If knowledge becomes cheap, nobody learns to know; someone who doesn't know can't ask; so where will Layer 3 come from?" This is the junior paradox, and it is the most serious counter-argument to the thesis.
+
+My answer: the paradox rests on the assumption that judgement develops *only from knowledge*, and that assumption is wrong. Judgement will still develop, but in a different direction.
+
+In the old world an engineer's maturity ladder looked like this: the junior accumulates knowledge, the mid-level applies what they have accumulated, the senior extracts patterns from what they have applied. The ladder was graded by the capacity to **produce knowledge**. Seniority measured how much you knew by heart and how many times you had done it.
+
+The new ladder is built on a different axis: **the capacity to interrogate.** The junior accepts the answer they had generated as it is. The mid-level learns to ask where the answer might be wrong. The senior distinguishes which question is worth asking, which answer is correct but irrelevant, which problem is really a different problem. The rungs of the ladder are not the quantity of knowledge but **the depth of the inquiry.**
+
+</section>
+
+<TwoLadders />
+
+<section class="col s-ladder">
+
+How does a junior climb this new ladder? Not the way they used to; that much is true. But they start climbing *much earlier*. In the old world a junior spent their first two years filling Layer 1; Layer 3 never got its turn. In the new world Layer 1 is accessible from day one; from their first day the junior faces the question "is this answer right?" Judgement is not postponed until *after* the accumulation phase; it starts on day one. This is a world with not less learning but *earlier* learning.
+
+And here there is something observable. **AI has equalized knowing.** A twenty-year engineer's biggest advantage over a junior was the volume of knowledge they carried in their head; that volume is now on everyone's desk. It is a reset: on the plane of knowing, the conditions are now equal. The only remaining advantage is in Layer 3, and Layer 3 grows with practice, not with years.
+
+One consequence of that reset is already in front of us: we are seeing unusually young C-level executives in companies founded in the AI era. One can read this as an anomaly or as investor enthusiasm; I read it as a consequence. These are people who have been equalized with a forty-year executive on the plane of knowing, but who started climbing the interrogation ladder twenty years earlier. In a world where knowledge was scarce this wasn't possible; it is possible now because, when knowledge is abundant, the definition of seniority changes.
+
+So the answer to the junior paradox is this: the paradox comes from measuring the new ladder with the old ladder's assumptions. On the new ladder, knowing is not a rung; it is the floor. Everyone stands on the same floor; the difference is who asks better.
+
+</section>
+
+{/* ================= 9 ================= */}
+<section class="col s-limits">
+
+## 9. Limits and counter-arguments
+
+This framework doesn't explain everything; if it claimed more than it explains, it would be wrong.
+
+1. **Kind environments still exist.** The surgeon, the aircraft maintenance technician, the compliance specialist, the safety-critical embedded engineer. In these jobs the rules are stable, feedback is clear and the cost of error is high; Layer 1 here is not the floor but a wall. This is also where the .40 of job knowledge tests in section 5 comes from. The thesis applies to jobs with high uncertainty, not to everyone. And which environment a job sits in is the first question the team writing the ad has to ask honestly.
+2. **The "generalist" label can become an excuse for cheap labour.** "Deployable across a wide spectrum" can be read as "let them do everything for one salary". That is not what this thesis argues. A person strong in Layer 3 is not cheaper than a person strong in Layer 1; they are probably more expensive, because they are scarcer.
+3. **Measuring Layer 3 is open to bias.** Asked without structure, "do they ask good questions?" turns into "are they like me?". The structure in section 6 is not an option but a necessity; an unstructured Layer 3 interview is worse than a skill list. The drop of unstructured interviews to .19 in the 2022 revision is the number behind this warning.
+4. **Hogarth's distinction is a spectrum, not a binary.** Not all of software work has become wicked; kind and wicked regions coexist inside the same job. An ad needs to know which region it targets; most ads don't.
+5. **Section 8 is an observation, not evidence.** The claim that young executives are a consequence of an AI-driven reset is a reasonable interpretation, but alternative explanations (investment cycles, the age of the sector, selection bias) have not been ruled out. The claim is open to correction, and should be corrected if a counterexample is found.
+
+</section>
+
+{/* ================= 10 ================= */}
+<section class="col s-close">
+
+## 10. Conclusion
+
+The job description is a spec written before the job. While the job was stable this wasn't a flaw; the past predicted the future and the ad described the past. When access to knowledge became cheap, scarcity moved: knowing became the floor, asking and understanding became the scarce resource. The ad still measures the floor.
+
+This claim has two layers, and I have tried to keep them apart. **The descriptive layer:** the evidence showed that claimed knowledge doesn't predict long before AI; AI only enlarged the bill. **The normative layer:** an organization that hires by skill list is silently filtering out the right people and never finds out; that is why it has to change, because it will never see the cost of not changing in any report.
+
+I discussed a similar dynamic on the organizational side, how the bottleneck moves from the tools to the organization once producing code becomes cheap, in an earlier essay on [what spec-driven development doesn't solve](/posts/what-spec-driven-development-does-not-solve-organization.html). The thesis here is its counterpart on the hiring side: just as an organization that doesn't make the product decision before the code produces the wrong product quickly, an organization that writes the ad without defining the job rejects the right person quickly.
+
+Within the limits of this essay, the answer to "what should we do?" is small but concrete: before writing the ad, ask which environment the job lives in; if you measure Layer 1, know what it doesn't measure; if you are going to measure Layer 3, structure it. And, just once, look at where the candidates you rejected ended up.
+
+</section>
+
+{/* ================= sources ================= */}
+<section class="col refs">
+
+<h2>Sources</h2>
+
+### Defining the work and the idea of a position
+
+- Frederick Winslow Taylor, [*The Principles of Scientific Management*](https://www.gutenberg.org/ebooks/6435), 1911; the separation of planning from doing, "the one best way", the shovelling study.
+- The Hay Guide Chart-Profile method, introduced by Edward N. Hay and Dale Purves in 1951; an overview of the three factors and its history in [The Hay System](https://www.thrivesparrow.com/blog/hay-system), and a critical reading in [The Hay System of Job Evaluation: A Critical Analysis](https://jhrmls.thebrpi.org/journals/jhrmls/Vol_3_No_1_June_2015/1.pdf), *Journal of Human Resources Management and Labor Studies*, 2015.
+- Lance Tokuda, [Computers Assist Humans in Human Resources](https://cdn.aaai.org/IAAI/1990/IAAI90-014.pdf), IAAI-90, 1990; Resumix, its development from April 1988 and its deployment at Sun Microsystems in January 1989.
+
+### Learning environments
+
+- Robin M. Hogarth, *Educating Intuition*, University of Chicago Press, 2001; the kind/wicked distinction and the typhoid physician. [Author page](https://en.wikipedia.org/wiki/Robin_M._Hogarth).
+- Robin M. Hogarth, Tomás Lejarraga and Emre Soyer, [The Two Settings of Kind and Wicked Learning Environments](https://journals.sagepub.com/doi/abs/10.1177/0963721415591878), *Current Directions in Psychological Science*, 24(5), 2015.
+
+### What predicts performance
+
+- Frank L. Schmidt and John E. Hunter, [The Validity and Utility of Selection Methods in Personnel Psychology: Practical and Theoretical Implications of 85 Years of Research Findings](https://doi.org/10.1037/0033-2909.124.2.262), *Psychological Bulletin*, 124(2), 262–274, 1998.
+- Paul R. Sackett, Charlene Zhang, Christopher M. Berry and Filip Lievens, [Revisiting Meta-Analytic Estimates of Validity in Personnel Selection: Addressing Systematic Overcorrection for Restriction of Range](https://doi.org/10.1037/apl0000994), *Journal of Applied Psychology*, 107(11), 2040–2068, 2022; the source of the comparison in the figure in section 5.
+- Adam Bryant, [In Head-Hunting, Big Data May Not Be Such a Big Deal](https://www.nytimes.com/2013/06/20/business/in-head-hunting-big-data-may-not-be-such-a-big-deal.html), *The New York Times*, June 2013; the interview with Laszlo Bock on brainteasers, GPAs and structured interviews.
+- Thomas L. Friedman, [How to Get a Job at Google](https://www.nytimes.com/2014/02/23/opinion/sunday/friedman-how-to-get-a-job-at-google.html), *The New York Times*, February 2014; Bock on learning ability.
+
+### Technical references for the interview examples
+
+- Erlang/OTP documentation, [Expressions: Receive](https://www.erlang.org/doc/system/expressions.html#receive); messages are taken from the mailbox in order, and unmatched messages remain in the queue.
+- PostgreSQL wiki, [Don't Do This: Don't use NOT IN](https://wiki.postgresql.org/wiki/Don%27t_Do_This#Don.27t_use_NOT_IN); `NOT IN` with a `NULL` returns no rows, and `NOT EXISTS` is recommended instead.
+- [Regulation (EU) 2016/679, Article 17](https://gdpr-info.eu/art-17-gdpr/); the right to erasure, and the exception in 17(3)(b) for compliance with a legal obligation.
+
+### Related essay
+
+- [What Spec-Driven Development Doesn't Solve: The Organization](/posts/what-spec-driven-development-does-not-solve-organization.html), on this blog.
+
+<div class="note">
+
+Note: the young-executive observation in section 8 is the author's interpretation, not a measured finding. The validity coefficients are operational validity estimates for overall job performance, not observed correlations; the size of the correction is itself the subject of the 2022 paper.
+
+</div>
+
+</section>

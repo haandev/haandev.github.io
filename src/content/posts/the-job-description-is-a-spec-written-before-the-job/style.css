@@ -1,0 +1,112 @@
+/* The job description is a spec written before the job — post-specific style.
+   Imported from the MDX. The three layers carry three colours; their
+   counterparts in the figures sit on the .fig-frame paper as fixed hex values
+   (because the paper stays white in the dark theme too). */
+.s-jd {
+  --l1: var(--danger);  /* Layer 1 — knowing               */
+  --l2: var(--geo);     /* Layer 2 — accessing             */
+  --l3: var(--alg);     /* Layer 3 — asking, understanding */
+  --ai: #c47b00;        /* the AI answer                   */
+}
+@media (prefers-color-scheme: dark) {
+  .s-jd { --ai: #e0a94e; }
+}
+
+/* the edge colour of section headings follows the subject */
+.s-open h2,
+.s-arch h2,
+.s-env h2,
+.s-limits h2,
+.s-close h2    { border-left: 4px solid var(--fg);    padding-left: 0.875rem; }
+.s-layers h2,
+.s-evid h2     { border-left: 4px solid var(--l1);    padding-left: 0.875rem; }
+.s-formats h2,
+.s-ladder h2   { border-left: 4px solid var(--l3);    padding-left: 0.875rem; }
+.s-fail h2     { border-left: 4px solid var(--danger); padding-left: 0.875rem; }
+
+.s-formats h3 {
+  margin-top: 3rem;
+  padding-left: 0.875rem;
+  border-left: 5px solid var(--l3);
+  font-size: 1.25rem;
+}
+
+/* headings for the three layers */
+.s-layers h3 {
+  margin-top: 2.25rem;
+  padding-left: 0.875rem;
+  border-left: 5px solid var(--rule);
+  font-size: 1.25rem;
+}
+.s-layers h3 .en {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.s-layers h3.t-l1 { border-color: var(--l1); }
+.s-layers h3.t-l2 { border-color: var(--l2); }
+.s-layers h3.t-l3 { border-color: var(--l3); }
+.s-layers h3.t-l1 .en { color: var(--l1); }
+.s-layers h3.t-l2 .en { color: var(--l2); }
+.s-layers h3.t-l3 .en { color: var(--l3); }
+
+/* what the interviewer says to the candidate */
+.prompt {
+  margin: 1.625rem 0;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--fg);
+  background: var(--code-bg);
+  border-radius: 0 6px 6px 0;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.prompt p { margin: 0; }
+
+/* a strong candidate's think-aloud trace */
+.trace {
+  margin: 1.625rem 0;
+  padding: 0.25rem 0 0.25rem 1.125rem;
+  border-left: 3px solid var(--l3);
+  font-size: 1rem;
+  font-style: italic;
+}
+.trace p { margin: 0; }
+
+/* the LLM answer under audit */
+.llm {
+  margin: 1.625rem 0;
+  padding: 1.125rem 1.375rem;
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--ai);
+  border-radius: 6px;
+  font-size: 1rem;
+}
+.llm p { margin: 0 0 0.875rem; }
+.llm p:last-child { margin-bottom: 0; }
+.llm pre { margin: 0.5rem 0 1rem; }
+.llm .lbl {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ai);
+}
+
+/* the three formats table */
+.tbl-formats table { min-width: 36rem; }
+.tbl-formats td:last-child { font-family: var(--font-ui); font-weight: 600; }
+.tbl-formats .k-miss  { color: var(--ai); }
+.tbl-formats .k-alien { color: var(--l2); }
+.tbl-formats .k-wrong { color: var(--danger); }
+
+/* this post's figures don't declare their own font; tie them to the UI font */
+figure svg text { font-family: var(--font-ui); }
+figure svg text.mono { font-family: var(--font-mono); }
+
+.dek .r { color: var(--danger); font-style: normal; }
