@@ -1,0 +1,54 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="On the left, the table the user declares and queries: employee with id, name, salary and department_id, the last two marked effective dated. On the right, what the engine stores: a main table employee with id and name; a side table employee$salary with id, salary and valid; a side table employee$department_id with id, department_id and valid. Arrows map id and name to the main table and each effective-dated column to its own side table. In each side table, intervals for the same id may not overlap.">
+   <defs>
+     <marker id="lp-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#8B8983"/></marker>
+     <marker id="lp-arr-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2733C9"/></marker>
+     <marker id="lp-arr-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#14724B"/></marker>
+   </defs>
+
+   <text x="20" y="22" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#55534E">WHAT YOU DECLARE AND QUERY</text>
+   <rect x="20" y="36" width="290" height="164" rx="6" fill="#FFFFFF" stroke="#55534E" stroke-width="1.5"/>
+   <rect x="20" y="36" width="290" height="32" rx="6" fill="#F4F3EF"/>
+   <line x1="20" y1="68" x2="310" y2="68" stroke="#C9C7C0" stroke-width="1"/>
+   <text class="mono" x="36" y="57" font-size="12.5" font-weight="700" fill="#141412">employee</text>
+   <text class="mono" x="36" y="89" font-size="12" fill="#141412">id</text>
+   <text x="294" y="89" font-size="10" font-weight="700" letter-spacing="0.1em" text-anchor="end" fill="#8B8983">KEY</text>
+   <line x1="20" y1="100" x2="310" y2="100" stroke="#EDEBE5" stroke-width="1"/>
+   <text class="mono" x="36" y="121" font-size="12" fill="#141412">name</text>
+   <line x1="20" y1="132" x2="310" y2="132" stroke="#EDEBE5" stroke-width="1"/>
+   <text class="mono" x="36" y="153" font-size="12" fill="#141412">salary</text>
+   <rect x="180" y="140" width="116" height="18" rx="9" fill="#EEF0FC" stroke="#2733C9" stroke-width="1"/>
+   <text x="238" y="153" font-size="9.5" font-weight="700" letter-spacing="0.08em" text-anchor="middle" fill="#2733C9">EFFECTIVE DATED</text>
+   <line x1="20" y1="164" x2="310" y2="164" stroke="#EDEBE5" stroke-width="1"/>
+   <text class="mono" x="36" y="185" font-size="12" fill="#141412">department_id</text>
+   <rect x="180" y="172" width="116" height="18" rx="9" fill="#EBF4EF" stroke="#14724B" stroke-width="1"/>
+   <text x="238" y="185" font-size="9.5" font-weight="700" letter-spacing="0.08em" text-anchor="middle" fill="#14724B">EFFECTIVE DATED</text>
+   <text x="20" y="224" font-size="11" fill="#55534E">one table, four columns</text>
+
+   <text x="440" y="22" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#55534E">WHAT THE ENGINE STORES</text>
+   <rect x="440" y="36" width="300" height="56" rx="6" fill="#FFFFFF" stroke="#55534E" stroke-width="1.5"/>
+   <text class="mono" x="456" y="57" font-size="12.5" font-weight="700" fill="#141412">employee</text>
+   <text class="mono" x="456" y="80" font-size="12" fill="#55534E">id · name</text>
+
+   <rect x="440" y="112" width="300" height="56" rx="6" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text class="mono" x="456" y="133" font-size="12.5" font-weight="700" fill="#2733C9">employee$salary</text>
+   <text class="mono" x="456" y="156" font-size="12" fill="#55534E">id · salary · valid</text>
+
+   <rect x="440" y="188" width="300" height="56" rx="6" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <text class="mono" x="456" y="209" font-size="12.5" font-weight="700" fill="#14724B">employee$department_id</text>
+   <text class="mono" x="456" y="232" font-size="12" fill="#55534E">id · department_id · valid</text>
+
+   <path d="M312 85 C 370 85, 380 62, 436 62" fill="none" stroke="#8B8983" stroke-width="1.5" marker-end="url(#lp-arr)"/>
+   <path d="M312 117 C 370 117, 380 66, 436 66" fill="none" stroke="#8B8983" stroke-width="1.5" marker-end="url(#lp-arr)"/>
+   <path d="M312 149 C 370 149, 380 140, 436 140" fill="none" stroke="#2733C9" stroke-width="1.5" marker-end="url(#lp-arr-b)"/>
+   <path d="M312 181 C 370 181, 380 216, 436 216" fill="none" stroke="#14724B" stroke-width="1.5" marker-end="url(#lp-arr-g)"/>
+
+   <text x="440" y="266" font-size="11" fill="#55534E">timeless columns stay in the main table;</text>
+   <text x="440" y="281" font-size="11" fill="#55534E">in each side table, <tspan font-weight="700" fill="#141412">no two intervals of one id overlap</tspan></text>
+ </svg>
+</div>
+<figcaption>The declaration changes the storage, not the table the user sees. Every column **with a history** gets its own table; every column **without one** stays where it was.</figcaption>
+</figure>
+</div>

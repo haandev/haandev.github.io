@@ -1,0 +1,52 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 352" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three steps of planning one query. First, what the user writes: SELECT name, salary FROM employee WHERE salary > 50000. Second, what the two rules produce: the projected salary becomes a LEFT JOIN to employee$salary on the same id with valid containing the effective point, and the predicate becomes an EXISTS subquery on the same side table. Third, what the planner runs: because the predicate rejects an empty value, the LEFT JOIN and the EXISTS fold into a single inner JOIN with the predicate in its condition. A query that does not mention salary never touches the side table.">
+   <text x="20" y="24" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#55534E">1 · WHAT YOU WRITE</text>
+   <rect x="20" y="36" width="220" height="252" rx="6" fill="#FFFFFF" stroke="#55534E" stroke-width="1.5"/>
+   <text class="mono" x="34" y="62" font-size="11" fill="#141412">SELECT name, salary</text>
+   <text class="mono" x="34" y="78" font-size="11" fill="#141412">FROM employee</text>
+   <text class="mono" x="34" y="94" font-size="11" fill="#141412">WHERE salary &gt; 50000</text>
+
+   <path d="M249 162 l12 0 m-5 -6 l6 6 l-6 6" fill="none" stroke="#8B8983" stroke-width="2"/>
+
+   <text x="270" y="24" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#55534E">2 · WHAT THE RULES PRODUCE</text>
+   <rect x="270" y="36" width="220" height="252" rx="6" fill="#FFFFFF" stroke="#55534E" stroke-width="1.5"/>
+   <text class="mono" x="284" y="62" font-size="11" fill="#141412">SELECT e.name, s.salary</text>
+   <text class="mono" x="284" y="78" font-size="11" fill="#141412">FROM employee e</text>
+   <rect x="278" y="84" width="204" height="52" rx="4" fill="#EEF0FC"/>
+   <text class="mono" x="284" y="98" font-size="11" font-weight="700" fill="#2733C9">LEFT JOIN employee$salary s</text>
+   <text class="mono" x="298" y="114" font-size="11" fill="#141412">ON s.id = e.id</text>
+   <text class="mono" x="298" y="130" font-size="11" fill="#141412">AND s.valid @&gt; :asof</text>
+   <rect x="278" y="142" width="204" height="100" rx="4" fill="#EBF4EF"/>
+   <text class="mono" x="284" y="156" font-size="11" font-weight="700" fill="#14724B">WHERE EXISTS (</text>
+   <text class="mono" x="298" y="172" font-size="11" fill="#141412">SELECT 1</text>
+   <text class="mono" x="298" y="188" font-size="11" fill="#141412">FROM employee$salary s2</text>
+   <text class="mono" x="298" y="204" font-size="11" fill="#141412">WHERE s2.id = e.id</text>
+   <text class="mono" x="312" y="220" font-size="11" fill="#141412">AND s2.valid @&gt; :asof</text>
+   <text class="mono" x="312" y="236" font-size="11" fill="#141412">AND s2.salary &gt; 50000)</text>
+
+   <path d="M499 162 l12 0 m-5 -6 l6 6 l-6 6" fill="none" stroke="#8B8983" stroke-width="2"/>
+
+   <text x="520" y="24" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#55534E">3 · WHAT THE PLANNER RUNS</text>
+   <rect x="520" y="36" width="220" height="252" rx="6" fill="#FFFFFF" stroke="#141412" stroke-width="2"/>
+   <text class="mono" x="534" y="62" font-size="11" fill="#141412">SELECT e.name, s.salary</text>
+   <text class="mono" x="534" y="78" font-size="11" fill="#141412">FROM employee e</text>
+   <text class="mono" x="534" y="98" font-size="11" font-weight="700" fill="#141412">JOIN employee$salary s</text>
+   <text class="mono" x="548" y="114" font-size="11" fill="#141412">ON s.id = e.id</text>
+   <text class="mono" x="548" y="130" font-size="11" fill="#141412">AND s.valid @&gt; :asof</text>
+   <text class="mono" x="548" y="146" font-size="11" fill="#141412">AND s.salary &gt; 50000</text>
+
+   <text x="20" y="308" font-size="11" fill="#55534E">an ordinary query, read at</text>
+   <text x="20" y="323" font-size="11" fill="#55534E">the session's effective point</text>
+   <text x="270" y="308" font-size="11" fill="#2733C9">rule 1: projection → LEFT JOIN</text>
+   <text x="270" y="323" font-size="11" fill="#14724B">rule 2: WHERE → EXISTS</text>
+   <text x="520" y="308" font-size="11" fill="#55534E">the predicate rejects an empty value,</text>
+   <text x="520" y="323" font-size="11" fill="#55534E">so both fold into <tspan font-weight="700" fill="#141412">one INNER JOIN</tspan></text>
+
+   <text x="740" y="346" font-size="11" text-anchor="end" fill="#8B8983">and SELECT name FROM employee never touches employee$salary: join elimination</text>
+ </svg>
+</div>
+<figcaption>The two rules are only the starting point; they are **correct**, not fast. Speed comes from transformations every planner already has: **outer join simplification** and **join elimination**.</figcaption>
+</figure>
+</div>

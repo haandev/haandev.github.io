@@ -1,0 +1,291 @@
+---
+title: "Time is a property of the column"
+date: "2026-10-20"
+description: "Date, Darwen and Lorentzos showed twenty years ago that in temporal data every attribute that changes over time needs its own table: sixth normal form. They left the decomposition to the schema designer, and nobody did it. A proposal to move it into the engine: a column-level declaration, a planner that turns projections into LEFT JOINs and predicates into EXISTS, future-dated updates, and one hard rule about uniqueness."
+ogDescription: "Not every attribute needs a history, but every attribute with a history needs its own table — and the engine, not the user, should keep it."
+bodyClass: "s-tc"
+dek: "Not every attribute needs a history, but <span class=\"a\">every attribute with a history needs its own table</span>. Date, Darwen and Lorentzos proved the second half twenty years ago and left it to the schema designer. <span class=\"g\">The engine should keep that table</span>, and once it does, the future can be written down today."
+tags:
+  - "databases"
+  - "sql"
+  - "temporal data"
+  - "normalization"
+  - "query planning"
+  - "systems design"
+---
+
+import "./style.css";
+
+import ActionVsFact from "./ActionVsFact.mdx";
+import RowVsAttribute from "./RowVsAttribute.mdx";
+import LogicalPhysical from "./LogicalPhysical.mdx";
+import PlanRewrite from "./PlanRewrite.mdx";
+import FutureUpdate from "./FutureUpdate.mdx";
+import UniquenessInversion from "./UniquenessInversion.mdx";
+import TableApproaches from "./TableApproaches.mdx";
+
+{/* ================= 1 ================= */}
+<section class="col s-prob">
+
+## 1. The problem: future-dated changes
+
+In mid-December a request arrives from HR: **"Everyone's salary goes up 10% from January 1st. Payroll has to run with the new salaries on January 1st, but we need to see them in the system now."**
+
+The request is usually met in one of two ways. The first is a job that runs an `UPDATE` at midnight on January 1st. Until it runs, the new salaries exist nowhere; "we need to see them now" is solved with a spreadsheet. The second is to write every change as a new row with an effective date. ERP systems have done this for decades; in PeopleSoft almost every table carries an `EFFDT` column in its key. The price is that every query grows this pattern:
+
+```sql
+WHERE j.effdt = (
+    SELECT MAX(j2.effdt) FROM job j2
+    WHERE j2.emplid = j.emplid AND j2.effdt <= CURRENT_DATE
+)
+```
+
+When the pattern is forgotten in one query, nothing fails; the query shows next year's salary as today's. And the row holds more than the salary: department and title live there too, and every salary change copies them into a new row.
+
+The two solutions represent the future differently. The job holds the future as an **action**: something to be done when the time comes. The effective-dated row holds it as a **fact**: something already true, just not yet in effect. An action can fail; a fact can't. The second is the right representation. The problem is that the whole burden of using it falls on the application.
+
+</section>
+
+<ActionVsFact />
+
+{/* ================= 2 ================= */}
+<section class="col s-nf">
+
+## 2. Why sixth normal form?
+
+A timeless employee table, `employee(id, name, salary, department)`, is already in fifth normal form. Every attribute depends on the key alone; when a salary changes, one cell changes. There is nothing to fix.
+
+Add time and the table is *still* in 5NF. The key becomes `(id, during)`, and every attribute depends on that key. But look at Ayşe's three rows:
+
+<div class="tbl tbl-ayse">
+
+| id | name | salary | department | during |
+|---|---|---|---|---|
+| 42 | Ayşe | 50,000 | Sales | [2024-01, 2025-01) |
+| 42 | Ayşe | 55,000 | Sales | [2025-01, 2025-05) |
+| 42 | Ayşe | 55,000 | Marketing | [2025-05, ∞) |
+
+</div>
+
+"Ayşe" is written three times. The fact "her salary has been 55,000 since January 2025" appears in no row; it is split across two, because the department changed in May. Two independent facts, salary and department, are forced to share one interval, and so they cut each other into pieces.
+
+The classical normal forms can't see this repetition, because it doesn't come from a dependency between attributes. The forms from 1NF to 5NF were defined between 1970 and 1979, by Codd and then Fagin, for how attributes depend *on each other*. The repetition here comes from something else: each attribute has **its own lifespan**, and the table imposes one lifespan on all of them.
+
+In *Temporal Data and the Relational Model* (2003), Date, Darwen and Lorentzos defined 6NF for exactly this: a key and at most one other attribute. Ayşe's table splits in three, and each table gets a new row only where its own attribute changes.
+
+</section>
+
+<RowVsAttribute />
+
+{/* ================= 3 ================= */}
+<section class="col s-prop">
+
+## 3. The proposal: a column-level declaration
+
+The book left 6NF as a schema design rule: the designer does the decomposition, the designer writes the queries. 6NF applied by hand is the PeopleSoft pattern ten times over, which is why nobody applies it.
+
+My proposal is to move that responsibility into the engine:
+
+```sql
+CREATE TABLE employee (
+    id            bigint PRIMARY KEY,
+    name          text NOT NULL,
+    salary        numeric EFFECTIVE DATED,
+    department_id bigint  EFFECTIVE DATED REFERENCES department
+);
+```
+
+`EFFECTIVE DATED` is a property of a column, like `NOT NULL` or `DEFAULT`. The syntax is invented; no engine has it in this form. The user sees a single table with four columns. The engine keeps a separate table for every effective-dated column:
+
+```sql
+employee                (id, name)
+employee$salary         (id, salary, valid daterange)
+employee$department_id  (id, department_id, valid daterange)
+-- in every side table: no overlapping intervals for the same id
+```
+
+`name` is timeless and stays in the main table. This is the idea the whole essay rests on: **not every attribute needs a history, but every attribute with a history needs its own table.** Applying 6NF only to the columns where time actually flows, rather than to the whole schema, is not a step back from the theory. The reason for 6NF was attributes that change at different times; there is no reason to split off an attribute that never changes.
+
+</section>
+
+<LogicalPhysical />
+
+<section class="col s-prop">
+
+Intervals are half-open: `[start, end)`. "From January 1st until further notice" is written `[2027-01-01, ∞)`; infinity is not a fake date like `9999-12-31` but the absence of an upper bound. There is no `NULL` in 6NF either: a missing value is a missing row for that point in time.
+
+</section>
+
+{/* ================= 4 ================= */}
+<section class="col s-read">
+
+## 4. Reading: query planning
+
+The user writes an ordinary query:
+
+```sql
+SELECT name, salary
+FROM employee
+WHERE salary > 50000;
+```
+
+It runs at the session's **effective point**. By default that point is today, but it can be given explicitly: `FROM employee AS OF EFFECTIVE DATE '2027-01-15'`.
+
+The planner's rule is two sentences:
+
+1. **An effective-dated column in the projection is planned as a `LEFT JOIN`.** If there is no value at that point, the row doesn't disappear; the column comes back empty.
+2. **An effective-dated column in the `WHERE` clause is planned as an `EXISTS`.** The predicate is evaluated on the value in effect at that point.
+
+In both cases the join condition is the same: `s.id = e.id AND s.valid @> :asof`. This is not a "latest record" lookup but a range containment test, answered by an index on `(id, valid)` at close to the cost of an equality. The correlated `MAX` subquery of the PeopleSoft pattern disappears.
+
+The rules are a starting point. The rest is done by transformations the planner already knows:
+
+- **Join elimination.** In `SELECT name FROM employee`, `salary` never appears, so its side table is never touched. The fear that 6NF means "ten joins in every query" is unfounded as long as an unused join costs nothing.
+- **Outer join simplification.** In the query above, `salary` is both projected and filtered. Any row that satisfies `salary > 50000` necessarily has a value, so the `LEFT JOIN` and the `EXISTS` fold into a single `INNER JOIN`.
+
+</section>
+
+<PlanRewrite />
+
+<section class="col s-read">
+
+Two edge cases show how the rules have to be written. `WHERE salary IS NULL` means "no salary on record at that point", and it must be planned as `NOT EXISTS`, not `EXISTS`; rule 2 applies only to predicates that reject an empty value. Second: every effective-dated column in a query is read **at the same point**. It should not be possible to write a query that reads the salary as of January 15th and the department as of today. That is exactly the most common silent bug in hand-written effective dating: the date condition is added to one join and forgotten on the next.
+
+</section>
+
+{/* ================= 5 ================= */}
+<section class="col s-write">
+
+## 5. Writing: future-dated updates
+
+December's request becomes a single statement:
+
+```sql
+UPDATE employee
+SET salary = salary * 1.10
+EFFECTIVE FROM DATE '2027-01-01';
+```
+
+For each employee the engine finds the interval that contains `2027-01-01`, splits it in two, and writes the new value into the right-hand part. Department, title and name are not copied; only `employee$salary` changes.
+
+This simple-looking operation hides two decisions, and both have to be made explicitly.
+
+**Which date's salary is the `salary` on the right-hand side?** If Ayşe already has a promotion on record effective December 1st, "10% from January 1st" means 10% on top of her January 1st salary. An engine that reads today's value silently undoes the promotion. The right-hand side of the assignment has to be evaluated at the point where the change takes effect.
+
+**What happens to later plans?** If a change is already on record for March, there are two reasonable meanings. The new value holds *until the next recorded change*, and the March plan survives; or it holds *until further notice*, and the March plan is removed. HR wants both, on different days. The syntax has to tell them apart (`UNTIL NEXT`, `ONWARD`); the engine must not choose silently.
+
+</section>
+
+<FutureUpdate />
+
+{/* ================= 6 ================= */}
+<section class="col s-uniq">
+
+## 6. Constraints: an effective-dated column cannot be unique
+
+The proposal's strictest rule is this: **an `EFFECTIVE DATED` column can never be `UNIQUE`, in any form.** It cannot be a `PRIMARY KEY`, it cannot carry a `UNIQUE` constraint, and it cannot be the target of another table's foreign key. The engine rejects the combination when the schema is defined. There are three reasons.
+
+**Identity is timeless.** Every side table points back to the main table by key. If the key could change over time, then knowing whose salary a row holds would first require knowing at which date to read the identity.
+
+**The meaning is ambiguous.** On an effective-dated column, `UNIQUE` could mean *unique at every point* or *unique across all time*. These are different constraints; one word carrying both means the engine chooses silently.
+
+**The violation happens in the future.** Say Mehmet is planned to give up an email address on January 1st, and Ayşe is assigned the same address from January 1st. When Mehmet's plan is pushed to February, the correction collides with a record of Ayşe's that hasn't happened yet. Combined with future-dated records, uniqueness weaves an invisible web of dependencies between rows.
+
+If "the same address can't belong to two people at once" is a real rule, the relationship is turned around. The address lives in its own table with a timeless key, and its holder is that table's effective-dated attribute:
+
+```sql
+CREATE TABLE email_address (
+    address  text PRIMARY KEY,
+    holder   bigint EFFECTIVE DATED REFERENCES employee
+);
+```
+
+Because a side table accepts no overlapping intervals for the same key, an address has at most one holder at any point. Uniqueness isn't declared separately; it follows from the key being timeless.
+
+</section>
+
+<UniquenessInversion />
+
+{/* ================= 7 ================= */}
+<section class="col s-prior">
+
+## 7. What exists today
+
+Every piece exists somewhere.
+
+- **SQL:2011** adds application time with `PERIOD FOR`, allows future-dated rows, and splits intervals with `FOR PORTION OF`. PostgreSQL 18 added temporal primary keys (`WITHOUT OVERLAPS`) and foreign keys (`PERIOD`). But time lives at the level of the **row**: a salary change copies the whole row, and queries have to filter on the period themselves.
+- **Anchor Modeling** (Rönnbäck et al., 2010) explicitly adopts 6NF and generates point-in-time views, and its performance relies on join elimination. But it is a modelling methodology: a tool generates the schema and the views, and the engine knows nothing.
+- **Datomic** stores data as `(entity, attribute, value, transaction)`: attribute-level 6NF, in the engine. But it only has transaction time; a fact that becomes true in the future can't be written. It runs Nubank's core systems, but it never spread far beyond Datalog and the Clojure ecosystem.
+- **XTDB** is SQL and bitemporal by default; valid time can lie in the future, and queries read the current point unless told otherwise. But time is again at the level of the **row**.
+
+</section>
+
+<TableApproaches />
+
+<section class="col s-prior">
+
+No system offers all three together: time at the level of the attribute, facts dated in the future, and planning in the engine. The content of the proposal is to bring those three into one place.
+
+</section>
+
+{/* ================= 8 ================= */}
+<section class="col s-limits">
+
+## 8. Limits
+
+1. **Planning the future needs bitemporal data.** If 10% is entered on December 15th and corrected to 8% on December 20th, the question "what had we planned on December 15th?" can't be answered with effective time alone; it needs recording time too. The proposal extends naturally by adding SQL:2011's system versioning to the side tables, but that is outside the scope of this essay.
+2. **Derived systems hear nothing.** On January 1st nothing is written, so no search index, cache or CDC pipeline receives an event either. The engine has to emit separate "this value is now in effect" events.
+3. **Wide reads are expensive.** Join elimination makes an unselected column free; it doesn't make a selected one free. `SELECT *` on a table with twenty effective-dated columns means twenty range lookups. The proposal is for schemas where a few columns genuinely flow with time.
+4. **The ban on uniqueness forces modelling work.** SQL:2011's `WITHOUT OVERLAPS` already supports "unique at every point"; this proposal deliberately refuses it. The price is that some schemas have to be turned around as in section 6.
+5. **This is a design proposal, not an implementation.** How cleanly the rules fit into an existing planner, and how interval splitting behaves under concurrency, are open questions.
+
+</section>
+
+{/* ================= 9 ================= */}
+<section class="col s-close">
+
+## 9. Conclusion
+
+Date, Darwen and Lorentzos showed that in temporal data, attributes that change at different times have to live in separate tables. The reason the idea stayed in a book for twenty years is not that it was wrong, but that applying it was left to the user.
+
+My proposal is to move that responsibility into the engine. A column is declared `EFFECTIVE DATED`; the engine keeps its side table; the planner turns projections into `LEFT JOIN`s and predicates into `EXISTS`; a future-dated `UPDATE` splits that one column's interval and nothing else. In return, an effective-dated column can never be unique, and identity stays timeless.
+
+Not every attribute needs a history, but every attribute with a history needs its own table. And in a database that does this, January 1st is an ordinary day: the data doesn't change; only the point it is read from moves forward.
+
+</section>
+
+{/* ================= sources ================= */}
+<section class="col refs">
+
+<h2>Sources</h2>
+
+### Temporal relational theory
+
+- C. J. Date, Hugh Darwen and Nikos A. Lorentzos, *Temporal Data and the Relational Model*, Morgan Kaufmann, 2003; intervals, sixth normal form.
+- C. J. Date, Hugh Darwen and Nikos A. Lorentzos, *Time and Relational Theory: Temporal Databases in the Relational Model and SQL*, Morgan Kaufmann, 2014; the revised and extended edition.
+
+### Normal forms
+
+- E. F. Codd, [A Relational Model of Data for Large Shared Data Banks](https://doi.org/10.1145/362384.362685), *Communications of the ACM*, 13(6), 1970.
+- E. F. Codd, "Further Normalization of the Data Base Relational Model", IBM Research Report RJ909, 1971; second and third normal form.
+- Ronald Fagin, "Multivalued Dependencies and a New Normal Form for Relational Databases", *ACM Transactions on Database Systems*, 2(3), 1977; fourth normal form.
+- Ronald Fagin, "Normal Forms and Relational Database Operators", *SIGMOD*, 1979; projection-join normal form, now called fifth.
+
+### Standards and engines
+
+- Krishna Kulkarni and Jan-Eike Michels, [Temporal Features in SQL:2011](https://sigmodrecord.org/2012/09/30/temporal-features-in-sql2011/), *SIGMOD Record*, 41(3), 2012.
+- PostgreSQL 18 documentation, [CREATE TABLE](https://www.postgresql.org/docs/18/sql-createtable.html); `WITHOUT OVERLAPS` and `PERIOD` constraints.
+- XTDB documentation, [Time in XTDB](https://docs.xtdb.com/about/time-in-xtdb.html).
+- Datomic documentation, [Datomic](https://docs.datomic.com/).
+
+### Applying 6NF in practice
+
+- Lars Rönnbäck et al., "Anchor Modeling: Agile Information Modeling in Evolving Data Environments", *Data & Knowledge Engineering*, 2010. [Anchor Modeling](https://www.anchormodeling.com/).
+
+<div class="note">
+
+Note: the syntax in this essay (`EFFECTIVE DATED`, `AS OF EFFECTIVE`, `EFFECTIVE FROM`, `UNTIL NEXT`, `ONWARD`) is invented for the proposal; no engine implements it in this form.
+
+</div>
+
+</section>

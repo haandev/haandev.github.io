@@ -1,0 +1,35 @@
+/* Time is a property of the column — post-specific style.
+   Imported from the MDX. Timeless attributes are grey, effective-dated ones
+   take the two strand colours; in the figures the same roles sit on the
+   .fig-frame paper as fixed hex values (the paper stays white in dark mode). */
+.s-tc {
+  --timeless: var(--muted);
+  --eff: var(--geo);     /* salary, the first effective-dated column */
+  --eff2: var(--alg);    /* department, the second                   */
+}
+
+/* the edge colour of section headings follows the subject */
+.s-prob h2,
+.s-nf h2,
+.s-prior h2,
+.s-limits h2,
+.s-close h2   { border-left: 4px solid var(--fg);     padding-left: 0.875rem; }
+.s-prop h2,
+.s-read h2,
+.s-write h2   { border-left: 4px solid var(--eff);    padding-left: 0.875rem; }
+.s-uniq h2    { border-left: 4px solid var(--danger); padding-left: 0.875rem; }
+
+/* Ayşe's 5NF table: the interval column is code */
+.tbl-ayse table { min-width: 32rem; }
+.tbl-ayse td:last-child { font-family: var(--font-mono); font-size: 0.875em; white-space: nowrap; }
+
+/* the comparison of approaches */
+.tbl-approaches table { min-width: 38rem; }
+.tbl-approaches td:first-child { font-weight: 600; }
+.tbl-approaches .y { color: var(--alg); font-family: var(--font-ui); font-weight: 600; }
+.tbl-approaches .n { color: var(--danger); font-family: var(--font-ui); }
+.tbl-approaches tr.this td { background: var(--geo-faint); }
+
+/* this post's figures don't declare their own font; tie them to the UI font */
+figure svg text { font-family: var(--font-ui); }
+figure svg text.mono { font-family: var(--font-mono); }
