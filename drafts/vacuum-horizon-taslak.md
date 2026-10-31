@@ -1,197 +1,215 @@
 ---
 title: "Silmek iki adımdır"
 date: "2026-11-??"
-description: "Bilgisayarda neredeyse hiçbir şey silindiği anda yok olmaz. Önce ölür, sonra gömülür. FAT32'den NTFS'e, Linux'tan veritabanlarına kadar her sistem bu iki adımı ayırır; aradaki boşluğu kimin uzattığı ve bunun bedelini kimin ödediği, depolamanın en az konuşulan konularından biridir."
-ogDescription: "Silmek iki adımdır: ölüm ve gömülme. Ölüme silen karar verir, gömülmeye en eski okuyucu."
+description: "Depolama sistemlerinde silme işlemi iki ayrı olaydan oluşur: kaydın geçersiz ilan edilmesi ve kapladığı alanın geri kazanılması. Dosya sistemlerinde ikinci olay çoğunlukla kimseyi beklemez; çok sürümlü veritabanlarında ise en eski aktif okuyucuya bağlıdır. Bu sınırın adı vacuum horizon'dur."
+ogDescription: "Silme iki olaydır: geçersiz ilan etme ve geri kazanım. İkincisinin ne zaman mümkün olduğunu en eski aktif okuyucu belirler."
 bodyClass: "s-vh"
-dek: "Silmek iki adımdır: <span class=\"a\">ölüm ve gömülme</span>. Ölüme silen karar verir; <span class=\"g\">gömülmeye en eski okuyucu</span>."
+dek: "Silme iki olaydır: <span class=\"a\">geçersiz ilan etme ve geri kazanım</span>. Birincisine silen karar verir; <span class=\"g\">ikincisine en eski aktif okuyucu</span>."
 tags:
   - "depolama"
   - "dosya sistemi"
   - "veritabanı"
+  - "mvcc"
   - "çöp toplama"
   - "sistem tasarımı"
 ---
 
 <!--
-TASLAK v2: herkesin anlayacağı dil. Teknik ayrıntılar "Teknik not" kutularında;
-okur onları atlasa da yazıyı takip edebilmeli.
+TASLAK v3: yarı akademik dil. Benzetme yok; terimler ilk geçtikleri yerde tanımlanıyor.
 Şekil yerleri [Şekil: ...] olarak işaretli.
 -->
 
-## 1. Silinen fotoğraf neden geri gelir?
+<div class="oz">
+<span class="lbl">Öz</span>
 
-Herkesin başına gelmiştir: bir USB belleği yanlışlıkla biçimlendirirsiniz ya da bir klasörü çöp kutusunu atlayarak silersiniz. Birisi size bir "veri kurtarma" programı önerir, programı çalıştırırsınız ve fotoğrafların çoğu geri gelir.
+Depolama sistemlerinde silme, tek bir işlem gibi görünse de iki ayrı olaydan oluşur: kaydın *geçersiz ilan edilmesi* ve kapladığı alanın *geri kazanılması*. Bu yazı, iki olay arasındaki aralığı inceliyor. Dosya sistemlerinde (FAT32, NTFS) bu aralık herhangi bir okuyucuya bağlı değildir; alan anında serbest kalır, verinin fiziksel olarak ortadan kalkması üzerine yeni veri yazılmasına bağlıdır. Çok sürümlü veritabanlarında ise geri kazanım, hâlâ kullanımda olan en eski anlık görüntüye (snapshot) bağlıdır. Bu sınıra *vacuum horizon* denir. Yazı, kavramın farklı sistemlerdeki karşılıklarını, bir okuyucu sınırı geride tuttuğunda maliyetin kime yüklendiğini ve sınırın gözlenerek ya da süre ilan edilerek belirlenmesi arasındaki farkı ele alıyor. Kavram yeni değildir; çok sürümlü eşzamanlılık denetimi (Reed, 1978; Bernstein ve Goodman, 1983) ve bellek geri kazanımı (McKenney ve Slingwine, 1998) literatürünün ortak bir yapısıdır. Yazının katkısı, bu yapıyı dosya sistemlerinden dağıtık veritabanlarına kadar tek bir çerçevede okumaktır.
 
-Bu küçük mucize, bilgisayarların silmeyi nasıl yaptığı hakkında önemli bir şey söyler: **silmek, yok etmek değildir.** Dosyayı sildiğiniz anda olan şey, diskteki verinin kaybolması değil, dosya sisteminin o veriyi *unutmaya karar vermesidir*. Veri, üzerine başka bir şey yazılana kadar orada durur.
+</div>
 
-Yani silmek iki ayrı olaydır:
+## 1. Silme ve geri kazanım
 
-1. **Ölüm.** Sistem "bu artık yok" diye not alır. Anında olur ve neredeyse hiç maliyeti yoktur.
-2. **Gömülme.** Verinin kapladığı yer gerçekten geri alınır ve üzerine başka bir şey yazılır. Bu daha sonra, bazen çok daha sonra olur.
+Bir depolama sisteminde silme işlemi iki olaydan oluşur:
 
-Bu yazının konusu, iki olay arasındaki o boşluk: neden var, kim uzatıyor ve uzadığında bedeli kim ödüyor.
+1. **Geçersiz ilan etme.** Sistem, kaydın artık geçerli olmadığını kendi meta verisine işler. Bu bir yazma işlemidir, anında gerçekleşir ve maliyeti düşüktür.
+2. **Geri kazanım.** Kaydın kapladığı alan yeniden kullanıma açılır ve zamanla üzerine yeni veri yazılır. Bu olay ilkinden sonra, kimi zaman çok daha sonra gerçekleşir.
 
-[Şekil: ÖlümVeGömülme — bir dosyanın zaman çizgisi: yazıldı → silindi (ölüm) → yeri boş işaretlendi → üzerine yeni veri yazıldı (gömülme). Ölüm ile gömülme arasındaki aralık taralı ve "kurtarılabilir" etiketli.]
+İki olay arasındaki aralıkta kayıt, sistemin mantıksal görünümünde yoktur ama fiziksel olarak hâlâ mevcuttur. Bu aralığın ne kadar süreceğini belirleyen kural, sistemden sisteme değişir ve bu yazının konusu o kuraldır.
 
-## 2. Dosya sistemleri nasıl siler?
+[Şekil: İkiOlay — bir kaydın zaman çizgisi: yazıldı → geçersiz ilan edildi → alan serbest bırakıldı → üzerine yeni veri yazıldı. Geçersiz ilan etme ile fiziksel yok oluş arasındaki aralık taralı.]
 
-FAT32 en basit örnektir. Bir klasör, içindeki dosyaların listesini tutan bir tablodur. Bir dosyayı sildiğinizde FAT32 iki küçük şey yapar: listede dosya adının ilk harfinin yerine özel bir işaret koyar ve dosyanın diskte kapladığı alanları "boş" olarak işaretler. Hepsi bu. Dosyanın içeriğine dokunulmaz.
+## 2. Dosya sistemlerinde silme
 
-NTFS de aynısını daha düzenli yapar. Diskteki her dosyanın bir kimlik kartı vardır (MFT kaydı). Silme işlemi, bu kartın üzerine "kullanılmıyor" yazar ve dosyanın yerini boş alan haritasında serbest bırakır. Yine, içerik yerinde durur.
+FAT32'de bir dizin, içerdiği dosyaların kayıtlarını tutan bir tablodur. Bir dosya silindiğinde dosya sistemi iki değişiklik yapar: dizin kaydının ilk baytını `0xE5` değeriyle işaretler ve dosyanın küme zincirini FAT tablosunda serbest olarak işaretler (Microsoft, 2000). Dosyanın içeriği değiştirilmez.
 
-Kurtarma programları bu yüzden çalışır: ölüm kaydını bulur, "kullanılmıyor" işaretini görmezden gelir ve hâlâ yerinde duran veriyi okurlar. Ta ki yeni bir dosya gelip o alana yazılana kadar. Gömülme o anda olur.
+NTFS'te her dosyanın Master File Table (MFT) içinde bir kaydı vardır. Silme işlemi bu kaydın "kullanımda" bayrağını kaldırır ve dosyanın kümelerini `$Bitmap` içinde serbest olarak işaretler. İçerik yine diskte kalır.
 
-> **Teknik not.** FAT32'de silinen dosyanın dizin kaydının ilk baytı `0xE5` olur ve dosyanın küme zinciri FAT tablosunda sıfırlanır. NTFS'te MFT kaydındaki "in use" bayrağı kalkar, kümeler `$Bitmap`'te boş işaretlenir. SSD'lerde işin son kısmı diske devredilir: işletim sistemi TRIM komutuyla "bu bloklar artık boş" der, diskin kendi denetleyicisi onları uygun bir anda gerçekten temizler. TRIM'den sonra kurtarma genellikle imkânsızdır.
+Adli bilişimde silinen dosyaların kurtarılabilmesi bu ayrıma dayanır: kurtarma araçları geçersiz ilan edilmiş meta veri kayıtlarını okur ve henüz üzerine yazılmamış kümelerden içeriği yeniden oluşturur (Carrier, 2005). İçeriğin fiziksel olarak ortadan kalkması, ilgili kümelere yeni veri yazılmasıyla gerçekleşir.
 
-Dosya sistemlerinde ölüm ile gömülme arasındaki boşluk aslında kimseyi beklemez. Yer, silindiği anda kullanılabilir olur; gerçek yok oluş yalnızca *tesadüfe* bağlıdır, yani yeni bir verinin o alana ne zaman denk geleceğine.
+SSD'lerde süreç bir katman daha içerir. İşletim sistemi TRIM komutuyla serbest kalan blokları depolama birimine bildirir; birimin denetleyicisi bu blokları kendi çöp toplama süreciyle silinmiş duruma getirir. TRIM uygulanmış bloklardan veri kurtarmak çoğu durumda mümkün değildir.
 
-Ama bir istisna var. Ve bütün hikâye o istisnada.
+Bu sistemlerin ortak özelliği şudur: **alan, geçersiz ilan edildiği anda yeniden kullanılabilir hâle gelir.** Geri kazanım hiçbir okuyucuyu beklemez. Verinin ne zaman fiziksel olarak ortadan kalkacağı, yalnızca o alana ne zaman yeni veri yazılacağına bağlıdır.
 
-## 3. Biri hâlâ okuyorsa
+## 3. Okuyucuya bağlı geri kazanım
 
-Linux'ta, bir program bir dosyayı açıkken o dosyayı silebilirsiniz. `rm` komutu hata vermez, dosya klasörden kaybolur, `ls` artık onu göstermez. Ama disk dolu kalır.
+Bu kuralın dosya sistemlerinde de bir istisnası vardır. POSIX semantiğinde bir dosyanın silinmesi (`unlink`), dizin girdisini kaldırır ve dosyanın bağlantı sayısını azaltır. Dosyanın inode'u ve veri blokları ise ancak bağlantı sayısı sıfıra düştüğünde **ve** dosyayı açık tutan son süreç tanıtıcıyı kapattığında serbest bırakılır.
 
-Çünkü dosyayı okuyan program hâlâ okumaya devam ediyordur ve Linux ona söz vermiştir: "açtığın dosya, sen kapatana kadar senindir." Dosya ölmüştür, ama gömülemez. Son okuyucu dosyayı kapattığı anda yer geri gelir.
+Sonuç olarak Linux'ta açık bir dosya silindiğinde dosya dizinden kaybolur, ancak kapladığı alan serbest kalmaz. Bu durum sistem yönetiminde bilinen bir tutarsızlığa yol açar: `df` diski dolu gösterirken `du` ile hesaplanan toplam çok daha düşüktür. Aradaki fark, silinmiş ama hâlâ bir süreç tarafından açık tutulan dosyalardır ve `lsof +L1` ile listelenebilir.
 
-Sistem yöneticilerinin klasik kâbusu budur: disk yüzde yüz dolu, ama klasörlerdeki dosyaların toplamı yarısını bile tutmuyor. Sebep, aylar önce silinmiş ama hâlâ çalışan bir programın açık tuttuğu dev bir log dosyasıdır.
+Windows aynı durumda farklı bir kural uygular: bir dosya `FILE_SHARE_DELETE` izni verilmeden açılmışsa silme işlemi reddedilir.
 
-Windows aynı durumda başka bir yol seçer: dosya açıksa silmenize izin vermez. "Bu dosya başka bir program tarafından kullanıldığı için işlem tamamlanamıyor" mesajı, aynı sorunun öbür cevabıdır.
+Bu iki davranış, ilerleyen bölümlerde ele alınacak bir ayrımı şimdiden gösterir. Linux silme işlemini kabul eder ve geri kazanımı okuyucunun bitmesine erteler; Windows ise silme işlemini okuyucu bitene kadar engeller. Her iki durumda da **geri kazanım artık bir okuyucuya bağlıdır.** Dosya sistemlerinde istisna olan bu durum, çok sürümlü veritabanlarında genel kuraldır.
 
-> **Teknik not.** Linux'ta silinmiş ama açık tutulan dosyalar `lsof +L1` ile listelenir. Dosyanın kimlik kartı (inode), bağlantı sayısı sıfıra düştüğünde *ve* onu açık tutan son süreç kapattığında serbest kalır.
+## 4. Çok sürümlü eşzamanlılık denetimi
 
-Burada ilk kez yeni bir şey ortaya çıkıyor: **gömülme artık tesadüfe değil, okuyucuya bağlı.** Silinmiş bir şey, onu hâlâ okuyan biri olduğu sürece gömülemez.
+Çok sürümlü eşzamanlılık denetimi (MVCC), okuma ve yazma işlemlerinin birbirini kilitlemeden çalışmasını sağlayan bir yöntemdir (Reed, 1978; Bernstein ve Goodman, 1983). Bir transaction başladığında veritabanının o anki tutarlı durumunun bir **anlık görüntüsünü** (snapshot) alır ve bütün okumalarını bu görüntü üzerinden yapar. Bir kayıt güncellendiğinde ya da silindiğinde veritabanı mevcut sürümün üzerine yazmaz; yeni bir sürüm oluşturur ve eski sürümü korur. Güncellemeden önce alınmış bir anlık görüntü, kaydı eski hâliyle görmeye devam etmek zorundadır.
 
-## 4. Veritabanları: okuyucu her zaman vardır
+Bu nedenle MVCC kullanan bir veritabanında her güncelleme ve silme, geçersiz ilan edilmiş ancak henüz geri kazanılamayan bir sürüm bırakır. PostgreSQL bu sürümlere *dead tuple*, InnoDB *undo kaydı*, Cassandra *tombstone* der. Bu sürümleri temizleyen süreç PostgreSQL'de **vacuum** olarak adlandırılır.
 
-Dosya sistemlerinde bu durum istisnadır. Veritabanlarında ise kuraldır.
+Terimin kökeni Stonebraker'ın (1987) POSTGRES depolama sistemi tasarımına uzanır. Bu tasarımda kayıtların üzerine yazılmıyor, eski sürümler "vacuum cleaner" adlı bir süreç tarafından arşiv depolamaya taşınıyordu. Amaç geçmişi silmek değil, geçmiş sürümler üzerinde sorgulama (*time travel*) yapabilmekti. Sonraki PostgreSQL sürümlerinde bu özellik kaldırıldı ve vacuum, eski sürümleri arşive taşımak yerine alanlarını geri kazanan bir sürece dönüştü.
 
-Modern veritabanlarının çoğu, okuyanla yazanı birbirine bekletmemek için şöyle bir yöntem kullanır: bir sorgu başladığında, veritabanının o anki hâlinin bir **fotoğrafını** çeker ve bütün işini o fotoğraf üzerinde yapar. Bu sırada başka biri bir kaydı değiştirirse veritabanı eski kaydın üstüne yazmaz; yeni bir sürüm yazar ve eskisini yerinde bırakır. Çünkü fotoğrafı daha önce çekilmiş bir sorgu, o kaydı hâlâ eski hâliyle görmek zorundadır.
+## 5. Vacuum horizon
 
-> **Teknik not.** Bu yöntemin adı çok sürümlü eşzamanlılık denetimidir (MVCC). "Fotoğraf"ın teknik adı *snapshot*'tır. PostgreSQL, MySQL'in InnoDB motoru, Oracle, SQL Server'ın snapshot modu ve dağıtık veritabanlarının çoğu bu yöntemi kullanır.
+Vacuum her ölü sürümü temizleyemez; yalnızca hiçbir aktif anlık görüntünün artık göremeyeceği sürümleri temizleyebilir. Bu sınıra **vacuum horizon** denir. Tanım iki bileşenden oluşur:
 
-Sonuç: veritabanında her güncelleme ve her silme, ölü ama henüz gömülemeyen bir kayıt bırakır. Bu kayıtları temizleyen bir süreç vardır; PostgreSQL ona doğrudan **vacuum** (elektrik süpürgesi) der. Ama süpürge her kaydı süpüremez. Yalnızca hiçbir fotoğrafın artık göremeyeceği kayıtları süpürebilir.
+- **Vacuum**, ölü sürümleri bulup alanlarını geri kazanan *işlemdir*.
+- **Horizon**, bu işlemin hangi noktaya kadar yapılabileceğini belirleyen *sınırdır*: bu çizgiden daha eski sürümleri hiçbir aktif okuyucu göremez ve göremeyecektir.
 
-O sınırın adı **vacuum horizon**'dur: "bu çizgiden eskisini artık kimse görmüyor ve görmeyecek" noktası. Çizginin gerisindeki her şey güvenle temizlenebilir; ilerisindeki hiçbir şey temizlenemez.
+İki bileşenin ayrılması pratik açıdan önemlidir. Vacuum'un yetersiz çalışması bir yapılandırma sorunudur; çalışma sıklığı, işçi sayısı ve maliyet sınırlarıyla ilgilidir. Horizon'un ilerlememesi ise bir yapılandırma sorunu değildir: vacuum ne kadar sık çalışırsa çalışsın, horizon'un ilerisindeki hiçbir sürümü temizleyemez.
 
-## 5. Kütüphanedeki en geç okur
+Horizon biçimsel olarak şöyle tanımlanabilir:
 
-Horizon'u anlamanın en kolay yolu bir kütüphane düşünmek.
+```
+horizon = min { s : s aktif bir okuyucunun anlık görüntüsü }
+```
 
-Kütüphane, eski baskısı çıkan bir kitabı koleksiyondan çıkarmaya karar veriyor. Kitap katalogdan siliniyor; artık kimse onu ödünç alamaz. Bu ölüm. Ama kitabın dört kopyası okurlarda. Kütüphane, rafı boşaltıp yeni kitaplara yer açmak için bütün kopyaların geri dönmesini beklemek zorunda. Bu gömülme.
+Tanımın belirleyici unsuru `min` işlecidir. Horizon, okuyucuların bir ortalaması değil, minimumudur. Dolayısıyla tek bir uzun süreli okuyucu, diğer okuyucuların süresinden bağımsız olarak horizon'u belirler. Sistemdeki okuyucuların büyük çoğunluğunun milisaniyeler içinde tamamlanması, bu sonucu değiştirmez.
 
-Üç okur kitabı ertesi gün getiriyor. Dördüncüsü getirmiyor. Rafa yer açılması, o dördüncü okurun ne zaman geleceğine bağlı.
+[Şekil: MinimumÇizgisi — yatay zaman ekseninde çok sayıda kısa okuyucu aralığı ve bir uzun aralık. Horizon çizgisi uzun aralığın başlangıcında; sağında geri kazanılamayan sürümler.]
 
-Horizon'un en önemli özelliği budur: **bir ortalama değil, bir minimumdur.** Bin okurun dokuz yüz doksan dokuzu kitabı zamanında getirse bile, rafı belirleyen, getirmeyen tek kişidir. Diğerlerinin ne kadar dakik olduğunun hiçbir önemi yoktur.
+## 6. Örnek: boşta bekleyen bir transaction
 
-Yani temizlik, en yavaş okuyucunun hızında ilerler.
+Bir analist cuma günü saat 18:40'ta bir rapor için veritabanına bağlanır, bir transaction başlatır, tek bir `SELECT` sorgusu çalıştırır ve istemciyi kapatmadan çalışmayı bırakır. Oturum PostgreSQL'de `idle in transaction` durumunda kalır. Transaction herhangi bir kilit tutmaz, yazma yapmaz ve kaynak tüketmez; ancak anlık görüntüsü aktif olduğu için horizon'u 18:40'ta sabitler.
 
-[Şekil: MinimumÇizgisi — yatay zaman ekseninde onlarca kısa okuyucu çubuğu ve bir tane çok uzun çubuk. Horizon çizgisi uzun çubuğun başına yapışmış; sağında biriken ölü kayıtlar.]
+Hafta sonu boyunca `orders` tablosundaki her güncelleme yeni bir sürüm oluşturur ve eski sürümü bırakır. Autovacuum düzenli olarak çalışır, ancak bu sürümlerin hiçbirini temizleyemez; çünkü 18:40'ta alınmış bir anlık görüntü onları teorik olarak hâlâ görebilir. Pazartesi sabahı tablo 30 GB'tan 210 GB'a çıkmıştır; satır sayısı ise neredeyse değişmemiştir.
 
-## 6. Bir dizüstü bilgisayarın kapağı
+`VACUUM (VERBOSE)` çıktısı bu durumu doğrudan gösterir:
 
-Bunun gerçek hayattaki karşılığı şöyle bir şeydir.
+```
+tuples: 0 removed, 1204117 remain, 1198320 are dead but not yet removable
+removable cutoff: 88213410, which was 4120331 XIDs old when operation ended
+```
 
-Cuma akşamı Mehmet bir rapor için veritabanına bağlanır, bir sorgu çalıştırır, sonucu kopyalar ve bilgisayarının kapağını kapatıp eve gider. Ama kullandığı program, sorgunun açtığı işlemi kapatmamıştır. Bağlantı açık kalır ve Mehmet'in cuma 18:40'ta çektiği fotoğraf hâlâ "kullanımda" sayılır.
+"Dead but not yet removable" ifadesi, temizlenecek sürümlerin tespit edildiğini ancak horizon nedeniyle temizlenemediğini belirtir.
 
-Hafta sonu boyunca sistem her zamanki gibi çalışır: siparişler gelir, kayıtlar güncellenir, her güncelleme eski bir sürüm bırakır. Süpürge düzenli olarak çalışır ve her seferinde aynı kararı verir: **temizleyemem, biri hâlâ görüyor olabilir.**
+## 7. Farklı sistemlerde aynı sınır
 
-Kimse görmüyordu. Ama veritabanı bunu bilemez. Bildiği tek şey, cuma 18:40'tan beri açık bir fotoğrafın var olduğudur.
+Aynı yapı, bir kaydın birden fazla sürümünü aynı anda tutan ya da paylaşılan bir veriyi okuyucular varken serbest bırakmak zorunda olan her sistemde bulunur. Literatürde *low watermark*, *GC safe point* ve *oldest active snapshot* gibi adlarla geçer.
 
-Pazartesi sabahı tablo 30 GB'tan 210 GB'a çıkmıştır. Satır sayısı neredeyse aynıdır. Kimse veri eklememiştir. Tabloyu şişiren şey, gömülmeyi bekleyen ölülerdir.
-
-## 7. Aynı fikir, başka isimler
-
-Bu kavram yalnızca PostgreSQL'e ait değildir. Silinen bir şeyin, onu hâlâ görebilecek biri olduğu sürece yaşaması gereken her sistemde aynı çizgi vardır. Sadece adı değişir:
-
-| Nerede | Adı | "Okuyucu" kim? |
+| Sistem | Terim | Okuyucu olarak sayılanlar |
 |---|---|---|
-| Linux dosya sistemi | açık dosya tanıtıcısı | Dosyayı hâlâ açık tutan programlar |
-| PostgreSQL | xmin horizon | Açık işlemler, replikalar, replikasyon slot'ları |
-| MySQL (InnoDB) | purge | Açık okuma görünümleri |
-| Oracle | undo retention | Uzun süren sorgular |
-| TiDB, CockroachDB | GC safe point, GC TTL | Belirli bir süreden genç işlemler, yedeklemeler |
-| Cassandra | tombstone, `gc_grace_seconds` | Silme haberini henüz almamış sunucular |
-| Delta Lake, Iceberg | `VACUUM`, snapshot expiry | Geçmiş sürümleri okuyan sorgular |
-| Linux çekirdeği | RCU grace period | Paylaşılan bir veriyi hâlâ okuyan işlemciler |
+| Linux (POSIX) | açık dosya tanıtıcısı | Dosyayı açık tutan süreçler |
+| PostgreSQL | xmin horizon, *removable cutoff* | Açık transaction'lar, `hot_standby_feedback` gönderen standby'lar, replication slot'lar, hazırlanmış transaction'lar |
+| MySQL InnoDB | purge, *read view* | Açık read view'lar |
+| Oracle | undo retention | Uzun süreli sorgular |
+| TiDB | GC safe point | `tidb_gc_life_time` süresinden kısa süredir açık transaction'lar |
+| CockroachDB | GC threshold, `gc.ttlseconds` | TTL süresi içindeki zaman damgaları; yedekleme ve changefeed'ler için *protected timestamp* |
+| Cassandra | tombstone, `gc_grace_seconds` | Silme işlemini henüz almamış replikalar |
+| Delta Lake, Iceberg | `VACUUM`, snapshot expiry | Geçmiş sürümleri okuyan sorgular ve eşzamanlı yazıcılar |
+| Linux çekirdeği (RCU) | grace period | Read-side kritik bölgedeki işlemciler |
+| Kilitsiz veri yapıları | epoch, hazard pointer | Belleğe referans tutan thread'ler |
 
-Literatürde de aynı şeye *low watermark*, *GC safe point* ya da *oldest active snapshot* denir.
+Tablonun belirleyici sütunu üçüncüsüdür. Tüm sistemlerde sorulan soru aynıdır: en eski aktif okuyucu hangisidir? Sistemler arasındaki fark, neyin okuyucu olarak sayıldığındadır. Pratikteki horizon sorunlarının önemli bir kısmı, işletenin okuyucu olarak tanımadığı bileşenlerden kaynaklanır: tüketicisi kaldırılmış bir replication slot, iki aşamalı commit'in ortasında bırakılmış bir `PREPARE TRANSACTION` ya da uzun süreli bir yedekleme işlemi. Bunların hiçbiri `pg_stat_activity` içinde uzun süreli bir sorgu olarak görünmez.
 
-Tablonun en önemli sütunu sonuncusudur. Her sistemde soru aynıdır: "en eski okuyucu nerede?" Değişen, **neyin okuyucu sayıldığıdır.** Sorunların çoğu da ekibin okuyucu olduğunu bilmediği bir şeyden çıkar: aylar önce kapatılmış bir sistemin unutulmuş replikasyon bağlantısı, yarıda kalmış bir işlem, bir yedekleme aracı.
+Cassandra bu tablodaki diğer sistemlerden ayrılır. Burada tombstone'un geri kazanımını geciktiren bir okuyucu değil, silme işlemini henüz almamış bir **replikadır**. Tombstone, bütün replikalar onarım (repair) ile eşitlenmeden kaldırılırsa, silme işlemini almamış replika eski veriyi hâlâ taşıdığı için bir sonraki eşitlemede silinmiş kayıt yeniden görünür hâle gelir. Literatürde bu durum *data resurrection* olarak adlandırılır. Yapı yine aynıdır: geçersiz ilan edilmiş bir kayıt, bu bilgiyi henüz almamış son taraf da onu alana kadar geri kazanılamaz.
 
-Cassandra satırı ayrıca ilginçtir. Orada silinmiş kaydı bekleten bir okuyucu değil, silme haberini henüz almamış bir **sunucudur**. Kayıt erken gömülürse, haberi almamış sunucu eski kopyayı hâlâ taşıdığı için bir sonraki eşitlemede silinmiş veri geri gelir. Buna literatürde "zombi veri" denir. Yapı yine aynıdır: ölü, ölümü görmemiş son taraf ölümü görene kadar gömülemez.
+## 8. Maliyetin dağılımı
 
-## 8. Biri beklettiğinde bedeli kim öder?
+Bir okuyucu horizon'u geride tuttuğunda sistemin üç seçeneği vardır ve her biri maliyeti farklı bir tarafa yükler.
 
-Gömülmeyi bekleten bir okuyucu olduğunda sistemin önünde üç seçenek vardır ve her biri birilerine fatura keser.
+**Silme işlemini engellemek.** Okuyucu bitene kadar silme kabul edilmez. Windows'un açık dosyalara uyguladığı kural budur. Okuyucunun tutarlılığı ve depolama alanı korunur; maliyeti **yazıcı** üstlenir.
 
-**Silmek isteyeni durdurmak.** Windows'un yolu: okunan dosya silinemez. Okuyucu güvendedir, disk şişmez; bedeli **silmek isteyen** öder.
+**Geri kazanımı ertelemek.** Silme kabul edilir, ancak alan okuyucu bitene kadar geri kazanılmaz. Linux'un açık dosyalara, PostgreSQL ve InnoDB'nin eski sürümlere uyguladığı kural budur. Okuyucu ve yazıcı etkilenmez; maliyeti **depolama** üstlenir.
 
-**Okuyucuyu beklemek.** Linux'un ve PostgreSQL'in yolu: silme kabul edilir, ama yer okuyucu bitene kadar geri alınmaz. Okuyucu güvendedir, silen engellenmez; bedeli **disk** öder. Pazartesi sabahki 210 GB bu seçimin faturasıdır.
+**Okuyucuyu sonlandırmak.** Belirli bir eşikten sonra eski sürümler okuyucuya rağmen geri kazanılır ve bu sürümlere ihtiyaç duyan okuma hata ile sonlanır. Oracle'da undo alanı yetersiz kaldığında alınan `ORA-01555: snapshot too old` hatası ve TiDB'de `tidb_gc_life_time` süresini aşan transaction'ların aldığı hata bu kuralın sonucudur. Depolama ve yazıcı korunur; maliyeti **okuyucu** üstlenir.
 
-**Okuyucuyu feda etmek.** Oracle'ın varsayılan yolu: eski sürümler için ayrılan alan dolduğunda en eskiler silinir ve onlara ihtiyaç duyan uzun sorgu yarıda hata alır. Oracle kullanıcılarının iyi bildiği `ORA-01555: snapshot too old` ("fotoğraf çok eski") hatası tam olarak budur. Disk korunur; bedeli **okuyucu** öder.
+[Şekil: ÜçMaliyet — üç köşeli şema: yazıcı, depolama, okuyucu. Her köşede ilgili kural ve örnek sistem: Windows (yazıcı), Linux, PostgreSQL ve InnoDB (depolama), Oracle varsayılanı ve TiDB (okuyucu).]
 
-[Şekil: ÜçBedel — üçgen: köşelerde silen, disk, okuyucu. Her köşenin yanında o bedeli seçen sistem: Windows (silen öder), Linux ve PostgreSQL (disk öder), Oracle (okuyucu öder).]
+Oracle bu seçimi bir yapılandırma parametresi olarak sunar. Undo tablespace'inde `RETENTION GUARANTEE` etkinleştirildiğinde, `UNDO_RETENTION` süresi içindeki undo verisinin üzerine yazılmaz; undo alanı dolduğunda ise yeni DML işlemleri hata almaya başlar. Böylece maliyet okuyucudan yazıcıya aktarılır. Bu örnek, üç seçeneğin aynı sistem içinde birbirinin alternatifi olduğunu gösterir: maliyet ortadan kaldırılamaz, yalnızca bir taraftan diğerine aktarılabilir.
 
-Bu seçeneklerin hiçbiri yanlış değildir. Yanlış olan, hangisinin seçildiğini bilmemektir. Okuyucu, silen ya da disk: üçünden biri mutlaka öder.
+Aynı ikilem, uzun süreli okumaların bir replikaya yönlendirildiği durumda da ortaya çıkar. PostgreSQL'de `hot_standby_feedback` kapalıyken standby, primary'den gelen temizlik kayıtlarını uygulayabilmek için çakışan sorguları iptal eder (`canceling statement due to conflict with recovery`); maliyeti okuyucu üstlenir. Parametre açıkken standby kendi en eski anlık görüntüsünü primary'ye bildirir ve primary'nin horizon'unu geride tutar; maliyeti primary'nin depolaması üstlenir. Okuyucunun başka bir sunucuya taşınması, horizon'u taşımaz.
 
-Aynı ikilem, sorunu başka bir makineye taşıyarak çözmeye çalıştığımızda da karşımıza çıkar. Uzun raporları ana veritabanının bir kopyasına (replika) yönlendirmek yaygın bir öneridir. Ama replika ya ana sunucudan gelen temizliği uygulamak için uzun sorguyu iptal eder (okuyucu öder), ya da ana sunucuya "bekle, burada hâlâ okuyan var" der ve ana sunucunun diski şişer (disk öder). **Okuyucuyu başka bir makineye taşımak, sorunu taşımaz.**
+## 9. Gözlenen ve ilan edilen horizon
 
-## 9. Söz vermek: "otuz gün saklıyoruz"
+Bölüm 7'deki sistemler, horizon'u belirleme biçimlerine göre de iki gruba ayrılabilir.
 
-Bazı sistemler okuyucuları tek tek izlemek yerine bir süre ilan eder.
+**Gözlenen horizon.** Sistem aktif okuyucuları izler ve horizon'u gerçekte var olan en eski okuyucudan hesaplar. PostgreSQL, InnoDB ve RCU bu gruptadır. Bu yaklaşım doğruluğu garanti eder: hiçbir okuyucu, kendisinden önce geri kazanılmış bir sürümle karşılaşmaz. Buna karşılık depolama üzerinde bir üst sınır yoktur; tek bir okuyucu horizon'u süresiz olarak geride tutabilir.
 
-Telefonunuzdaki "Son Silinenler" klasörü, Gmail'in çöp kutusu ve birçok bulut servisinin "30 gün boyunca geri alabilirsiniz" vaadi bunun gündelik hâlidir. Veri öldükten sonra otuz gün yaşar, sonra okuyan olsun olmasın gömülür.
+**İlan edilen horizon.** Sistem okuyucuları izlemez; bunun yerine sabit bir saklama süresi tanımlar. Cassandra'nın `gc_grace_seconds` değeri (varsayılan 864000 saniye, yani 10 gün), Delta Lake'in `VACUUM` için varsayılan 7 günlük saklama süresi ve TiDB'nin `tidb_gc_life_time` değeri (varsayılan 10 dakika) bu gruptadır. Bu yaklaşım depolama üzerinde öngörülebilir bir üst sınır sağlar, ancak doğruluğu tüm okuyucuların ve replikaların bu süreye uymasına bağlar. `gc_grace_seconds` süresinden uzun süre devre dışı kalan ve onarılmayan bir Cassandra replikası silinmiş verinin yeniden görünmesine yol açabilir. Saklama süresinin altında bir değerle çalıştırılan Delta Lake `VACUUM` işlemi, eski dosyaları okuyan sorguları ya da eşzamanlı yazıcıları bozabilir; Delta Lake bu nedenle varsayılan olarak bu tür bir çalıştırmayı reddeder.
 
-Veritabanları da aynısını yapar. Cassandra silinmiş kayıtları varsayılan olarak on gün saklar. Delta Lake, silinen dosyaları yedi gün boyunca diskte tutar. TiDB, on dakikadan eski sürümleri temizler.
+İki yaklaşım arasındaki ilişki, Bölüm 8'deki ayrımın mimari düzeydeki karşılığıdır. Gözlenen horizon maliyeti depolamaya, ilan edilen horizon ise sözleşmeye uymayan okuyucuya yükler.
 
-İki yaklaşım arasındaki fark şudur:
+## 10. Geçici neden, kalıcı etki
 
-- **Okuyucuyu izlemek** güvenlidir ama sınırsızdır. Kimse erken gömülmez; ama tek bir unutkan okuyucu diski süresiz şişirebilir.
-- **Süre ilan etmek** sınırlıdır ama bir sözdür. Disk ne kadar büyüyeceği önceden bellidir; ama süreyi aşan okuyucu yarı yolda kalır. On günden uzun süre kapalı kalan bir Cassandra sunucusu geri döndüğünde, silinmiş veriyi geri getirebilir.
+Horizon'u geride tutan transaction kapandığında horizon ilerler ve bir sonraki vacuum geçişi biriken ölü sürümleri temizler. Ancak bu, tablonun diskte kapladığı alanı azaltmaz.
 
-Birincisi doğruluğu garanti eder, diski riske atar. İkincisi diski garanti eder, doğruluğu sözün tutulmasına bağlar.
+PostgreSQL'de vacuum, geri kazandığı alanı işletim sistemine iade etmez; yalnızca tablonun sayfaları içinde yeniden kullanılabilir olarak işaretler. Dosya boyutu yalnızca tablonun sonundaki tamamen boş sayfalar için kısalabilir. Önceki örnekteki tablo, ölü sürümler temizlendikten sonra da yaklaşık 210 GB yer kaplamaya devam eder ve sıralı taramalar bu sayfaları okumayı sürdürür. Alanın gerçekten geri alınması `VACUUM FULL` (tabloyu yeniden yazar ve işlem boyunca özel kilit tutar) ya da `pg_repack` gibi bir araç gerektirir.
 
-## 10. Sebep geçicidir, hasar kalıcıdır
+Etki tabloyla da sınırlı değildir:
 
-Pazartesi sabahı Mehmet bilgisayarını açar, programı kapatır ve fotoğraf serbest kalır. Süpürge bir sonraki turunda üç günlük ölüyü temizler.
+- **İndeksler** ölü sürümlere işaret eden girdiler nedeniyle büyür ve aynı sorgu için daha fazla sayfa okunur.
+- **HOT (heap-only tuple) güncellemeleri** azalır. Sayfalarda boş alan kalmadığında güncellemeler indeksleri de yeniden yazmak zorunda kalır ve büyüme hızlanır.
+- **Dondurma** (freezing) de aynı horizon'a bağlıdır. Horizon yeterince uzun süre ilerlemezse transaction ID'lerin sarmalanmasına (wraparound) karşı koruma mekanizmaları devreye girer; en kötü durumda veritabanı yeni yazma işlemlerini reddeder.
 
-Ama tablo küçülmez.
+Bu nedenle horizon'un izlenmesi, uzun süreli sorguların izlenmesiyle eşdeğer değildir. Uzun süreli okuma sona erdiğinde nedeni ortadan kalkar, ancak etkisi devam eder.
 
-PostgreSQL'de süpürge, temizlediği yeri diske geri vermez; yalnızca tablonun içinde "burası yeniden kullanılabilir" diye işaretler. Boşaltılmış bir dolap gibi: içi boştur, ama duvardan sökülmemiştir ve odada aynı yeri kaplar. Tablo 210 GB'ta kalır; tablonun tamamını okuyan sorgular boş rafları da okumaya devam eder. Yeri gerçekten geri almak, tabloyu baştan yazan ağır bir işlem gerektirir.
+## 11. Teşhis ve önlem
 
-> **Teknik not.** PostgreSQL'de tabloyu küçültmek için `VACUUM FULL` (tabloyu kilitler) ya da `pg_repack` gibi bir araç gerekir. Şişme yalnızca tabloyla sınırlı kalmaz: indeksler de ölü kayıtlara işaret eden girdilerle dolar. Horizon yeterince uzun süre geride kalırsa, işlem numaralarının tükenmesine karşı koruma (wraparound) devreye girer ve en kötü durumda veritabanı yeni yazmaları reddeder.
+PostgreSQL'de horizon'u geride tutan bileşeni bulmak için okuyucu olarak sayılan her kaynağın ayrı ayrı incelenmesi gerekir:
 
-Bu yüzden horizon problemleri yanıltıcıdır. Uzun okuma bittiğinde alarm susar; ama faturası haftalarca ödenmeye devam eder.
+```sql
+-- Açık transaction'lar
+SELECT pid, usename, state, xact_start, age(backend_xmin) AS xmin_age
+FROM pg_stat_activity
+WHERE backend_xmin IS NOT NULL
+ORDER BY age(backend_xmin) DESC;
 
-## 11. Ne yapılabilir?
+-- Replication slot'lar (aktif olmayanlar dahil)
+SELECT slot_name, active, xmin, catalog_xmin
+FROM pg_replication_slots;
 
-Okuyucuyu izleyen bir sistemde yapılabilecek en etkili şey, okuyucuya süre vermektir. Yani bölüm 9'daki "söz verme" fikrini okuyucu tarafına uygulamak.
+-- Hazırlanmış transaction'lar
+SELECT gid, prepared, owner FROM pg_prepared_xacts;
 
-> **Teknik not (PostgreSQL).**
-> - `idle_in_transaction_session_timeout`: açık bırakılıp boşta bekleyen oturumları belirli bir süre sonra kapatır. Mehmet'in senaryosunu doğrudan önler.
-> - `transaction_timeout` (PostgreSQL 17+): bir işlemin toplam süresini sınırlar.
-> - Kullanılmayan replikasyon slot'larını izlemek ve silmek. Bir replikanın sahibi gittiğinde slot kendiliğinden gitmez.
-> - Horizon'u kimin tuttuğunu bulmak için `VACUUM (VERBOSE)` çıktısındaki "dead but not yet removable" satırı ve `pg_stat_activity`, `pg_replication_slots`, `pg_prepared_xacts` görünümleri.
->
-> MySQL'de karşılığı, `SHOW ENGINE INNODB STATUS` çıktısındaki *History list length* değeridir. Sürekli yükseliyorsa biri temizliği bekletiyordur.
+-- Feedback gönderen standby'lar
+SELECT application_name, backend_xmin FROM pg_stat_replication;
+```
 
-Bu önlemlerin hepsi aynı şeyi yapar: bedelin bir kısmını diskten alıp okuyucuya yükler. Temizliği bedavaya ilerletmenin bir yolu yoktur. Yalnızca bedeli kimin ödeyeceğine önceden karar vermenin bir yolu vardır.
+InnoDB'de karşılık gelen gösterge, `SHOW ENGINE INNODB STATUS` çıktısındaki *History list length* değeridir. Bu değerin sürekli artması, purge sürecinin bir read view tarafından geride tutulduğunu gösterir.
+
+Gözlenen horizon kullanan bir sistemde temel önlem, okuyucuların süresini sınırlamaktır. Bu, Bölüm 9'daki ilan edilen horizon yaklaşımının okuyucu tarafına uygulanması anlamına gelir. PostgreSQL'de ilgili parametreler şunlardır:
+
+- `idle_in_transaction_session_timeout`: boşta bekleyen açık transaction'ları belirli bir süre sonra sonlandırır. Bölüm 6'daki senaryoyu doğrudan önler.
+- `transaction_timeout` (PostgreSQL 17 ve sonrası): bir transaction'ın toplam süresini sınırlar.
+- `statement_timeout`: tek bir ifadenin süresini sınırlar; boşta bekleyen transaction'ları kapsamaz.
+
+Bunlara ek olarak, tüketicisi kaldırılmış replication slot'ların izlenmesi ve silinmesi gerekir; slot'lar tüketicileriyle birlikte otomatik olarak kaldırılmaz.
+
+Bu önlemlerin tümü, maliyetin bir kısmını depolamadan okuyucuya aktarır. Bölüm 8'deki ayrım burada da geçerlidir: maliyet ortadan kaldırılamaz, yalnızca hangi tarafın üstleneceği önceden belirlenebilir.
 
 ## 12. İtirazlar ve sınırlar
 
-1. **"Uzun okumalar meşrudur."** Doğru. Ay sonu raporları ve yedeklemeler saatler sürebilir. Buradaki argüman uzun okumanın yanlış olduğu değil, bedelinin görünmez olduğudur.
-2. **Karşılaştırma kabadır.** Linux çekirdeğinde bekleme mikrosaniyeler, Cassandra'da günler sürer; birinin okuyucusu bir işlemci, ötekininki bir sunucudur. Tablo bir eşitlik değil, aynı fikrin farklı ölçeklerde tekrarıdır.
-3. **Dosya sistemi örneği tam örtüşmez.** FAT32 ve NTFS'te silinen yer hemen kullanılabilir hâle gelir; gömülme kimseyi beklemez, yalnızca tesadüfe bağlıdır. Okuyucuyu bekleyen gömülme, dosya sistemlerinde Linux'taki açık dosya gibi istisnai durumlarda ortaya çıkar. Veritabanlarında ise istisna değil, kuraldır.
-4. **Sayılar sürüme bağlıdır.** Varsayılan değerler ve hata mesajları sürümden sürüme değişir.
+1. **Uzun süreli okumalar meşrudur.** Ay sonu raporları, yedeklemeler ve mantıksal replikasyonun ilk kopyalama aşaması saatler sürebilir. Buradaki argüman, uzun süreli okumaların hatalı olduğu değil, depolama üzerindeki etkilerinin çoğunlukla görünmez kaldığıdır.
+2. **Sistemler arası karşılaştırma ölçek farklarını gizler.** RCU'da grace period mikrosaniyeler, Cassandra'da `gc_grace_seconds` günler mertebesindedir; birinde okuyucu bir işlemci, diğerinde bir replikadır. Bölüm 7'deki tablo bir eşdeğerlik iddiası değil, aynı yapının farklı ölçeklerde tekrarlandığının gösterimidir.
+3. **Dosya sistemleri yapıya kısmen uyar.** FAT32 ve NTFS'te geri kazanım hiçbir okuyucuya bağlı değildir; verinin fiziksel olarak ortadan kalkması yalnızca üzerine yazılmaya bağlıdır. Okuyucuya bağlı geri kazanım, dosya sistemlerinde POSIX `unlink` semantiği gibi sınırlı durumlarda ortaya çıkar. Yazı, dosya sistemlerini bu nedenle bir eşdeğer olarak değil, iki olay arasındaki ayrımın en yalın örneği olarak kullanıyor.
+4. **Varsayılan değerler sürüme bağlıdır.** Parametre adları, varsayılan değerler ve hata mesajları sürümden sürüme değişebilir; buradakiler yazının yazıldığı tarihteki belgelere dayanmaktadır.
 
 ## 13. Sonuç
 
-Bilgisayarda neredeyse hiçbir şey silindiği anda yok olmaz. Silmek iki adımdır: önce ölüm, sonra gömülme. Ölüm, silenin kararıdır ve anında olur. Gömülme ise ya tesadüfe bağlıdır, ya da ölümden önce gelmiş son okuyucunun gitmesine.
+Depolama sistemlerinde silme, kaydın geçersiz ilan edilmesi ve alanının geri kazanılması olmak üzere iki ayrı olaydan oluşur. Dosya sistemlerinde ikinci olay çoğunlukla hiçbir okuyucuya bağlı değildir. Çok sürümlü veritabanlarında ise hâlâ kullanımda olan en eski anlık görüntüye bağlıdır ve bu sınır vacuum horizon olarak adlandırılır.
 
-O son okuyucunun durduğu çizgi vacuum horizon'dur. Bir minimum olduğu için en yavaş okuyucunun hızında ilerler. Onu tutan biri olduğunda bedeli mutlaka birisi öder: silen, okuyan ya da disk. Hangisinin ödeyeceği bir tercihtir; tercih yapılmamışsa, varsayılan seçilmiş demektir.
+Horizon bir minimum olduğu için en uzun süreli okuyucu tarafından belirlenir. Bir okuyucu horizon'u geride tuttuğunda maliyet yazıcıya, depolamaya ya da okuyucuya yüklenir. Hangi tarafın üstleneceği bir tasarım kararıdır; karar açıkça verilmemişse sistemin varsayılanı geçerli olur.
 
-Pazartesi sabahki 210 GB'lık tablo bir hata değildi. Veritabanı kendisinden isteneni yaptı: kimsenin görmediği ama birinin görebileceği bir veriyi korudu. Silmek iki adımdır; ve ikinci adımı bazen, kapağı kapatılmış bir dizüstü bilgisayar belirler.
+Silme iki olaydır: birincisine silen karar verir, ikincisine en eski aktif okuyucu.
 
 ---
 
@@ -199,28 +217,31 @@ Pazartesi sabahki 210 GB'lık tablo bir hata değildi. Veritabanı kendisinden i
 
 ### Dosya sistemleri
 
-1. Microsoft, *FAT32 File System Specification* (FAT: General Overview of On-Disk Format), 2000.
-2. Carrier, B. (2005). *File System Forensic Analysis*. Addison-Wesley. FAT ve NTFS'te silinen dosyaların izleri.
-3. Linux `unlink(2)` ve `lsof(8)` kılavuz sayfaları.
+1. Microsoft Corporation (2000). *Microsoft Extensible Firmware Initiative FAT32 File System Specification*, sürüm 1.03.
+2. Carrier, B. (2005). *File System Forensic Analysis*. Addison-Wesley.
+3. IEEE Std 1003.1 (POSIX), `unlink()`; Linux `unlink(2)` ve `lsof(8)` kılavuz sayfaları.
 
-### Çok sürümlü veritabanları
+### Çok sürümlü eşzamanlılık denetimi
 
 4. Reed, D. P. (1978). *Naming and Synchronization in a Decentralized Computer System*. Doktora tezi, MIT.
-5. Bernstein, P. A. & Goodman, N. (1983). *Multiversion Concurrency Control — Theory and Algorithms*. ACM TODS 8(4).
-6. Stonebraker, M. (1987). *The Design of the POSTGRES Storage System*. VLDB '87. "Vacuum cleaner" sürecinin ilk tarifi.
-7. Wu, Y., Arulraj, J., Lin, J., Xian, R. & Pavlo, A. (2017). *An Empirical Evaluation of In-Memory Multi-Version Concurrency Control*. PVLDB 10(7).
+5. Bernstein, P. A. ve Goodman, N. (1983). *Multiversion Concurrency Control — Theory and Algorithms*. ACM TODS 8(4).
+6. Stonebraker, M. (1987). *The Design of the POSTGRES Storage System*. VLDB '87.
+7. Wu, Y., Arulraj, J., Lin, J., Xian, R. ve Pavlo, A. (2017). *An Empirical Evaluation of In-Memory Multi-Version Concurrency Control*. PVLDB 10(7).
 
 ### Bellek geri kazanımı
 
-8. McKenney, P. E. & Slingwine, J. D. (1998). *Read-Copy Update: Using Execution History to Solve Concurrency Problems*. PDCS '98.
+8. McKenney, P. E. ve Slingwine, J. D. (1998). *Read-Copy Update: Using Execution History to Solve Concurrency Problems*. PDCS '98.
+9. Michael, M. M. (2004). *Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects*. IEEE TPDS 15(6).
+10. Fraser, K. (2004). *Practical Lock-Freedom*. Doktora tezi, University of Cambridge.
 
 ### Ürün belgeleri
 
-9. PostgreSQL belgeleri, *Routine Vacuuming*.
-10. MySQL belgeleri, *InnoDB Multi-Versioning* ve *Purge Configuration*.
-11. Oracle belgeleri, *Managing Undo*; ORA-01555.
-12. Apache Cassandra belgeleri, *Tombstones*; `gc_grace_seconds`.
-13. TiDB belgeleri, *GC Overview*; CockroachDB belgeleri, `gc.ttlseconds`.
-14. Delta Lake belgeleri, `VACUUM`.
+11. PostgreSQL belgeleri, *Routine Vacuuming*; `hot_standby_feedback`, `idle_in_transaction_session_timeout`, `transaction_timeout`.
+12. MySQL belgeleri, *InnoDB Multi-Versioning*; *Purge Configuration*.
+13. Oracle belgeleri, *Managing Undo*; `UNDO_RETENTION`, `RETENTION GUARANTEE`.
+14. Apache Cassandra belgeleri, *Compaction*; *Tombstones*; `gc_grace_seconds`.
+15. TiDB belgeleri, *GC Overview*; `tidb_gc_life_time`.
+16. CockroachDB belgeleri, *Configure Replication Zones*; `gc.ttlseconds`.
+17. Delta Lake belgeleri, *Remove files no longer referenced by a Delta table*.
 
-<!-- Not: bağlantılar ve sürüm numaraları yayından önce eklenecek / doğrulanacak. -->
+<!-- Not: bağlantılar ve sürüm numaraları yayından önce eklenecek ve doğrulanacak. -->
