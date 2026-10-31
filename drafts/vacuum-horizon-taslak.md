@@ -22,7 +22,7 @@ TASLAK v3: yarı akademik dil. Benzetme yok; terimler ilk geçtikleri yerde tan�
 <div class="oz">
 <span class="lbl">Öz</span>
 
-Depolama sistemlerinde silme, tek bir işlem gibi görünse de iki ayrı olaydan oluşur: kaydın *geçersiz ilan edilmesi* ve kapladığı alanın *geri kazanılması*. Bu yazı, iki olay arasındaki aralığı inceliyor. Dosya sistemlerinde (FAT32, NTFS) bu aralık herhangi bir okuyucuya bağlı değildir; alan anında serbest kalır, verinin fiziksel olarak ortadan kalkması üzerine yeni veri yazılmasına bağlıdır. Çok sürümlü veritabanlarında ise geri kazanım, hâlâ kullanımda olan en eski anlık görüntüye (snapshot) bağlıdır. Bu sınıra *vacuum horizon* denir. Yazı, kavramın farklı sistemlerdeki karşılıklarını, bir okuyucu sınırı geride tuttuğunda maliyetin kime yüklendiğini ve sınırın gözlenerek ya da süre ilan edilerek belirlenmesi arasındaki farkı ele alıyor. Kavram yeni değildir; çok sürümlü eşzamanlılık denetimi (Reed, 1978; Bernstein ve Goodman, 1983) ve bellek geri kazanımı (McKenney ve Slingwine, 1998) literatürünün ortak bir yapısıdır. Yazının katkısı, bu yapıyı dosya sistemlerinden dağıtık veritabanlarına kadar tek bir çerçevede okumaktır.
+Depolama sistemlerinde silme, tek bir işlem gibi görünse de iki ayrı olaydan oluşur: kaydın *geçersiz ilan edilmesi* ve kapladığı alanın *geri kazanılması*. Dosya sistemlerinde (FAT32, NTFS) iki olay arasındaki aralık herhangi bir okuyucuya bağlı değildir; alan anında serbest kalır, verinin fiziksel olarak ortadan kalkması üzerine yeni veri yazılmasına bağlıdır. Çok sürümlü veritabanlarında ise geri kazanım, hâlâ kullanımda olan en eski anlık görüntüye (snapshot) bağlıdır. Bu sınıra *vacuum horizon* denir. Aynı sınır farklı sistemlerde farklı adlarla bulunur; bir okuyucu onu geride tuttuğunda maliyet yazıcıya, depolamaya ya da okuyucuya yüklenir; sınır ise ya aktif okuyucular gözlenerek ya da bir saklama süresi ilan edilerek belirlenir. Kavram yeni değildir; çok sürümlü eşzamanlılık denetimi (Reed, 1978; Bernstein ve Goodman, 1983) ve bellek geri kazanımı (McKenney ve Slingwine, 1998) literatürünün ortak bir yapısıdır; dosya sistemlerinden dağıtık veritabanlarına kadar aynı biçimde tekrarlanır.
 
 </div>
 
@@ -33,7 +33,7 @@ Bir depolama sisteminde silme işlemi iki olaydan oluşur:
 1. **Geçersiz ilan etme.** Sistem, kaydın artık geçerli olmadığını kendi meta verisine işler. Bu bir yazma işlemidir, anında gerçekleşir ve maliyeti düşüktür.
 2. **Geri kazanım.** Kaydın kapladığı alan yeniden kullanıma açılır ve zamanla üzerine yeni veri yazılır. Bu olay ilkinden sonra, kimi zaman çok daha sonra gerçekleşir.
 
-İki olay arasındaki aralıkta kayıt, sistemin mantıksal görünümünde yoktur ama fiziksel olarak hâlâ mevcuttur. Bu aralığın ne kadar süreceğini belirleyen kural, sistemden sisteme değişir ve bu yazının konusu o kuraldır.
+İki olay arasındaki aralıkta kayıt, sistemin mantıksal görünümünde yoktur ama fiziksel olarak hâlâ mevcuttur. Bu aralığın ne kadar süreceğini belirleyen kural sistemden sisteme değişir.
 
 [Şekil: İkiOlay — bir kaydın zaman çizgisi: yazıldı → geçersiz ilan edildi → alan serbest bırakıldı → üzerine yeni veri yazıldı. Geçersiz ilan etme ile fiziksel yok oluş arasındaki aralık taralı.]
 
@@ -57,7 +57,7 @@ Sonuç olarak Linux'ta açık bir dosya silindiğinde dosya dizinden kaybolur, a
 
 Windows aynı durumda farklı bir kural uygular: bir dosya `FILE_SHARE_DELETE` izni verilmeden açılmışsa silme işlemi reddedilir.
 
-Bu iki davranış, ilerleyen bölümlerde ele alınacak bir ayrımı şimdiden gösterir. Linux silme işlemini kabul eder ve geri kazanımı okuyucunun bitmesine erteler; Windows ise silme işlemini okuyucu bitene kadar engeller. Her iki durumda da **geri kazanım artık bir okuyucuya bağlıdır.** Dosya sistemlerinde istisna olan bu durum, çok sürümlü veritabanlarında genel kuraldır.
+Linux silme işlemini kabul eder ve geri kazanımı okuyucunun bitmesine erteler; Windows ise silme işlemini okuyucu bitene kadar engeller. Her iki durumda da **geri kazanım artık bir okuyucuya bağlıdır.** Dosya sistemlerinde istisna olan bu durum, çok sürümlü veritabanlarında genel kuraldır.
 
 ## 4. Çok sürümlü eşzamanlılık denetimi
 
@@ -118,9 +118,9 @@ Aynı yapı, bir kaydın birden fazla sürümünü aynı anda tutan ya da payla�
 | Linux çekirdeği (RCU) | grace period | Read-side kritik bölgedeki işlemciler |
 | Kilitsiz veri yapıları | epoch, hazard pointer | Belleğe referans tutan thread'ler |
 
-Tablonun belirleyici sütunu üçüncüsüdür. Tüm sistemlerde sorulan soru aynıdır: en eski aktif okuyucu hangisidir? Sistemler arasındaki fark, neyin okuyucu olarak sayıldığındadır. Pratikteki horizon sorunlarının önemli bir kısmı, işletenin okuyucu olarak tanımadığı bileşenlerden kaynaklanır: tüketicisi kaldırılmış bir replication slot, iki aşamalı commit'in ortasında bırakılmış bir `PREPARE TRANSACTION` ya da uzun süreli bir yedekleme işlemi. Bunların hiçbiri `pg_stat_activity` içinde uzun süreli bir sorgu olarak görünmez.
+Tüm sistemlerde sorulan soru aynıdır: en eski aktif okuyucu hangisidir? Sistemler arasındaki fark, neyin okuyucu olarak sayıldığındadır. Pratikteki horizon sorunlarının önemli bir kısmı, işletenin okuyucu olarak tanımadığı bileşenlerden kaynaklanır: tüketicisi kaldırılmış bir replication slot, iki aşamalı commit'in ortasında bırakılmış bir `PREPARE TRANSACTION` ya da uzun süreli bir yedekleme işlemi. Bunların hiçbiri `pg_stat_activity` içinde uzun süreli bir sorgu olarak görünmez.
 
-Cassandra bu tablodaki diğer sistemlerden ayrılır. Burada tombstone'un geri kazanımını geciktiren bir okuyucu değil, silme işlemini henüz almamış bir **replikadır**. Tombstone, bütün replikalar onarım (repair) ile eşitlenmeden kaldırılırsa, silme işlemini almamış replika eski veriyi hâlâ taşıdığı için bir sonraki eşitlemede silinmiş kayıt yeniden görünür hâle gelir. Literatürde bu durum *data resurrection* olarak adlandırılır. Yapı yine aynıdır: geçersiz ilan edilmiş bir kayıt, bu bilgiyi henüz almamış son taraf da onu alana kadar geri kazanılamaz.
+Cassandra'da yapı farklı bir biçim alır. Tombstone'un geri kazanımını geciktiren bir okuyucu değil, silme işlemini henüz almamış bir **replikadır**. Tombstone, bütün replikalar onarım (repair) ile eşitlenmeden kaldırılırsa, silme işlemini almamış replika eski veriyi hâlâ taşıdığı için bir sonraki eşitlemede silinmiş kayıt yeniden görünür hâle gelir. Literatürde bu durum *data resurrection* olarak adlandırılır. Yapı yine aynıdır: geçersiz ilan edilmiş bir kayıt, bu bilgiyi henüz almamış son taraf da onu alana kadar geri kazanılamaz.
 
 ## 8. Maliyetin dağılımı
 
@@ -134,19 +134,19 @@ Bir okuyucu horizon'u geride tuttuğunda sistemin üç seçeneği vardır ve her
 
 [Şekil: ÜçMaliyet — üç köşeli şema: yazıcı, depolama, okuyucu. Her köşede ilgili kural ve örnek sistem: Windows (yazıcı), Linux, PostgreSQL ve InnoDB (depolama), Oracle varsayılanı ve TiDB (okuyucu).]
 
-Oracle bu seçimi bir yapılandırma parametresi olarak sunar. Undo tablespace'inde `RETENTION GUARANTEE` etkinleştirildiğinde, `UNDO_RETENTION` süresi içindeki undo verisinin üzerine yazılmaz; undo alanı dolduğunda ise yeni DML işlemleri hata almaya başlar. Böylece maliyet okuyucudan yazıcıya aktarılır. Bu örnek, üç seçeneğin aynı sistem içinde birbirinin alternatifi olduğunu gösterir: maliyet ortadan kaldırılamaz, yalnızca bir taraftan diğerine aktarılabilir.
+Oracle bu seçimi bir yapılandırma parametresi olarak sunar. Undo tablespace'inde `RETENTION GUARANTEE` etkinleştirildiğinde, `UNDO_RETENTION` süresi içindeki undo verisinin üzerine yazılmaz; undo alanı dolduğunda ise yeni DML işlemleri hata almaya başlar. Böylece maliyet okuyucudan yazıcıya aktarılır. Üç seçenek aynı sistem içinde birbirinin alternatifidir: maliyet ortadan kaldırılamaz, yalnızca bir taraftan diğerine aktarılabilir.
 
 Aynı ikilem, uzun süreli okumaların bir replikaya yönlendirildiği durumda da ortaya çıkar. PostgreSQL'de `hot_standby_feedback` kapalıyken standby, primary'den gelen temizlik kayıtlarını uygulayabilmek için çakışan sorguları iptal eder (`canceling statement due to conflict with recovery`); maliyeti okuyucu üstlenir. Parametre açıkken standby kendi en eski anlık görüntüsünü primary'ye bildirir ve primary'nin horizon'unu geride tutar; maliyeti primary'nin depolaması üstlenir. Okuyucunun başka bir sunucuya taşınması, horizon'u taşımaz.
 
 ## 9. Gözlenen ve ilan edilen horizon
 
-Bölüm 7'deki sistemler, horizon'u belirleme biçimlerine göre de iki gruba ayrılabilir.
+Sistemler, horizon'u belirleme biçimlerine göre de iki gruba ayrılır.
 
 **Gözlenen horizon.** Sistem aktif okuyucuları izler ve horizon'u gerçekte var olan en eski okuyucudan hesaplar. PostgreSQL, InnoDB ve RCU bu gruptadır. Bu yaklaşım doğruluğu garanti eder: hiçbir okuyucu, kendisinden önce geri kazanılmış bir sürümle karşılaşmaz. Buna karşılık depolama üzerinde bir üst sınır yoktur; tek bir okuyucu horizon'u süresiz olarak geride tutabilir.
 
 **İlan edilen horizon.** Sistem okuyucuları izlemez; bunun yerine sabit bir saklama süresi tanımlar. Cassandra'nın `gc_grace_seconds` değeri (varsayılan 864000 saniye, yani 10 gün), Delta Lake'in `VACUUM` için varsayılan 7 günlük saklama süresi ve TiDB'nin `tidb_gc_life_time` değeri (varsayılan 10 dakika) bu gruptadır. Bu yaklaşım depolama üzerinde öngörülebilir bir üst sınır sağlar, ancak doğruluğu tüm okuyucuların ve replikaların bu süreye uymasına bağlar. `gc_grace_seconds` süresinden uzun süre devre dışı kalan ve onarılmayan bir Cassandra replikası silinmiş verinin yeniden görünmesine yol açabilir. Saklama süresinin altında bir değerle çalıştırılan Delta Lake `VACUUM` işlemi, eski dosyaları okuyan sorguları ya da eşzamanlı yazıcıları bozabilir; Delta Lake bu nedenle varsayılan olarak bu tür bir çalıştırmayı reddeder.
 
-İki yaklaşım arasındaki ilişki, Bölüm 8'deki ayrımın mimari düzeydeki karşılığıdır. Gözlenen horizon maliyeti depolamaya, ilan edilen horizon ise sözleşmeye uymayan okuyucuya yükler.
+Bu ayrım, maliyetin dağılımına ilişkin seçimin mimari düzeydeki karşılığıdır. Gözlenen horizon maliyeti depolamaya, ilan edilen horizon ise sözleşmeye uymayan okuyucuya yükler.
 
 ## 10. Geçici neden, kalıcı etki
 
@@ -186,22 +186,22 @@ SELECT application_name, backend_xmin FROM pg_stat_replication;
 
 InnoDB'de karşılık gelen gösterge, `SHOW ENGINE INNODB STATUS` çıktısındaki *History list length* değeridir. Bu değerin sürekli artması, purge sürecinin bir read view tarafından geride tutulduğunu gösterir.
 
-Gözlenen horizon kullanan bir sistemde temel önlem, okuyucuların süresini sınırlamaktır. Bu, Bölüm 9'daki ilan edilen horizon yaklaşımının okuyucu tarafına uygulanması anlamına gelir. PostgreSQL'de ilgili parametreler şunlardır:
+Gözlenen horizon kullanan bir sistemde temel önlem, okuyucuların süresini sınırlamaktır. Bu, ilan edilen horizon yaklaşımının okuyucu tarafına uygulanmasıdır. PostgreSQL'de ilgili parametreler şunlardır:
 
-- `idle_in_transaction_session_timeout`: boşta bekleyen açık transaction'ları belirli bir süre sonra sonlandırır. Bölüm 6'daki senaryoyu doğrudan önler.
+- `idle_in_transaction_session_timeout`: boşta bekleyen açık transaction'ları belirli bir süre sonra sonlandırır. Boşta bekleyen bir transaction'ın horizon'u saatlerce sabitlemesini doğrudan önler.
 - `transaction_timeout` (PostgreSQL 17 ve sonrası): bir transaction'ın toplam süresini sınırlar.
 - `statement_timeout`: tek bir ifadenin süresini sınırlar; boşta bekleyen transaction'ları kapsamaz.
 
 Bunlara ek olarak, tüketicisi kaldırılmış replication slot'ların izlenmesi ve silinmesi gerekir; slot'lar tüketicileriyle birlikte otomatik olarak kaldırılmaz.
 
-Bu önlemlerin tümü, maliyetin bir kısmını depolamadan okuyucuya aktarır. Bölüm 8'deki ayrım burada da geçerlidir: maliyet ortadan kaldırılamaz, yalnızca hangi tarafın üstleneceği önceden belirlenebilir.
+Bu önlemlerin tümü, maliyetin bir kısmını depolamadan okuyucuya aktarır. Maliyet burada da ortadan kaldırılamaz, yalnızca hangi tarafın üstleneceği önceden belirlenebilir.
 
 ## 12. İtirazlar ve sınırlar
 
-1. **Uzun süreli okumalar meşrudur.** Ay sonu raporları, yedeklemeler ve mantıksal replikasyonun ilk kopyalama aşaması saatler sürebilir. Buradaki argüman, uzun süreli okumaların hatalı olduğu değil, depolama üzerindeki etkilerinin çoğunlukla görünmez kaldığıdır.
-2. **Sistemler arası karşılaştırma ölçek farklarını gizler.** RCU'da grace period mikrosaniyeler, Cassandra'da `gc_grace_seconds` günler mertebesindedir; birinde okuyucu bir işlemci, diğerinde bir replikadır. Bölüm 7'deki tablo bir eşdeğerlik iddiası değil, aynı yapının farklı ölçeklerde tekrarlandığının gösterimidir.
-3. **Dosya sistemleri yapıya kısmen uyar.** FAT32 ve NTFS'te geri kazanım hiçbir okuyucuya bağlı değildir; verinin fiziksel olarak ortadan kalkması yalnızca üzerine yazılmaya bağlıdır. Okuyucuya bağlı geri kazanım, dosya sistemlerinde POSIX `unlink` semantiği gibi sınırlı durumlarda ortaya çıkar. Yazı, dosya sistemlerini bu nedenle bir eşdeğer olarak değil, iki olay arasındaki ayrımın en yalın örneği olarak kullanıyor.
-4. **Varsayılan değerler sürüme bağlıdır.** Parametre adları, varsayılan değerler ve hata mesajları sürümden sürüme değişebilir; buradakiler yazının yazıldığı tarihteki belgelere dayanmaktadır.
+1. **Uzun süreli okumalar meşrudur.** Ay sonu raporları, yedeklemeler ve mantıksal replikasyonun ilk kopyalama aşaması saatler sürebilir. Sorun uzun süreli okumaların kendisi değil, depolama üzerindeki etkilerinin çoğunlukla görünmez kalmasıdır.
+2. **Sistemler arası karşılaştırma ölçek farklarını gizler.** RCU'da grace period mikrosaniyeler, Cassandra'da `gc_grace_seconds` günler mertebesindedir; birinde okuyucu bir işlemci, diğerinde bir replikadır. Benzerlik bir eşdeğerlik değil, aynı yapının farklı ölçeklerde tekrarıdır.
+3. **Dosya sistemleri yapıya kısmen uyar.** FAT32 ve NTFS'te geri kazanım hiçbir okuyucuya bağlı değildir; verinin fiziksel olarak ortadan kalkması yalnızca üzerine yazılmaya bağlıdır. Okuyucuya bağlı geri kazanım, dosya sistemlerinde POSIX `unlink` semantiği gibi sınırlı durumlarda ortaya çıkar. Dosya sistemleri bu nedenle veritabanlarının bir eşdeğeri değil, iki olay arasındaki ayrımın en yalın örneğidir.
+4. **Varsayılan değerler sürüme bağlıdır.** Parametre adları, varsayılan değerler ve hata mesajları sürümden sürüme değişebilir; verilen değerler Ekim 2026 itibarıyla geçerli belgelere dayanır.
 
 ## 13. Sonuç
 
