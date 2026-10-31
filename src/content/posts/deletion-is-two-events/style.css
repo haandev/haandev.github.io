@@ -1,0 +1,32 @@
+/* Deletion is two events — post-specific style, imported from the MDX.
+   The three poles keep the colours they had in "The anatomy of data
+   languages", so the two spectrum figures read as one system; in the figures
+   the same roles sit on the .fig-frame paper as fixed hex values (the paper
+   stays white in the dark theme too). */
+.s-del {
+  --fs: var(--alg);   /* file system    */
+  --db: var(--geo);   /* database       */
+  --mq: #c47b00;      /* message queue  */
+}
+@media (prefers-color-scheme: dark) {
+  .s-del { --mq: #e0a94e; }
+}
+
+/* the edge colour of section headings follows the subject */
+.s-two h2,
+.s-close h2 { border-left: 4px solid var(--fg);     padding-left: 0.875rem; }
+.s-fs h2    { border-left: 4px solid var(--fs);     padding-left: 0.875rem; }
+.s-db h2    { border-left: 4px solid var(--db);     padding-left: 0.875rem; }
+.s-cost h2  { border-left: 4px solid var(--danger); padding-left: 0.875rem; }
+.s-pole h2  { border-left: 4px solid var(--mq);     padding-left: 0.875rem; }
+
+/* the systems table: the term column is mostly code */
+.tbl-sys table { min-width: 34rem; }
+.tbl-sys td:first-child { font-weight: 600; white-space: nowrap; }
+
+.refs ul { padding-left: 1.25rem; margin: 0; }
+.refs li { margin-bottom: 0.5rem; line-height: 1.55; }
+
+/* this post's figures don't declare their own font; tie them to the UI font */
+figure svg text { font-family: var(--font-ui); }
+figure svg text.mono { font-family: var(--font-mono); }
