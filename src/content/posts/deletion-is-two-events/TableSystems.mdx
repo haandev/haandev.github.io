@@ -1,0 +1,23 @@
+<div class="col">
+<div class="tbl tbl-sys">
+<table>
+<thead>
+<tr><th>System</th><th>Name for the line</th><th>What counts as a reader</th></tr>
+</thead>
+<tbody>
+<tr><td>Linux (POSIX)</td><td>open file descriptor</td><td>processes holding the file open</td></tr>
+<tr><td>SQLite (WAL mode)</td><td>checkpoint</td><td>open read transactions that still need frames in the WAL file</td></tr>
+<tr><td>PostgreSQL</td><td>xmin horizon, *removable cutoff*</td><td>open transactions, standbys sending `hot_standby_feedback`, replication slots, prepared transactions</td></tr>
+<tr><td>MySQL InnoDB</td><td>purge, *read view*</td><td>open read views</td></tr>
+<tr><td>Oracle</td><td>undo retention</td><td>long-running queries</td></tr>
+<tr><td>TiDB</td><td>GC safe point</td><td>since 6.1, open transactions, for at most `tidb_gc_max_wait_time`; before that, only the `tidb_gc_life_time` period</td></tr>
+<tr><td>CockroachDB</td><td>GC threshold, `gc.ttlseconds`</td><td>timestamps inside the TTL; *protected timestamps* for backups and changefeeds</td></tr>
+<tr><td>Cassandra</td><td>tombstone, `gc_grace_seconds`</td><td>replicas that have not yet received the deletion</td></tr>
+<tr><td>Delta Lake, Iceberg</td><td>`VACUUM`, snapshot expiry</td><td>queries reading old versions, concurrent writers</td></tr>
+<tr><td>Kafka</td><td>log retention, `retention.ms`</td><td>none: a segment past its retention is deleted wherever the consumers are</td></tr>
+<tr><td>Linux kernel (RCU)</td><td>grace period</td><td>CPUs inside a read-side critical section</td></tr>
+<tr><td>Lock-free data structures</td><td>epoch, hazard pointer</td><td>threads still holding a reference</td></tr>
+</tbody>
+</table>
+</div>
+</div>

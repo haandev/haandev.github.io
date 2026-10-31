@@ -1,0 +1,321 @@
+---
+title: "Deletion is two events"
+date: "2026-10-31"
+description: "Deleting a record is two separate events: declaring it invalid and reclaiming the space it occupies. In file systems the second event mostly waits for no one; in multi-version databases it waits for the oldest active reader. That line is the vacuum horizon. Where it goes by other names, who holds it back, who pays when someone does, and how the three ideal poles of file system, database and queue each reclaim deleted data differently."
+ogDescription: "Deletion is two events: declaring a record invalid and reclaiming its space. The oldest active reader decides when the second one can happen."
+bodyClass: "s-del"
+dek: "Deletion is two events: <span class=\"a\">declaring invalid and reclaiming</span>. The one who deletes decides the first; <span class=\"g\">the oldest active reader decides the second</span>."
+tags:
+  - "databases"
+  - "file systems"
+  - "mvcc"
+  - "garbage collection"
+  - "storage"
+  - "systems design"
+---
+
+import "./style.css";
+
+import TwoEvents from "./TwoEvents.mdx";
+import MinimumLine from "./MinimumLine.mdx";
+import TableSystems from "./TableSystems.mdx";
+import ThreeCosts from "./ThreeCosts.mdx";
+import ThreePoles from "./ThreePoles.mdx";
+
+<div class="col">
+<div class="abst">
+<span class="lbl">Abstract</span>
+
+Deletion is two separate events: a record is *declared invalid*, and the space it occupies is *reclaimed*. In file systems the second event mostly waits for no one. In multi-version databases it depends on the oldest snapshot still in use; that line is called the *vacuum horizon*. The same line appears under different names in different systems, and when a reader holds it back the cost falls on the writer, on storage or on the reader. The idea is a shared structure of the literature on multi-version concurrency control (Reed, 1978; Bernstein and Goodman, 1983) and memory reclamation (McKenney and Slingwine, 1998), and it is the deletion-side counterpart of the thesis in [*The anatomy of data languages*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html): the difference between a file system and a database is one of degree, not of kind.
+
+</div>
+</div>
+
+{/* ================= 1 ================= */}
+<section class="col s-two">
+
+## 1. Deletion and reclamation
+
+In a storage system, deletion consists of two events:
+
+1. **Declaring invalid.** The system records in its metadata that the record is no longer valid. This happens at once.
+2. **Reclamation.** The space the record occupied is opened up for reuse. This happens after the first event, sometimes long after.
+
+In the language of [*The anatomy of data languages*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html): on a disk there are only bytes, and file and row are names given to those bytes. Declaring a record invalid withdraws a name, and is instant; when the bytes become free is decided by the promise the naming program has made to its readers.
+
+</section>
+
+<TwoEvents />
+
+{/* ================= 2 ================= */}
+<section class="col s-fs">
+
+## 2. Deletion in file systems
+
+In FAT32 the first byte of a deleted file's directory entry is marked `0xE5` and its clusters are freed (Microsoft, 2000); in NTFS the "in use" flag of the file's MFT record is cleared. In both cases the content stays on the disk, which is why recovery tools work (Carrier, 2005). On SSDs, TRIM reports the free blocks to the controller and makes recovery largely impossible (King and Vidas, 2011).
+
+What these have in common: **the space is reusable the moment it is declared invalid.** Reclamation waits for no reader; whether the data is physically gone depends only on when something new is written over it.
+
+## 3. Reclamation that waits for a reader
+
+There is an exception. In POSIX, when an open file is deleted (`unlink`), it disappears from the directory, but its space is not freed until the last process holding it open closes it. The familiar discrepancy between `df` and `du` comes from here. Windows, in the same situation, usually refuses the deletion.
+
+In both cases **reclamation depends on a reader.** What is an exception in file systems is the rule in multi-version databases, because a file system makes its readers a weak consistency promise, while a database promises every reader a consistent view.
+
+</section>
+
+{/* ================= 4 ================= */}
+<section class="col s-db">
+
+## 4. Multi-version concurrency control
+
+Multi-version concurrency control (MVCC) lets reads and writes proceed without locking each other (Reed, 1978; Bernstein and Goodman, 1983). When a transaction starts, it takes a **snapshot** of the database's consistent state at that moment and runs all its reads against that snapshot. When a record is updated or deleted, the database doesn't overwrite the current version; it creates a new one and keeps the old. A snapshot taken before the update has to go on seeing the record as it was.
+
+So in an MVCC database every update and every deletion leaves behind a version that has been declared invalid but can't yet be reclaimed. PostgreSQL calls these *dead tuples*, InnoDB *undo records*, Cassandra *tombstones*. In PostgreSQL the process that cleans them up is called **vacuum**.
+
+The name goes back to Stonebraker's (1987) design of the POSTGRES storage system. Records were never overwritten, and old versions were moved to archival storage by a process called the "vacuum cleaner". The aim was not to erase history but to be able to query past versions (*time travel*). The feature was removed in PostgreSQL 6.2 (1997) on grounds of performance and storage cost, and vacuum turned from a process that archived old versions into one that reclaims their space.
+
+The same distinction shows up on two levels at once in SQLite, which *The anatomy of data languages* used as its example of a recursive interpretation stack. To the file system an SQLite database is a single file; from the inside it holds tables and rows. When a row is deleted in SQLite, its bytes aren't removed from the file: the space is marked free within the page, and pages that become entirely empty go onto the file's freelist. The structure is the same as FAT32 marking a directory entry and freeing its clusters, one level up, inside a file. Unless `PRAGMA secure_delete` is on, deleted content stays in the file, and the file only shrinks when SQLite's own `VACUUM` command rewrites it.
+
+{/* ================= 5 ================= */}
+
+## 5. The vacuum horizon
+
+Vacuum can't clean up every dead version, only those that no active snapshot can still see. That line is called the **vacuum horizon**. The term has two parts:
+
+- **Vacuum** is the *process* that finds dead versions and reclaims their space.
+- **Horizon** is the *line* that sets how far that process may go: no active reader can see, or will ever see, a version older than this line.
+
+Keeping the two apart matters in practice. Vacuum not keeping up is a configuration problem, a matter of how often it runs, how many workers it has and its cost limits. A horizon that doesn't move is not a configuration problem: however often vacuum runs, it can't clean up anything ahead of the horizon.
+
+Formally:
+
+```
+horizon = min { s : s is the snapshot of an active reader }
+```
+
+The deciding element of the definition is `min`. The horizon is not an average of the readers but their minimum. A single long-running reader therefore sets the horizon regardless of how long the others take. That the vast majority of readers in the system finish in milliseconds changes nothing.
+
+</section>
+
+<MinimumLine />
+
+{/* ================= 6 ================= */}
+<section class="col s-db">
+
+## 6. An example: a transaction left idle
+
+On a Friday at 18:40 an analyst connects to the database for a report, starts a transaction, runs a single `SELECT` and stops working without closing the client. In PostgreSQL the session stays in the `idle in transaction` state. The transaction holds no locks, writes nothing and consumes no resources; but because its snapshot is active, it pins the horizon at 18:40.
+
+Over the weekend every update to the `orders` table creates a new version and leaves the old one behind. Autovacuum runs on schedule but can clean up none of them, because a snapshot taken at 18:40 could, in principle, still see them. On Monday morning the table has grown from 30 GB to 210 GB; the number of rows has barely changed.
+
+The output of `VACUUM (VERBOSE)` (PostgreSQL 15 and later) shows this directly:
+
+```
+tuples: 0 removed, 1204117 remain, 1198320 are dead but not yet removable
+removable cutoff: 88213410, which was 4120331 XIDs old when operation ended
+```
+
+"Dead but not yet removable" says the versions to be cleaned up were found, but the horizon kept them from being removed.
+
+{/* ================= 7 ================= */}
+
+## 7. The same line in other systems
+
+The same structure exists in every system that keeps several versions of a record at once, or that has to free shared data while readers may still be using it. It goes by different names in different systems and papers: the *xmin horizon* in PostgreSQL, the *GC safe point* in TiDB, garbage collection driven by the oldest active transaction in Hekaton (Diaconu et al., 2013), and most often the *low watermark* in work on in-memory MVCC systems (Böttcher et al., 2019).
+
+</section>
+
+<TableSystems />
+
+<section class="col s-db">
+
+The systems in the table are the ones *The anatomy of data languages* sorted into separate categories called file system, database and message queue, though all of them are naming programs working on the same bytes. Their deletion rules are therefore not separately invented mechanisms but answers to the same problem at different depths. Every one of them asks the same question: which is the oldest active reader? What differs is what counts as a reader. A good share of horizon problems in practice come from components the operator doesn't think of as readers: a replication slot whose consumer is gone, a `PREPARE TRANSACTION` abandoned halfway through a two-phase commit, a long-running backup. None of them shows up in `pg_stat_activity` as a long-running query.
+
+In Cassandra the structure takes a different form. What delays the reclamation of a tombstone is not a reader but a **replica** that has not yet received the deletion. If the tombstone is removed before every replica has been brought in line by repair, the replica that missed the deletion still holds the old data, and at the next synchronisation the deleted record reappears. This is known as *data resurrection*. The structure is the same again: a record declared invalid can't be reclaimed until the last party that hasn't heard of it has.
+
+</section>
+
+{/* ================= 8 ================= */}
+<section class="col s-cost">
+
+## 8. Who pays
+
+When a reader holds the horizon back, the system has three options, and each puts the cost on a different party.
+
+**Blocking the deletion.** The deletion is not accepted until the reader is done. This is the rule Windows applies to open files. The reader's consistency and the storage are protected; **the writer** pays.
+
+**Deferring reclamation.** The deletion is accepted, but the space isn't reclaimed until the reader is done. This is the rule Linux applies to open files, and PostgreSQL and InnoDB to old versions. Reader and writer are unaffected; **storage** pays.
+
+**Ending the reader.** Past some threshold, old versions are reclaimed in spite of the reader, and a read that needs them fails. Oracle's `ORA-01555: snapshot too old`, raised when undo space runs short, and TiDB's `GC life time is shorter than transaction duration`, raised for a transaction left behind the GC safe point, are both consequences of this rule. Storage and writer are protected; **the reader** pays.
+
+</section>
+
+<ThreeCosts />
+
+<section class="col s-cost">
+
+Oracle offers the choice as a configuration setting. With `RETENTION GUARANTEE` enabled on the undo tablespace, undo within `UNDO_RETENTION` is never overwritten; when undo space runs out, new DML starts failing instead (usually with `ORA-30036`). The cost moves from the reader to the writer. The three options are alternatives within a single system: the cost can't be removed, only moved from one party to another.
+
+The same dilemma comes back when long reads are sent to a replica. In PostgreSQL, with `hot_standby_feedback` off, if a cleanup record from the primary would remove versions a running query still needs, the standby waits for `max_standby_streaming_delay` and then cancels the query (`canceling statement due to conflict with recovery`); the reader pays. With it on, the standby reports its oldest snapshot to the primary and holds back the primary's horizon; the primary's storage pays. Moving the reader to another server doesn't move the horizon.
+
+</section>
+
+{/* ================= 9 ================= */}
+<section class="col s-pole">
+
+## 9. Observed and declared horizons
+
+Systems also split into two groups by how they set the horizon.
+
+**An observed horizon.** The system tracks the active readers and computes the horizon from the oldest one that actually exists. PostgreSQL, InnoDB and RCU are in this group. The approach guarantees correctness: no reader ever meets a version reclaimed before it was done. In exchange there is no upper bound on storage; a single reader can hold the horizon back indefinitely.
+
+**A declared horizon.** The system doesn't track readers; it defines a fixed retention period instead. Cassandra's `gc_grace_seconds` (by default 864,000 seconds, or 10 days), Delta Lake's default 7-day retention for `VACUUM` (`delta.deletedFileRetentionDuration`), Iceberg's default 5-day snapshot age (`history.expire.max-snapshot-age-ms`) and Kafka's default 7-day `retention.ms` are in this group. The approach gives a predictable upper bound on storage, but makes correctness depend on every reader and replica keeping to the period. A Cassandra replica that stays down longer than `gc_grace_seconds` without being repaired can bring deleted data back. A Delta Lake `VACUUM` run with less than the retention period can break queries reading old files or concurrent writers, which is why Delta Lake refuses such a run by default (`spark.databricks.delta.retentionDurationCheck.enabled`).
+
+**A hybrid.** Some systems combine the two: they observe readers, but cap how long they will wait. Before TiDB 6.1, open transactions did not affect the GC safe point at all; the horizon was set only by the declared `tidb_gc_life_time` period (10 minutes, both the default and the minimum). Since 6.1 open transactions can hold the safe point back, but for at most `tidb_gc_max_wait_time`; once that is exceeded, the safe point is forced forward. Up to the cap the observed horizon protects correctness; the cap protects storage. A reader past the cap pays, as it would under a declared horizon.
+
+This split is the architectural counterpart of the choice of who pays. An observed horizon puts the cost on storage; a declared one, on the reader who doesn't keep to the contract.
+
+{/* ================= 10 ================= */}
+
+## 10. Three poles, three rules for deletion
+
+[*The anatomy of data languages*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html) defined system categories not as sharp classes but as three ideal poles between which real systems sit: the ideal file system, which keeps naming to a minimum; the ideal database, which takes naming to its maximum and promises strict consistency; and the ideal message queue, which ties naming to time. Rules for reclamation map onto the three poles one to one.
+
+- **The ideal file system doesn't wait for readers.** The promise it makes them is weak; space is free the moment it is declared invalid. FAT32 and NTFS sit near this pole.
+- **The ideal database observes its readers.** Because every reader is promised a consistent snapshot, the horizon is computed from the actual readers. PostgreSQL and InnoDB sit near this pole.
+- **The ideal message queue declares a period.** Because the meaning of the data lies in the interval between production and consumption, reclamation is tied to time, not to readers. In Kafka, segments past `retention.ms` are deleted whether or not consumers have read them; a consumer left behind gets an error saying its position no longer exists (`OFFSET_OUT_OF_RANGE`) and carries on from the earliest or the latest record, depending on `auto.offset.reset`.
+
+</section>
+
+<ThreePoles />
+
+<section class="col s-pole">
+
+Real systems sit between the poles, and their reclamation rules follow their positions. Linux waiting for readers of open files is a step from the file-system pole toward the database. Cassandra and Delta Lake, though they call themselves databases, follow the queue pole's rule in reclamation: they declare a period. TiDB's change in 6.1 can be read as the same system moving from that pole toward the database. SQLite in WAL mode follows the database pole's rule inside a single file: an open read transaction keeps a checkpoint from resetting the WAL file, and in a system that always has readers the WAL file can grow without bound.
+
+*The anatomy of data languages* proposed replacing the question "is this a database?" with "how deeply does it name the bytes, and what does it promise those names?". Reclamation is the most concrete measure of the second half of that question: what a system promises its readers decides when it can let go of deleted bytes.
+
+</section>
+
+{/* ================= 11 ================= */}
+<section class="col s-db">
+
+## 11. A passing cause, a lasting effect
+
+When the transaction holding the horizon back closes, the horizon moves and the next vacuum pass cleans up the accumulated dead versions. But that doesn't reduce the space the table takes on disk.
+
+In PostgreSQL, vacuum doesn't return the space it reclaims to the operating system; it only marks it reusable within the table's pages. The file can only shrink by completely empty pages at the end of the table. The table in the example still takes about 210 GB after the dead versions are cleaned up, and sequential scans go on reading those pages. Really getting the space back takes `VACUUM FULL` (which rewrites the table and holds an `ACCESS EXCLUSIVE` lock throughout) or a tool such as `pg_repack`. `pg_repack` rewrites the table online and takes the exclusive lock only briefly at the start and the end; in exchange it needs free disk space of about twice the size of the table and its indexes.
+
+Nor is the effect confined to the table:
+
+- **Indexes** grow with entries pointing to dead versions, and the same query reads more pages.
+- **HOT (heap-only tuple) updates** become rarer. When pages have no free space left, updates have to rewrite the indexes too, and growth speeds up.
+- **Freezing** depends on the same horizon. If it stays put long enough, protection against transaction ID wraparound kicks in. First come aggressive freezing passes and warnings; in the worst case the database refuses commands that need a new transaction ID. Read-only queries keep working, but writes stop.
+
+So watching the horizon is not the same as watching for long-running queries. When the long read ends, the cause is gone, but the effect remains.
+
+## 12. Diagnosis and prevention
+
+To find what is holding the horizon back in PostgreSQL, every source that counts as a reader has to be checked separately:
+
+```sql
+-- Open transactions
+SELECT pid, usename, state, xact_start, age(backend_xmin) AS xmin_age
+FROM pg_stat_activity
+WHERE backend_xmin IS NOT NULL
+ORDER BY age(backend_xmin) DESC;
+
+-- Replication slots (including inactive ones)
+SELECT slot_name, active, xmin, catalog_xmin
+FROM pg_replication_slots;
+
+-- Prepared transactions
+SELECT gid, prepared, owner FROM pg_prepared_xacts;
+
+-- Standbys sending feedback
+SELECT application_name, backend_xmin FROM pg_stat_replication;
+```
+
+In InnoDB the corresponding indicator is the *History list length* in the output of `SHOW ENGINE INNODB STATUS`. A value that keeps rising means purge is being held back by a read view.
+
+In a system with an observed horizon, the basic remedy is to limit how long readers can last; that is, to apply the declared-horizon approach on the reader's side. In PostgreSQL the relevant settings are:
+
+- `idle_in_transaction_session_timeout`: ends open transactions that sit idle after a set time. It directly prevents an idle transaction from pinning the horizon for hours.
+- `transaction_timeout` (PostgreSQL 17 and later): limits the total duration of a transaction.
+- `statement_timeout`: limits the duration of a single statement; it doesn't cover transactions sitting idle.
+
+Replication slots whose consumers are gone also have to be watched and dropped; slots are not removed together with their consumers.
+
+All of these measures move part of the cost from storage to the reader. Here too the cost can't be removed; only who bears it can be decided in advance.
+
+</section>
+
+{/* ================= 13 ================= */}
+<section class="col s-close">
+
+## 13. Objections and limits
+
+1. **Long reads are legitimate.** Month-end reports, backups and the initial copy of logical replication can take hours. The problem is not long reads themselves but that their effect on storage mostly stays invisible.
+2. **Comparing systems hides differences of scale.** A grace period in RCU is measured in microseconds, `gc_grace_seconds` in Cassandra in days; in one the reader is a CPU, in the other a replica. The resemblance is not an equivalence but the same structure recurring at different scales.
+3. **File systems fit the structure only partly.** In FAT32 and NTFS reclamation depends on no reader; whether data is physically gone depends only on overwriting. Reclamation that waits for a reader appears in file systems only in limited cases such as POSIX `unlink` semantics. File systems are therefore not an equivalent of databases but the plainest example of the split between the two events. The partial fit agrees with the spectrum in *The anatomy of data languages*: file systems sit near the pole that promises its readers least, so they are the systems that apply reader-dependent reclamation least.
+4. **Matching the poles is not deriving from them.** That reclamation rules map onto the three poles doesn't mean the rules can be derived from the poles. As the limits section of *The anatomy of data languages* noted, the naming framework doesn't explain performance characteristics; two systems near the same pole can have very different reclamation costs depending on their storage structures.
+5. **Defaults depend on the version.** Parameter names, defaults and error messages change from version to version; the values given here are based on documentation current as of October 2026.
+
+## 14. Conclusion
+
+In storage systems, deletion consists of two separate events: declaring a record invalid and reclaiming its space. In file systems the second event mostly depends on no reader. In multi-version databases it depends on the oldest snapshot still in use, and that line is called the vacuum horizon.
+
+Because the horizon is a minimum, it is set by the longest-running reader. When a reader holds it back, the cost falls on the writer, on storage or on the reader. Which one bears it is a design decision; if the decision isn't made explicitly, the system's default stands.
+
+*The anatomy of data languages* argued that on a disk there are only bytes, and that file, row and message are names given to those bytes. Deletion is the other side of that thesis: withdrawing a name is instant; freeing the bytes depends on the promise the naming program has made to its readers. The difference of degree between a file system and a database shows most clearly in that promise.
+
+Deletion is two events: the one who deletes decides the first, the oldest active reader decides the second.
+
+</section>
+
+{/* ================= sources ================= */}
+<section class="col refs">
+
+<h2>Sources</h2>
+
+### On this blog
+
+- [*The anatomy of data languages: bytes, names and a spectrum*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html), 8 August 2026.
+
+### File systems
+
+- Microsoft Corporation, *Microsoft Extensible Firmware Initiative FAT32 File System Specification*, version 1.03, 6 December 2000.
+- Brian Carrier, *File System Forensic Analysis*, Addison-Wesley, 2005.
+- Christopher King and Timothy Vidas, "Empirical Analysis of Solid State Disk Data Retention When Used with Contemporary Operating Systems", *Digital Investigation* 8, S111–S117, 2011 (DFRWS 2011).
+- IEEE Std 1003.1 (POSIX), `unlink()`; the Linux `unlink(2)` and `lsof(8)` manual pages.
+
+### Multi-version concurrency control
+
+- David P. Reed, *Naming and Synchronization in a Decentralized Computer System*, PhD thesis, MIT, 1978; MIT/LCS/TR-205.
+- Philip A. Bernstein and Nathan Goodman, [Multiversion Concurrency Control — Theory and Algorithms](https://doi.org/10.1145/319996.319998), *ACM Transactions on Database Systems*, 8(4), 465–483, 1983.
+- Michael Stonebraker, "The Design of the POSTGRES Storage System", *VLDB*, 289–300, 1987. [Technical report UCB/ERL M87/6](https://dsf.berkeley.edu/papers/ERL-M87-06.pdf).
+- Yingjun Wu, Joy Arulraj, Jiexi Lin, Ran Xian and Andrew Pavlo, [An Empirical Evaluation of In-Memory Multi-Version Concurrency Control](https://doi.org/10.14778/3067421.3067427), *PVLDB*, 10(7), 781–792, 2017.
+- Cristian Diaconu et al., [Hekaton: SQL Server's Memory-Optimized OLTP Engine](https://doi.org/10.1145/2463676.2463710), *SIGMOD*, 2013.
+- Jan Böttcher, Viktor Leis, Thomas Neumann and Alfons Kemper, [Scalable Garbage Collection for In-Memory MVCC Systems](https://doi.org/10.14778/3364324.3364328), *PVLDB*, 13(2), 2019.
+
+### Memory reclamation
+
+- Paul E. McKenney and John D. Slingwine, "Read-Copy Update: Using Execution History to Solve Concurrency Problems", *PDCS*, 509–518, 1998.
+- Maged M. Michael, [Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects](https://doi.org/10.1109/TPDS.2004.8), *IEEE Transactions on Parallel and Distributed Systems*, 15(6), 491–504, 2004.
+- Keir Fraser, [*Practical Lock-Freedom*](https://doi.org/10.48456/tr-579), PhD thesis, University of Cambridge, 2003; Technical Report UCAM-CL-TR-579, February 2004.
+
+### Product documentation
+
+- PostgreSQL documentation, *Routine Vacuuming*; `hot_standby_feedback`, `idle_in_transaction_session_timeout`, `transaction_timeout`.
+- MySQL documentation, *InnoDB Multi-Versioning*; *Purge Configuration*.
+- Oracle documentation, *Managing Undo*; `UNDO_RETENTION`, `RETENTION GUARANTEE`; ORA-01555, ORA-30036.
+- Apache Cassandra documentation, *Compaction*; *Tombstones*; `gc_grace_seconds`.
+- TiDB documentation, *GC Overview*; *GC Configuration*; `tidb_gc_life_time`, `tidb_gc_max_wait_time`.
+- CockroachDB documentation, *Configure Replication Zones*; `gc.ttlseconds`.
+- Delta Lake documentation, *Remove files no longer referenced by a Delta table*.
+- Apache Iceberg documentation, *Configuration*; `history.expire.max-snapshot-age-ms`.
+- SQLite documentation, *Write-Ahead Logging*; *PRAGMA secure_delete*; *VACUUM*.
+- Apache Kafka documentation, *Topic Configs*, `retention.ms`; *Consumer Configs*, `auto.offset.reset`.
+
+</section>
