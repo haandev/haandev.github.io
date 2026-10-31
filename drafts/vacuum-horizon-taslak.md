@@ -22,7 +22,7 @@ TASLAK v3: yarı akademik dil. Benzetme yok; terimler ilk geçtikleri yerde tan�
 <div class="oz">
 <span class="lbl">Öz</span>
 
-Depolama sistemlerinde silme, tek bir işlem gibi görünse de iki ayrı olaydan oluşur: kaydın *geçersiz ilan edilmesi* ve kapladığı alanın *geri kazanılması*. Dosya sistemlerinde (FAT32, NTFS) iki olay arasındaki aralık herhangi bir okuyucuya bağlı değildir; alan anında serbest kalır, verinin fiziksel olarak ortadan kalkması üzerine yeni veri yazılmasına bağlıdır. Çok sürümlü veritabanlarında ise geri kazanım, hâlâ kullanımda olan en eski anlık görüntüye (snapshot) bağlıdır. Bu sınıra *vacuum horizon* denir. Aynı sınır farklı sistemlerde farklı adlarla bulunur; bir okuyucu onu geride tuttuğunda maliyet yazıcıya, depolamaya ya da okuyucuya yüklenir; sınır ise ya aktif okuyucular gözlenerek ya da bir saklama süresi ilan edilerek belirlenir. Kavram yeni değildir; çok sürümlü eşzamanlılık denetimi (Reed, 1978; Bernstein ve Goodman, 1983) ve bellek geri kazanımı (McKenney ve Slingwine, 1998) literatürünün ortak bir yapısıdır; dosya sistemlerinden dağıtık veritabanlarına kadar aynı biçimde tekrarlanır.
+Depolama sistemlerinde silme, tek bir işlem gibi görünse de iki ayrı olaydan oluşur: kaydın *geçersiz ilan edilmesi* ve kapladığı alanın *geri kazanılması*. Dosya sistemlerinde (FAT32, NTFS) iki olay arasındaki aralık herhangi bir okuyucuya bağlı değildir; alan anında serbest kalır, verinin fiziksel olarak ortadan kalkması üzerine yeni veri yazılmasına bağlıdır. Çok sürümlü veritabanlarında ise geri kazanım, hâlâ kullanımda olan en eski anlık görüntüye (snapshot) bağlıdır. Bu sınıra *vacuum horizon* denir. Aynı sınır farklı sistemlerde farklı adlarla bulunur; bir okuyucu onu geride tuttuğunda maliyet yazıcıya, depolamaya ya da okuyucuya yüklenir; sınır ise ya aktif okuyucular gözlenerek ya da bir saklama süresi ilan edilerek belirlenir. Kavram yeni değildir; çok sürümlü eşzamanlılık denetimi (Reed, 1978; Bernstein ve Goodman, 1983) ve bellek geri kazanımı (McKenney ve Slingwine, 1998) literatürünün ortak bir yapısıdır; dosya sistemlerinden dağıtık veritabanlarına kadar aynı biçimde tekrarlanır. Bu tekrar, [*Veri dillerinin anatomisi*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html) yazısında savunulan bir tezin silme tarafındaki karşılığıdır: dosya sistemi ile veritabanı arasındaki fark bir tür farkı değil, baytlara verilen isimlerin derinliği ve o isimlere verilen vaadin gücü bakımından bir derece farkıdır.
 
 </div>
 
@@ -33,7 +33,7 @@ Bir depolama sisteminde silme işlemi iki olaydan oluşur:
 1. **Geçersiz ilan etme.** Sistem, kaydın artık geçerli olmadığını kendi meta verisine işler. Bu bir yazma işlemidir, anında gerçekleşir ve maliyeti düşüktür.
 2. **Geri kazanım.** Kaydın kapladığı alan yeniden kullanıma açılır ve zamanla üzerine yeni veri yazılır. Bu olay ilkinden sonra, kimi zaman çok daha sonra gerçekleşir.
 
-İki olay arasındaki aralıkta kayıt, sistemin mantıksal görünümünde yoktur ama fiziksel olarak hâlâ mevcuttur. Bu aralığın ne kadar süreceğini belirleyen kural sistemden sisteme değişir.
+İki olay arasındaki aralıkta kayıt, sistemin mantıksal görünümünde yoktur ama fiziksel olarak hâlâ mevcuttur. Bu ayrım, [*Veri dillerinin anatomisi*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html) yazısındaki temel ayrımın doğrudan bir sonucudur: diskte yalnızca baytlar vardır; dosya, satır, document ve mesaj, o baytlara bakan programların verdiği isimlerdir. Bu çerçevede geçersiz ilan etme, baytlara verilmiş bir ismin geri çekilmesidir; geri kazanım ise baytların kendisiyle ilgilidir. İsim anında geri çekilebilir, baytların ne zaman serbest kalacağını ise isimlendiren programın okuyucularına verdiği vaat belirler. Bu aralığın ne kadar süreceğini belirleyen kural sistemden sisteme değişir.
 
 [Şekil: İkiOlay — bir kaydın zaman çizgisi: yazıldı → geçersiz ilan edildi → alan serbest bırakıldı → üzerine yeni veri yazıldı. Geçersiz ilan etme ile fiziksel yok oluş arasındaki aralık taralı.]
 
@@ -43,7 +43,7 @@ FAT32'de bir dizin, içerdiği dosyaların kayıtlarını tutan bir tablodur. Bi
 
 NTFS'te her dosyanın Master File Table (MFT) içinde bir kaydı vardır. Silme işlemi bu kaydın "kullanımda" bayrağını kaldırır ve dosyanın kümelerini `$Bitmap` içinde serbest olarak işaretler. İçerik yine diskte kalır.
 
-Adli bilişimde silinen dosyaların kurtarılabilmesi bu ayrıma dayanır: kurtarma araçları geçersiz ilan edilmiş meta veri kayıtlarını okur ve henüz üzerine yazılmamış kümelerden içeriği yeniden oluşturur (Carrier, 2005). İçeriğin fiziksel olarak ortadan kalkması, ilgili kümelere yeni veri yazılmasıyla gerçekleşir.
+Adli bilişimde silinen dosyaların kurtarılabilmesi bu ayrıma dayanır: kurtarma araçları geçersiz ilan edilmiş meta veri kayıtlarını okur ve henüz üzerine yazılmamış kümelerden içeriği yeniden oluşturur (Carrier, 2005). İçeriğin fiziksel olarak ortadan kalkması, ilgili kümelere yeni veri yazılmasıyla gerçekleşir. Önceki yazıda veri kurtarma için yapılan gözlem burada da geçerlidir: "dosya silindi" ifadesi, bayt düzeyinde "isimlendirme programı bu baytlara artık bir isim vermiyor" anlamına gelir; baytlar yerinde durur.
 
 SSD'lerde süreç bir katman daha içerir. İşletim sistemi TRIM komutuyla serbest kalan blokları depolama birimine bildirir; birimin denetleyicisi bu blokları kendi çöp toplama süreciyle silinmiş duruma getirir. TRIM uygulanmış bloklardan veri kurtarmak çoğu durumda mümkün değildir.
 
@@ -57,7 +57,7 @@ Sonuç olarak Linux'ta açık bir dosya silindiğinde dosya dizinden kaybolur, a
 
 Windows aynı durumda farklı bir kural uygular: bir dosya `FILE_SHARE_DELETE` izni verilmeden açılmışsa silme işlemi reddedilir.
 
-Linux silme işlemini kabul eder ve geri kazanımı okuyucunun bitmesine erteler; Windows ise silme işlemini okuyucu bitene kadar engeller. Her iki durumda da **geri kazanım artık bir okuyucuya bağlıdır.** Dosya sistemlerinde istisna olan bu durum, çok sürümlü veritabanlarında genel kuraldır.
+Linux silme işlemini kabul eder ve geri kazanımı okuyucunun bitmesine erteler; Windows ise silme işlemini okuyucu bitene kadar engeller. Her iki durumda da **geri kazanım artık bir okuyucuya bağlıdır.** Dosya sistemlerinde istisna olan bu durum, çok sürümlü veritabanlarında genel kuraldır. Önceki yazıdaki spektrum açısından bu fark beklenen bir sonuçtur: dosya sistemi okuyucularına zayıf bir tutarlılık vaadi verir ve bu nedenle onları beklemek zorunda değildir; veritabanı ise her okuyucuya tutarlı bir görüntü vaat eder ve bu vaadin bedeli, geri kazanımın okuyucuya bağlanmasıdır.
 
 ## 4. Çok sürümlü eşzamanlılık denetimi
 
@@ -66,6 +66,8 @@ Linux silme işlemini kabul eder ve geri kazanımı okuyucunun bitmesine erteler
 Bu nedenle MVCC kullanan bir veritabanında her güncelleme ve silme, geçersiz ilan edilmiş ancak henüz geri kazanılamayan bir sürüm bırakır. PostgreSQL bu sürümlere *dead tuple*, InnoDB *undo kaydı*, Cassandra *tombstone* der. Bu sürümleri temizleyen süreç PostgreSQL'de **vacuum** olarak adlandırılır.
 
 Terimin kökeni Stonebraker'ın (1987) POSTGRES depolama sistemi tasarımına uzanır. Bu tasarımda kayıtların üzerine yazılmıyor, eski sürümler "vacuum cleaner" adlı bir süreç tarafından arşiv depolamaya taşınıyordu. Amaç geçmişi silmek değil, geçmiş sürümler üzerinde sorgulama (*time travel*) yapabilmekti. Sonraki PostgreSQL sürümlerinde bu özellik kaldırıldı ve vacuum, eski sürümleri arşive taşımak yerine alanlarını geri kazanan bir sürece dönüştü.
+
+Aynı ayrım, önceki yazıda özyinelemeli yorum yığınının örneği olarak kullanılan SQLite'ta iki katmanda birden görülür. SQLite veritabanı, dosya sisteminin gözünden tek bir dosyadır; içeriden bakıldığında ise tablolar ve satırlar içerir. SQLite'ta bir satır silindiğinde satırın baytları dosyadan kaldırılmaz; ilgili alan sayfa içinde boş olarak işaretlenir, tamamen boşalan sayfalar ise dosya içindeki serbest sayfa listesine (freelist) eklenir. Yapı, FAT32'nin dizin kaydını işaretleyip kümeleri serbest bırakmasıyla aynıdır; yalnızca bir katman yukarıda, bir dosyanın içinde gerçekleşir. `PRAGMA secure_delete` etkinleştirilmedikçe silinen içerik dosyada kalır ve dosya boyutu ancak SQLite'ın kendi `VACUUM` komutu dosyayı yeniden yazdığında küçülür.
 
 ## 5. Vacuum horizon
 
@@ -108,6 +110,8 @@ Aynı yapı, bir kaydın birden fazla sürümünü aynı anda tutan ya da payla�
 | Sistem | Terim | Okuyucu olarak sayılanlar |
 |---|---|---|
 | Linux (POSIX) | açık dosya tanıtıcısı | Dosyayı açık tutan süreçler |
+| SQLite (WAL kipi) | checkpoint | WAL dosyasındaki kayıtlara ihtiyaç duyan açık okuma transaction'ları |
+| Kafka | log retention (`retention.ms`) | Hiçbiri: süre dolduğunda segment, tüketicilerin konumundan bağımsız olarak silinir |
 | PostgreSQL | xmin horizon, *removable cutoff* | Açık transaction'lar, `hot_standby_feedback` gönderen standby'lar, replication slot'lar, hazırlanmış transaction'lar |
 | MySQL InnoDB | purge, *read view* | Açık read view'lar |
 | Oracle | undo retention | Uzun süreli sorgular |
@@ -118,7 +122,7 @@ Aynı yapı, bir kaydın birden fazla sürümünü aynı anda tutan ya da payla�
 | Linux çekirdeği (RCU) | grace period | Read-side kritik bölgedeki işlemciler |
 | Kilitsiz veri yapıları | epoch, hazard pointer | Belleğe referans tutan thread'ler |
 
-Tüm sistemlerde sorulan soru aynıdır: en eski aktif okuyucu hangisidir? Sistemler arasındaki fark, neyin okuyucu olarak sayıldığındadır. Pratikteki horizon sorunlarının önemli bir kısmı, işletenin okuyucu olarak tanımadığı bileşenlerden kaynaklanır: tüketicisi kaldırılmış bir replication slot, iki aşamalı commit'in ortasında bırakılmış bir `PREPARE TRANSACTION` ya da uzun süreli bir yedekleme işlemi. Bunların hiçbiri `pg_stat_activity` içinde uzun süreli bir sorgu olarak görünmez.
+Tablodaki sistemler, önceki yazıda dosya sistemi, veritabanı ve mesaj kuyruğu adlarıyla ayrı kategorilere yerleştirilen ama aynı baytlar üzerinde çalışan isimlendirme programlarıdır. Silme kuralları da bu nedenle ayrı ayrı icat edilmiş mekanizmalar değil, aynı sorunun farklı derinliklerdeki çözümleridir. Tüm sistemlerde sorulan soru aynıdır: en eski aktif okuyucu hangisidir? Sistemler arasındaki fark, neyin okuyucu olarak sayıldığındadır. Pratikteki horizon sorunlarının önemli bir kısmı, işletenin okuyucu olarak tanımadığı bileşenlerden kaynaklanır: tüketicisi kaldırılmış bir replication slot, iki aşamalı commit'in ortasında bırakılmış bir `PREPARE TRANSACTION` ya da uzun süreli bir yedekleme işlemi. Bunların hiçbiri `pg_stat_activity` içinde uzun süreli bir sorgu olarak görünmez.
 
 Cassandra'da yapı farklı bir biçim alır. Tombstone'un geri kazanımını geciktiren bir okuyucu değil, silme işlemini henüz almamış bir **replikadır**. Tombstone, bütün replikalar onarım (repair) ile eşitlenmeden kaldırılırsa, silme işlemini almamış replika eski veriyi hâlâ taşıdığı için bir sonraki eşitlemede silinmiş kayıt yeniden görünür hâle gelir. Literatürde bu durum *data resurrection* olarak adlandırılır. Yapı yine aynıdır: geçersiz ilan edilmiş bir kayıt, bu bilgiyi henüz almamış son taraf da onu alana kadar geri kazanılamaz.
 
@@ -148,7 +152,21 @@ Sistemler, horizon'u belirleme biçimlerine göre de iki gruba ayrılır.
 
 Bu ayrım, maliyetin dağılımına ilişkin seçimin mimari düzeydeki karşılığıdır. Gözlenen horizon maliyeti depolamaya, ilan edilen horizon ise sözleşmeye uymayan okuyucuya yükler.
 
-## 10. Geçici neden, kalıcı etki
+## 10. Üç kutup, üç silme kuralı
+
+[*Veri dillerinin anatomisi*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html) yazısı, sistem kategorilerini kesin sınıflar olarak değil, gerçek sistemlerin arasında konumlandığı üç ideal kutup olarak tanımlıyordu: isimlendirmeyi asgaride tutan ideal dosya sistemi, isimlendirmeyi azamiye çıkaran ve katı tutarlılık vaat eden ideal veritabanı ve isimlendirmeyi zamana bağlayan ideal mesaj kuyruğu. Geri kazanım kuralları bu üç kutupla birebir örtüşür.
+
+- **İdeal dosya sistemi okuyucuyu beklemez.** Okuyuculara verilen vaat zayıftır; alan geçersiz ilan edildiği anda serbest kalır. FAT32 ve NTFS bu kutba yakındır.
+- **İdeal veritabanı okuyucuyu gözler.** Her okuyucuya tutarlı bir anlık görüntü vaat edildiği için horizon gerçek okuyuculardan hesaplanır. PostgreSQL ve InnoDB bu kutba yakındır.
+- **İdeal mesaj kuyruğu süre ilan eder.** Verinin anlamı üretim ile tüketim arasındaki aralıkta bulunduğu için geri kazanım okuyucuya değil zamana bağlanır. Kafka'da `retention.ms` süresi dolan segmentler, tüketiciler onları okumuş olsun olmasın silinir; geride kalan bir tüketici, konumunun artık mevcut olmadığını bildiren bir hatayla karşılaşır.
+
+Gerçek sistemler bu kutupların arasında durur ve geri kazanım kuralları da konumlarını izler. Linux'un açık dosyalar için okuyucuyu beklemesi, dosya sistemi kutbundan veritabanına doğru bir adımdır. Cassandra, TiDB ve Delta Lake, veritabanı olarak adlandırılmalarına rağmen geri kazanımda mesaj kuyruğu kutbunun kuralını, yani süre ilan etmeyi uygular. SQLite'ın WAL kipi ise tek bir dosya içinde veritabanı kutbunun kuralını uygular: açık bir okuma transaction'ı checkpoint'in WAL dosyasını sıfırlamasını engeller ve sürekli okuyucuların bulunduğu bir sistemde WAL dosyası sınırsız büyüyebilir.
+
+Önceki yazıda "Bu bir veritabanı mıdır?" sorusunun yerine "baytlara ne derinlikte isim veriyor ve o isimlere ne vaat ediyor?" sorusu önerilmişti. Geri kazanım, bu sorunun ikinci yarısının en somut ölçüsüdür: bir sistemin okuyucularına ne vaat ettiği, silinmiş baytları ne zaman bırakabileceğini belirler.
+
+[Şekil: ÜçKutup — önceki yazıdaki üç kutuplu spektrum şeması; köşelerde "beklemez", "gözler", "süre ilan eder"; içeride FAT32, NTFS, Linux, SQLite, PostgreSQL, InnoDB, Cassandra, Delta Lake, TiDB ve Kafka'nın konumları.]
+
+## 11. Geçici neden, kalıcı etki
 
 Horizon'u geride tutan transaction kapandığında horizon ilerler ve bir sonraki vacuum geçişi biriken ölü sürümleri temizler. Ancak bu, tablonun diskte kapladığı alanı azaltmaz.
 
@@ -162,7 +180,7 @@ Etki tabloyla da sınırlı değildir:
 
 Bu nedenle horizon'un izlenmesi, uzun süreli sorguların izlenmesiyle eşdeğer değildir. Uzun süreli okuma sona erdiğinde nedeni ortadan kalkar, ancak etkisi devam eder.
 
-## 11. Teşhis ve önlem
+## 12. Teşhis ve önlem
 
 PostgreSQL'de horizon'u geride tutan bileşeni bulmak için okuyucu olarak sayılan her kaynağın ayrı ayrı incelenmesi gerekir:
 
@@ -196,24 +214,31 @@ Bunlara ek olarak, tüketicisi kaldırılmış replication slot'ların izlenmesi
 
 Bu önlemlerin tümü, maliyetin bir kısmını depolamadan okuyucuya aktarır. Maliyet burada da ortadan kaldırılamaz, yalnızca hangi tarafın üstleneceği önceden belirlenebilir.
 
-## 12. İtirazlar ve sınırlar
+## 13. İtirazlar ve sınırlar
 
 1. **Uzun süreli okumalar meşrudur.** Ay sonu raporları, yedeklemeler ve mantıksal replikasyonun ilk kopyalama aşaması saatler sürebilir. Sorun uzun süreli okumaların kendisi değil, depolama üzerindeki etkilerinin çoğunlukla görünmez kalmasıdır.
 2. **Sistemler arası karşılaştırma ölçek farklarını gizler.** RCU'da grace period mikrosaniyeler, Cassandra'da `gc_grace_seconds` günler mertebesindedir; birinde okuyucu bir işlemci, diğerinde bir replikadır. Benzerlik bir eşdeğerlik değil, aynı yapının farklı ölçeklerde tekrarıdır.
-3. **Dosya sistemleri yapıya kısmen uyar.** FAT32 ve NTFS'te geri kazanım hiçbir okuyucuya bağlı değildir; verinin fiziksel olarak ortadan kalkması yalnızca üzerine yazılmaya bağlıdır. Okuyucuya bağlı geri kazanım, dosya sistemlerinde POSIX `unlink` semantiği gibi sınırlı durumlarda ortaya çıkar. Dosya sistemleri bu nedenle veritabanlarının bir eşdeğeri değil, iki olay arasındaki ayrımın en yalın örneğidir.
-4. **Varsayılan değerler sürüme bağlıdır.** Parametre adları, varsayılan değerler ve hata mesajları sürümden sürüme değişebilir; verilen değerler Ekim 2026 itibarıyla geçerli belgelere dayanır.
+3. **Dosya sistemleri yapıya kısmen uyar.** FAT32 ve NTFS'te geri kazanım hiçbir okuyucuya bağlı değildir; verinin fiziksel olarak ortadan kalkması yalnızca üzerine yazılmaya bağlıdır. Okuyucuya bağlı geri kazanım, dosya sistemlerinde POSIX `unlink` semantiği gibi sınırlı durumlarda ortaya çıkar. Dosya sistemleri bu nedenle veritabanlarının bir eşdeğeri değil, iki olay arasındaki ayrımın en yalın örneğidir. Bu kısmi uyum, önceki yazıdaki spektrum çerçevesiyle tutarlıdır: dosya sistemleri, okuyucularına en az vaat eden kutba yakın durdukları için okuyucuya bağlı geri kazanımı en az uygulayan sistemlerdir.
+4. **Kutuplarla örtüşme bir türetme değildir.** Geri kazanım kurallarının üç kutupla örtüşmesi, kuralların kutuplardan türetilebileceği anlamına gelmez. Önceki yazının sınırlar bölümünde belirtildiği gibi, isimlendirme çerçevesi performans karakteristiklerini açıklamaz; aynı kutba yakın iki sistem, depolama yapılarına bağlı olarak çok farklı geri kazanım maliyetlerine sahip olabilir.
+5. **Varsayılan değerler sürüme bağlıdır.** Parametre adları, varsayılan değerler ve hata mesajları sürümden sürüme değişebilir; verilen değerler Ekim 2026 itibarıyla geçerli belgelere dayanır.
 
-## 13. Sonuç
+## 14. Sonuç
 
 Depolama sistemlerinde silme, kaydın geçersiz ilan edilmesi ve alanının geri kazanılması olmak üzere iki ayrı olaydan oluşur. Dosya sistemlerinde ikinci olay çoğunlukla hiçbir okuyucuya bağlı değildir. Çok sürümlü veritabanlarında ise hâlâ kullanımda olan en eski anlık görüntüye bağlıdır ve bu sınır vacuum horizon olarak adlandırılır.
 
 Horizon bir minimum olduğu için en uzun süreli okuyucu tarafından belirlenir. Bir okuyucu horizon'u geride tuttuğunda maliyet yazıcıya, depolamaya ya da okuyucuya yüklenir. Hangi tarafın üstleneceği bir tasarım kararıdır; karar açıkça verilmemişse sistemin varsayılanı geçerli olur.
+
+Önceki yazı, diskte yalnızca baytlar bulunduğunu ve dosya, satır ve mesajın o baytlara verilen isimler olduğunu savunuyordu. Silme bu tezin öbür yüzüdür: bir ismi geri çekmek anlıktır; baytları serbest bırakmak ise isimlendiren programın okuyucularına verdiği vaade bağlıdır. Dosya sistemi ile veritabanı arasındaki derece farkı, en açık biçimde bu vaatte görülür.
 
 Silme iki olaydır: birincisine silen karar verir, ikincisine en eski aktif okuyucu.
 
 ---
 
 ## Kaynakça
+
+### Bu blogda
+
+- [*Veri dillerinin anatomisi: bayt, isim ve spektrum*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html), 8 Ağustos 2026.
 
 ### Dosya sistemleri
 
@@ -243,5 +268,7 @@ Silme iki olaydır: birincisine silen karar verir, ikincisine en eski aktif okuy
 15. TiDB belgeleri, *GC Overview*; `tidb_gc_life_time`.
 16. CockroachDB belgeleri, *Configure Replication Zones*; `gc.ttlseconds`.
 17. Delta Lake belgeleri, *Remove files no longer referenced by a Delta table*.
+18. SQLite belgeleri, *Write-Ahead Logging* (checkpoint starvation); *PRAGMA secure_delete*; *VACUUM*.
+19. Apache Kafka belgeleri, *Topic Configs*; `retention.ms`.
 
 <!-- Not: bağlantılar ve sürüm numaraları yayından önce eklenecek ve doğrulanacak. -->
