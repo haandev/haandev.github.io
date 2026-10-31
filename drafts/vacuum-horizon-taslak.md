@@ -22,42 +22,32 @@ TASLAK v3: yarı akademik dil. Benzetme yok; terimler ilk geçtikleri yerde tan�
 <div class="oz">
 <span class="lbl">Öz</span>
 
-Depolama sistemlerinde silme, tek bir işlem gibi görünse de iki ayrı olaydan oluşur: kaydın *geçersiz ilan edilmesi* ve kapladığı alanın *geri kazanılması*. Dosya sistemlerinde (FAT32, NTFS) iki olay arasındaki aralık herhangi bir okuyucuya bağlı değildir; alan anında serbest kalır, verinin fiziksel olarak ortadan kalkması üzerine yeni veri yazılmasına bağlıdır. Çok sürümlü veritabanlarında ise geri kazanım, hâlâ kullanımda olan en eski anlık görüntüye (snapshot) bağlıdır. Bu sınıra *vacuum horizon* denir. Aynı sınır farklı sistemlerde farklı adlarla bulunur; bir okuyucu onu geride tuttuğunda maliyet yazıcıya, depolamaya ya da okuyucuya yüklenir; sınır ise ya aktif okuyucular gözlenerek ya da bir saklama süresi ilan edilerek belirlenir. Kavram yeni değildir; çok sürümlü eşzamanlılık denetimi (Reed, 1978; Bernstein ve Goodman, 1983) ve bellek geri kazanımı (McKenney ve Slingwine, 1998) literatürünün ortak bir yapısıdır; dosya sistemlerinden dağıtık veritabanlarına kadar aynı biçimde tekrarlanır. Bu tekrar, [*Veri dillerinin anatomisi*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html) yazısında savunulan bir tezin silme tarafındaki karşılığıdır: dosya sistemi ile veritabanı arasındaki fark bir tür farkı değil, baytlara verilen isimlerin derinliği ve o isimlere verilen vaadin gücü bakımından bir derece farkıdır.
+Silme iki ayrı olaydır: kaydın *geçersiz ilan edilmesi* ve kapladığı alanın *geri kazanılması*. Dosya sistemlerinde ikinci olay çoğunlukla kimseyi beklemez. Çok sürümlü veritabanlarında ise hâlâ kullanımda olan en eski anlık görüntüye (snapshot) bağlıdır; bu sınıra *vacuum horizon* denir. Aynı sınır farklı sistemlerde farklı adlarla bulunur, onu geride tutan bir okuyucunun maliyeti yazıcıya, depolamaya ya da okuyucuya yüklenir. Kavram, çok sürümlü eşzamanlılık denetimi (Reed, 1978; Bernstein ve Goodman, 1983) ve bellek geri kazanımı (McKenney ve Slingwine, 1998) literatürünün ortak bir yapısıdır ve [*Veri dillerinin anatomisi*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html) yazısındaki tezin silme tarafındaki karşılığıdır: dosya sistemi ile veritabanı arasındaki fark tür değil, derece farkıdır.
 
 </div>
 
 ## 1. Silme ve geri kazanım
 
-Bir depolama sisteminde silme işlemi iki olaydan oluşur:
+Bir depolama sisteminde silme iki olaydan oluşur:
 
-1. **Geçersiz ilan etme.** Sistem, kaydın artık geçerli olmadığını kendi meta verisine işler. Bu bir yazma işlemidir, anında gerçekleşir ve maliyeti düşüktür.
-2. **Geri kazanım.** Kaydın kapladığı alan yeniden kullanıma açılır ve zamanla üzerine yeni veri yazılır. Bu olay ilkinden sonra, kimi zaman çok daha sonra gerçekleşir.
+1. **Geçersiz ilan etme.** Sistem, kaydın artık geçerli olmadığını meta verisine işler. Anında gerçekleşir.
+2. **Geri kazanım.** Kaydın kapladığı alan yeniden kullanıma açılır. İlkinden sonra, kimi zaman çok daha sonra gerçekleşir.
 
-İki olay arasındaki aralıkta kayıt, sistemin mantıksal görünümünde yoktur ama fiziksel olarak hâlâ mevcuttur. Bu ayrım, [*Veri dillerinin anatomisi*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html) yazısındaki temel ayrımın doğrudan bir sonucudur: diskte yalnızca baytlar vardır; dosya, satır, document ve mesaj, o baytlara bakan programların verdiği isimlerdir. Bu çerçevede geçersiz ilan etme, baytlara verilmiş bir ismin geri çekilmesidir; geri kazanım ise baytların kendisiyle ilgilidir. İsim anında geri çekilebilir, baytların ne zaman serbest kalacağını ise isimlendiren programın okuyucularına verdiği vaat belirler. Bu aralığın ne kadar süreceğini belirleyen kural sistemden sisteme değişir.
+[*Veri dillerinin anatomisi*](/posts/anatomy-of-data-languages-bytes-names-and-spectrum.html) yazısının diliyle: diskte yalnızca baytlar vardır, dosya ve satır o baytlara verilen isimlerdir. Geçersiz ilan etme bir ismin geri çekilmesidir ve anlıktır; baytların ne zaman serbest kalacağını ise isimlendiren programın okuyucularına verdiği vaat belirler.
 
 [Şekil: İkiOlay — bir kaydın zaman çizgisi: yazıldı → geçersiz ilan edildi → alan serbest bırakıldı → üzerine yeni veri yazıldı. Geçersiz ilan etme ile fiziksel yok oluş arasındaki aralık taralı.]
 
 ## 2. Dosya sistemlerinde silme
 
-FAT32'de bir dizin, içerdiği dosyaların kayıtlarını tutan bir tablodur. Bir dosya silindiğinde dosya sistemi iki değişiklik yapar: dizin kaydının ilk baytını `0xE5` değeriyle işaretler (Microsoft, 2000) ve dosyanın küme zincirindeki girdileri FAT tablosunda sıfırlayarak serbest bırakır. `0xE5` işareti spesifikasyonda tanımlıdır; zincirin sıfırlanması ise Microsoft'un uygulamasının davranışıdır (Carrier, 2005). Dosyanın içeriği değiştirilmez.
+FAT32'de silinen dosyanın dizin kaydının ilk baytı `0xE5` ile işaretlenir ve kümeleri serbest bırakılır (Microsoft, 2000); NTFS'te MFT kaydının "kullanımda" bayrağı kaldırılır. İki durumda da içerik diskte kalır ve kurtarma araçları bu yüzden çalışır (Carrier, 2005). SSD'lerde TRIM, serbest blokları denetleyiciye bildirir ve kurtarmayı büyük ölçüde imkânsız kılar (King ve Vidas, 2011).
 
-NTFS'te her dosyanın Master File Table (MFT) içinde bir kaydı vardır. Silme işlemi bu kaydın "kullanımda" bayrağını kaldırır ve dosyanın kümelerini `$Bitmap` içinde serbest olarak işaretler. İçerik yine diskte kalır.
-
-Adli bilişimde silinen dosyaların kurtarılabilmesi bu ayrıma dayanır: kurtarma araçları geçersiz ilan edilmiş meta veri kayıtlarını okur ve henüz üzerine yazılmamış kümelerden içeriği yeniden oluşturur (Carrier, 2005). İçeriğin fiziksel olarak ortadan kalkması, ilgili kümelere yeni veri yazılmasıyla gerçekleşir. Önceki yazıda veri kurtarma için yapılan gözlem burada da geçerlidir: "dosya silindi" ifadesi, bayt düzeyinde "isimlendirme programı bu baytlara artık bir isim vermiyor" anlamına gelir; baytlar yerinde durur.
-
-SSD'lerde süreç bir katman daha içerir. İşletim sistemi TRIM komutuyla serbest kalan blokları depolama birimine bildirir; birimin denetleyicisi bu blokları kendi çöp toplama süreciyle silinmiş duruma getirir. TRIM uygulanmış bloklardan veri kurtarmak, denetleyiciye ve zamanlamaya bağlı olarak çoğunlukla imkânsız ya da çok sınırlıdır; on altı sürücü üzerinde yapılan bir ölçümde TRIM etkinken kurtarılabilen blok oranı sürücüye göre yüzde 0 ile yüzde 27 arasında değişmiştir (King ve Vidas, 2011).
-
-Bu sistemlerin ortak özelliği şudur: **alan, geçersiz ilan edildiği anda yeniden kullanılabilir hâle gelir.** Geri kazanım hiçbir okuyucuyu beklemez. Verinin ne zaman fiziksel olarak ortadan kalkacağı, yalnızca o alana ne zaman yeni veri yazılacağına bağlıdır.
+Ortak özellik şudur: **alan, geçersiz ilan edildiği anda yeniden kullanılabilir.** Geri kazanım hiçbir okuyucuyu beklemez; verinin fiziksel olarak ortadan kalkması yalnızca üzerine yeni veri yazılmasına bağlıdır.
 
 ## 3. Okuyucuya bağlı geri kazanım
 
-Bu kuralın dosya sistemlerinde de bir istisnası vardır. POSIX semantiğinde bir dosyanın silinmesi (`unlink`), dizin girdisini kaldırır ve dosyanın bağlantı sayısını azaltır. Dosyanın inode'u ve veri blokları ise ancak bağlantı sayısı sıfıra düştüğünde **ve** dosyayı açık tutan son süreç tanıtıcıyı kapattığında serbest bırakılır.
+Bunun bir istisnası vardır. POSIX'te açık bir dosya silindiğinde (`unlink`) dosya dizinden kaybolur, ama alanı onu açık tutan son süreç kapanana kadar serbest kalmaz. `df` ile `du` arasındaki bilinen tutarsızlık buradan doğar. Windows ise aynı durumda silmeyi çoğunlukla reddeder.
 
-Sonuç olarak Linux'ta açık bir dosya silindiğinde dosya dizinden kaybolur, ancak kapladığı alan serbest kalmaz. Bu durum sistem yönetiminde bilinen bir tutarsızlığa yol açar: `df` diski dolu gösterirken `du` ile hesaplanan toplam çok daha düşüktür. Aradaki fark, silinmiş ama hâlâ bir süreç tarafından açık tutulan dosyalardır ve `lsof +L1` ile listelenebilir.
-
-Windows aynı durumda farklı bir kural uygular: dosyayı açık tutan tanıtıcılardan herhangi biri `FILE_SHARE_DELETE` izni vermemişse silme işlemi paylaşım ihlali (`ERROR_SHARING_VIOLATION`) ile reddedilir. Bütün tanıtıcılar bu izni vermişse silme kabul edilir, ancak dosya yalnızca "silinmeyi bekliyor" olarak işaretlenir ve son tanıtıcı kapandığında kaldırılır.
-
-Linux silme işlemini kabul eder ve geri kazanımı okuyucunun bitmesine erteler; Windows ise silme işlemini okuyucu bitene kadar engeller. Her iki durumda da **geri kazanım artık bir okuyucuya bağlıdır.** Dosya sistemlerinde istisna olan bu durum, çok sürümlü veritabanlarında genel kuraldır. Önceki yazıdaki spektrum açısından bu fark beklenen bir sonuçtur: dosya sistemi okuyucularına zayıf bir tutarlılık vaadi verir ve bu nedenle onları beklemek zorunda değildir; veritabanı ise her okuyucuya tutarlı bir görüntü vaat eder ve bu vaadin bedeli, geri kazanımın okuyucuya bağlanmasıdır.
+İki durumda da **geri kazanım bir okuyucuya bağlıdır.** Dosya sistemlerinde istisna olan bu durum, çok sürümlü veritabanlarında kuraldır; çünkü dosya sistemi okuyucularına zayıf bir tutarlılık vaadi verir, veritabanı ise her okuyucuya tutarlı bir görüntü vaat eder.
 
 ## 4. Çok sürümlü eşzamanlılık denetimi
 
