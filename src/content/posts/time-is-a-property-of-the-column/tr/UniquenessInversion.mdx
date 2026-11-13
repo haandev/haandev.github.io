@@ -1,0 +1,52 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Solda: email, employee tablosunun benzersiz ve etkinlik tarihli bir sütunu. sales@acme 1 Ocak'a kadar Mehmet'te, 1 Ocak'tan itibaren Ayşe'de; Mehmet'in devri 1 Şubat'a ertelendiğinde iki satır Ocak'ta örtüşür, yani başka birinin gelecekteki satırında bir çakışma çıkar. Sağda: adres, etkinlik tarihli bir sahiple kendi tablosunda. Her adres için tek bir şerit vardır: 1 Ocak'a kadar Mehmet, sonra Ayşe. Mehmet'i 1 Şubat'a ertelemek Ayşe'nin aralığının başlangıcını kaydırır; aynı anda iki sahip yazılamaz bile.">
+   <text x="20" y="22" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#b3261e">ETKİNLİK TARİHLİ SÜTUNDA UNIQUE</text>
+   <text class="mono" x="20" y="40" font-size="11" fill="#55534E">employee.email</text>
+
+   <rect x="235" y="52" width="62.5" height="78" fill="#FBEDEC"/>
+   <text x="20" y="77" font-size="12" font-weight="700" fill="#141412">Mehmet</text>
+   <rect x="110" y="60" width="125" height="26" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text class="mono" x="172" y="77" font-size="11" text-anchor="middle" fill="#141412">sales@acme</text>
+   <rect x="235" y="60" width="62.5" height="26" rx="4" fill="none" stroke="#b3261e" stroke-width="1.5" stroke-dasharray="4 3"/>
+   <text x="20" y="117" font-size="12" font-weight="700" fill="#141412">Ayşe</text>
+   <rect x="235" y="100" width="125" height="26" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text class="mono" x="297" y="117" font-size="11" text-anchor="middle" fill="#141412">sales@acme</text>
+   <text x="266" y="145" font-size="11" font-weight="700" text-anchor="middle" fill="#b3261e">çakışma</text>
+
+   <line x1="110" y1="156" x2="360" y2="156" stroke="#C9C7C0" stroke-width="1.5"/>
+   <text x="110" y="171" font-size="10.5" text-anchor="middle" fill="#8B8983">1 Kas</text>
+   <text x="235" y="171" font-size="10.5" text-anchor="middle" fill="#8B8983">1 Oca</text>
+   <text x="297" y="171" font-size="10.5" text-anchor="middle" fill="#8B8983">1 Şub</text>
+   <text x="360" y="171" font-size="10.5" text-anchor="end" fill="#8B8983">1 Mar</text>
+   <text x="20" y="192" font-size="11" fill="#55534E">erteleme <tspan font-weight="700" fill="#b3261e">Ayşe'nin gelecek satırıyla</tspan> çakışır</text>
+
+   <line x1="380" y1="14" x2="380" y2="192" stroke="#EDEBE5" stroke-width="1"/>
+
+   <text x="400" y="22" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#14724B">ADRES SAHİBİNİ TUTAR</text>
+   <text class="mono" x="400" y="40" font-size="11" fill="#55534E">email_address.holder · sales@acme</text>
+
+   <text x="400" y="77" font-size="12" font-weight="700" fill="#141412">planlanan</text>
+   <rect x="480" y="60" width="125" height="26" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <text x="542" y="77" font-size="11.5" text-anchor="middle" fill="#141412">Mehmet</text>
+   <rect x="605" y="60" width="125" height="26" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <text x="667" y="77" font-size="11.5" text-anchor="middle" fill="#141412">Ayşe</text>
+
+   <text x="400" y="117" font-size="12" font-weight="700" fill="#141412">ertelenen</text>
+   <rect x="480" y="100" width="187.5" height="26" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <text x="573" y="117" font-size="11.5" text-anchor="middle" fill="#141412">Mehmet</text>
+   <rect x="667.5" y="100" width="62.5" height="26" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <text x="698" y="117" font-size="11.5" text-anchor="middle" fill="#141412">Ayşe</text>
+
+   <line x1="480" y1="156" x2="730" y2="156" stroke="#C9C7C0" stroke-width="1.5"/>
+   <text x="480" y="171" font-size="10.5" text-anchor="middle" fill="#8B8983">1 Kas</text>
+   <text x="605" y="171" font-size="10.5" text-anchor="middle" fill="#8B8983">1 Oca</text>
+   <text x="667" y="171" font-size="10.5" text-anchor="middle" fill="#8B8983">1 Şub</text>
+   <text x="730" y="171" font-size="10.5" text-anchor="end" fill="#8B8983">1 Mar</text>
+   <text x="400" y="192" font-size="11" fill="#55534E">tek anahtar, tek şerit: <tspan font-weight="700" fill="#14724B">aynı anda iki sahip yazılamaz</tspan></text>
+ </svg>
+</div>
+<figcaption>Solda benzersizlik, **satırlar** arasında gelecekte bozulan bir kısıttır. Sağda ise **yapının** kendisinden çıkar: bir yan tablo tek bir anahtar için asla örtüşen iki aralık tutmaz.</figcaption>
+</figure>
+</div>

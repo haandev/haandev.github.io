@@ -1,0 +1,23 @@
+<div class="col">
+<div class="tbl tbl-sys">
+<table>
+<thead>
+<tr><th>Sistem</th><th>Çizginin adı</th><th>Okuyucu sayılan</th></tr>
+</thead>
+<tbody>
+<tr><td>Linux (POSIX)</td><td>açık file descriptor</td><td>dosyayı açık tutan süreçler</td></tr>
+<tr><td>SQLite (WAL modu)</td><td>checkpoint</td><td>WAL dosyasındaki frame'lere hâlâ ihtiyaç duyan açık okuma transaction'ları</td></tr>
+<tr><td>PostgreSQL</td><td>xmin horizon, *removable cutoff*</td><td>açık transaction'lar, `hot_standby_feedback` gönderen standby'lar, replication slot'lar, prepared transaction'lar</td></tr>
+<tr><td>MySQL InnoDB</td><td>purge, *read view*</td><td>açık read view'lar</td></tr>
+<tr><td>Oracle</td><td>undo retention</td><td>uzun süren sorgular</td></tr>
+<tr><td>TiDB</td><td>GC safe point</td><td>6.1'den beri en fazla `tidb_gc_max_wait_time` süresince açık transaction'lar; öncesinde yalnızca `tidb_gc_life_time` süresi</td></tr>
+<tr><td>CockroachDB</td><td>GC threshold, `gc.ttlseconds`</td><td>TTL içindeki zaman damgaları; yedekler ve changefeed'ler için *protected timestamp*'ler</td></tr>
+<tr><td>Cassandra</td><td>tombstone, `gc_grace_seconds`</td><td>silmeyi henüz almamış replikalar</td></tr>
+<tr><td>Delta Lake, Iceberg</td><td>`VACUUM`, snapshot expiry</td><td>eski sürümleri okuyan sorgular, eşzamanlı yazanlar</td></tr>
+<tr><td>Kafka</td><td>log retention, `retention.ms`</td><td>yok: retention süresini aşan segment, tüketiciler nerede olursa olsun silinir</td></tr>
+<tr><td>Linux çekirdeği (RCU)</td><td>grace period</td><td>okuma tarafı kritik bölgesinin içindeki CPU'lar</td></tr>
+<tr><td>Kilitsiz veri yapıları</td><td>epoch, hazard pointer</td><td>hâlâ referans tutan thread'ler</td></tr>
+</tbody>
+</table>
+</div>
+</div>

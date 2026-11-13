@@ -1,0 +1,309 @@
+---
+title: "JavaScript'i önceden derlemek: bytecode, JIT ve Bun AoT"
+date: "2026-11-13"
+description: "Bun artık TypeScript'i doğrudan makine koduna derleyebiliyor. Bunun ne anlama geldiği ancak bir JavaScript motorunun kodu nasıl çalıştırdığına, bu zincirin nereden kesilebileceğine ve önceden derlemeyi deneyen Android, Java ve Hermes'in neyle karşılaştığına baktıktan sonra netleşiyor. JavaScriptCore'un katmanlarından bun compile'a bir yürüyüş: kısa ve uzun ömürlü süreçler için Bun'ın kendi rakamları, kapalı dünyanın bedeli ve V8 isolate'leriyle bir karşılaştırma."
+ogDescription: "Önceden derleyen bir derleyicinin, JIT'in çalışma anında öğrendiğini derleme anında bilmesi gerekir. JavaScript'te bu bilginin tek kaynağı tiplerdir."
+bodyClass: "s-aot"
+dek: "Bun artık TypeScript'i doğrudan makine koduna derleyebiliyor. Bunun ne anlama geldiğini görmek için önce bir JavaScript motorunun kodu nasıl çalıştırdığına, sonra aynı şeyi deneyen Android, Java ve Hermes'in neyle karşılaştığına bakmak gerekiyor. Hepsi aynı noktaya varıyor: <span class=\"a\">önceden derleyen bir derleyicinin derleme anında bilmesi gerekir</span> <span class=\"g\">JIT'in çalışma anında öğrendiğini</span>, ve JavaScript'te bu bilginin tek kaynağı tiplerdir."
+tags:
+  - "javascript"
+  - "typescript"
+  - "compilers"
+  - "bun"
+  - "runtimes"
+  - "systems design"
+---
+
+import "../style.css";
+
+import EnginePipeline from "./EnginePipeline.mdx";
+import CutPoints from "./CutPoints.mdx";
+import AotHistory from "./AotHistory.mdx";
+import ObserveVsProve from "./ObserveVsProve.mdx";
+import ClaudeCodeNumbers from "./ClaudeCodeNumbers.mdx";
+import WhoPays from "./WhoPays.mdx";
+
+{/* ================= 1 ================= */}
+<section class="col s-q">
+
+## 1. Soru: `--bytecode` ile `--aot` arasındaki fark
+
+Bun bir süredir bir programı tek bir çalıştırılabilir dosyaya paketleyebiliyor (`bun build --compile`) ve bu dosyaya önceden üretilmiş bytecode gömebiliyor (`--bytecode`). Yeni seçenek `bun compile` (`bun build --compile --aot`'un kısaltması) ise programı makine koduna derliyor.
+
+İlk bakışta ikisi aynı işi yapıyor. İkisi de şunu söylüyor: kaynağı önceden işle, çalışma anında daha az iş kalsın. Aradaki farkı görmek için, bir JavaScript motorunun bir fonksiyonu ilk gördüğü andan makine koduna çevirdiği ana kadar ne yaptığını izlemek gerekiyor. İki seçenek bu zinciri farklı yerlerden kesiyor.
+
+</section>
+
+{/* ================= 2 ================= */}
+<section class="col s-engine">
+
+## 2. Bir JavaScript motoru kodu nasıl çalıştırır
+
+Örnek olarak Bun'ın kullandığı motor olan JavaScriptCore'u (JSC) alalım. V8 ve SpiderMonkey ayrıntıda farklı, ama ana hatlar aynı.
+
+1. **Ayrıştırma.** Kaynak metin bir sözdizimi ağacına çevrilir. Motorlar bunu tembel yapar: bir fonksiyonun gövdesi ancak fonksiyon ilk çağrıldığında tam olarak ayrıştırılır.
+2. **Bytecode.** Ağaç, motorun kendi ara diline çevrilir. Bytecode makine kodu değildir; bir yorumlayıcının okuyacağı komut dizisidir.
+3. **Yorumlayıcı (LLInt).** Fonksiyon önce yorumlayıcıda çalışır; yorumlayıcı bytecode'u adım adım okur. Yavaştır, ama hemen başlar. Bu sırada motor *profil* tutar: her property erişimine hangi biçimde nesnelerin geldiğini, her çağrının hangi fonksiyona ulaştığını, her toplamanın tamsayılarla mı yapıldığını.
+4. **Baseline JIT.** Yeterince çalışmış bir fonksiyon, bytecode'unun basit bir makine kodu karşılığına çevrilir. Hâlâ genel durumu ele alır, ama yorumlama yükü kalkar.
+5. **DFG ve FTL.** Sık çalışmaya devam eden fonksiyonlar, profili kullanan optimize eden derleyicilere gider. FTL'nin arka ucu B3'tür; Apple'ın 2016'da JSC'de LLVM'in yerine koymak için yazdığı bir derleyici.
+
+Son adımın kritik kelimesi *spekülasyon*. Profil, `p.x` erişimine hep aynı biçimde nesnelerin geldiğini söylüyorsa, optimize eden derleyici erişimi tek bir bellek okumasına çevirir ve başına küçük bir kontrol koyar. Bir gün başka biçimde bir nesne gelirse kontrol tutmaz, optimize edilmiş kod atılır ve fonksiyon yorumlayıcıya geri döner (*deoptimization*). JIT'in dinamik bir dilde hızlı olabilmesinin sebebi bu: tipleri bilmek zorunda değildir; onları gözlemler.
+
+Bu düzenin bedeli sürecin başında ödenir: ayrıştırma, yorumlayıcıdaki yavaş ilk çalışmalar, profil için bellek ve arka plan iş parçacıklarında çalışan derleyicilerin CPU'su. Getirisi sürecin geri kalan ömründe alınır. Haftalarca açık kalan bir sunucu için bu iyi bir takastır. Başlayıp tek bir iş yapan ve 300 milisaniye sonra kapanan bir CLI aracı için bedel ödenir, ama getirinin çoğu hiç gelmez.
+
+</section>
+
+<EnginePipeline />
+
+{/* ================= 3 ================= */}
+<section class="col s-cut">
+
+## 3. Zincir nereden kesilebilir
+
+Açılış maliyetini azaltmak isteyen biri bu zinciri üç yerden kesebilir.
+
+**Bytecode'u önbelleğe almak.** İlk iki adım, ayrıştırma ve bytecode üretimi, derleme anında yapılır ve sonuç bir dosyaya yazılır. V8'in *code cache*'i ve Bun'ın `--bytecode`'u bu türdendir. Çalışma modeli değişmez: program yine yorumlayıcıda başlar, yine profil toplar, yine JIT ile ısınır. Kazanılan şey ayrıştırma süresidir.
+
+**Yığının anlık görüntüsünü almak.** Program başlatılır, ilk kurulumu bitene kadar çalıştırılır ve o andaki bellek durumu bir dosyaya yazılır. Sonraki açılışlar bu görüntüden devam eder. V8'in *startup snapshot*'ları ve Node'un tek dosyalık çalıştırılabilir uygulamalarındaki snapshot seçeneği (20.6'dan beri) bu türdendir. Bu, kurulum maliyetini kaldırır; JIT'in ısınmasını kaldırmaz.
+
+**Bütün zinciri derleme anına taşımak.** Makine kodu derleme anında üretilir ve çalışma anında JIT yoktur. Bu yalnızca açılış maliyetini değil, profil belleğini ve derleyici iş parçacıklarını da kaldırır. Ama 2. bölümdeki spekülasyonun dayandığı profili de kaldırır: derleme anında gözlemlenecek bir çalışma yoktur.
+
+İlk iki kesim güvenlidir, çünkü JIT'e dokunmazlar. Üçüncüsü, JIT'in çalışırken öğreneceğini başka bir yerden bilmeyi gerektirir. Bunu deneyenlerin hepsi aynı soruyla karşılaştı.
+
+</section>
+
+<CutPoints />
+
+{/* ================= 4 ================= */}
+<section class="col s-hist">
+
+## 4. Önceden derlemeyi daha önce deneyenler
+
+**Android: Dalvik, ART ve hibrit model.** Android uygulamaları yıllarca Dalvik sanal makinesinde çalıştı; Dalvik 2010'da bir JIT kazandı. Android 5.0 (2014) Dalvik'in yerine ART'yi getirdi ve uygulamaları kurulum anında tamamen makine koduna derlemeye başladı. Uygulamalar hızlı açılıyordu, ama kurulumlar ve sistem güncellemeleri dakikalar sürüyordu ve derlenmiş kod depolamada ciddi yer kaplıyordu. Android 7.0 (2016) hibrite geçti: uygulama önce JIT'le çalışıyor, JIT hangi metotların sık çalıştığını kaydediyor ve cihaz boştayken yalnızca bu metotlar önceden derleniyor. Önceden derleme, bir profille beslendiğinde işe yaradı.
+
+**Java: GraalVM Native Image.** GraalVM bir Java uygulamasını tek bir çalıştırılabilir dosyaya derleyebiliyor; JVM'in ısınması ortadan kalkıyor ve açılış milisaniyelere iniyor. Bunun bedeli *kapalı dünya varsayımı*: derleyici, programın ulaşabileceği bütün kodu derleme anında görmek zorunda. Reflection, dinamik sınıf yükleme ve çalışma anında üretilen proxy'ler ya yapılandırma dosyalarında önceden bildirilmeli ya da çalışmaz. Tepe performansta genellikle sıcak bir JVM'in gerisinde kalıyor, ve Oracle'ın cevabı yine profil: Oracle GraalVM'de enstrümanlı bir derleme gerçek iş üzerinde çalıştırılıyor ve program topladığı profille yeniden derleniyor.
+
+**JavaScript: Hermes ve Static Hermes.** Meta, React Native için Hermes motorunu 2019'da yayımladı. Hermes'in ana kararı JIT'ten vazgeçmekti: JavaScript derleme anında bytecode'a çevriliyor ve uygulamanın içinde dağıtılıyor; telefonda yalnızca bir yorumlayıcı çalışıyor. Telefonlarda öncelik tepe hızı değil, açılış süresi ve bellekti, ve iOS üçüncü taraf uygulamaların çalışma anında çalıştırılabilir bellek oluşturmasına zaten izin vermiyor. 2023'te duyurulan Static Hermes daha da ileri gitti: tip anotasyonlu JavaScript'i C ve LLVM üzerinden makine koduna derliyor ve sağlam tipleri derleme anında güvenilir bilgi olarak kullanıyor. Bu çalışma daha sonra Hermes'in ana geliştirme hattı oldu; o hatta, dikkat çekici şekilde, o zamandan beri bir JIT de eklendi.
+
+Üç hikâyeden çıkan ders aynı. Önceden derleme açılışı ve belleği güvenilir şekilde iyileştiriyor. Tepe performansı korumak için ise derleyicinin, JIT'in çalışma anında topladığı bilgiye derleme anında sahip olması gerekiyor. Android ve GraalVM bu bilgiyi bir önceki çalışmanın profilinden aldı. Static Hermes onu kaynak koddaki tiplerden almayı seçti.
+
+</section>
+
+<AotHistory />
+
+{/* ================= 5 ================= */}
+<section class="col s-bun">
+
+## 5. Bun'ın üç seçeneği
+
+Bun, bu yelpazenin üç noktasına karşılık gelen üç yol sunuyor:
+
+<div class="tbl tbl-options">
+
+| | `bun build --compile` | `… --compile --bytecode` | `bun compile` |
+|---|---|---|---|
+| Dosyada ne var | Paketlenmiş JS | Paketlenmiş JS + JSC bytecode'u | Makine kodu |
+| Zincirin kesildiği yer | Hiçbir yer | Ayrıştırma ve bytecode'dan sonra | Bütün zincir |
+| Çalışma anında JIT | Var | Var | Yok |
+| TypeScript tipleri | Silinir | Silinir | Denetlenir, sonra kullanılır |
+| Hedef platform | `--target` ile her platform | `--target` ile her platform | Yalnızca üzerinde çalıştığı platform |
+| Durum | Kararlı | Kararlı | Deneysel |
+
+</div>
+
+`--bytecode`, 3. bölümdeki ilk kesimdir. Bun'ın kendi ölçümüne göre `tsc` bytecode ile iki kat hızlı açılıyor, büyük uygulamalar iki ila dört kat kazanıyor. Ama program açıldıktan sonra her şey `bun run`'daki gibidir.
+
+`bun compile` üçüncü kesimdir. Giriş noktasından başlayarak importları izler, TypeScript'i tip denetiminden geçirir ve bütün program üzerinde her değişkene hangi nesnelerin ulaştığını, her çağrının hangi fonksiyona gittiğini hesaplar. Sonra ulaşılabilen her fonksiyon için, npm paketleri dahil, makine kodu üretir. Bunu, JSC'nin FTL'de kullandığı arka uçla, B3 ile yapar: Bun, JIT'in en üst katmanını fiilen derleme anına taşımış oluyor. Çıktı, Bun çalışma zamanının JIT'siz bir kopyasıdır. Linux 6.7 ve sonrasında süreç, çekirdekten yeni çalıştırılabilir bellek oluşturulmasını yasaklamasını bile istiyor (`PR_SET_MDWE`); yani JIT yalnızca kullanılmıyor değil, kullanılamıyor.
+
+Dördüncü bölümdeki soru burada da geçerli: JIT'in profilden öğreneceğini `bun compile` nereden alıyor?
+
+</section>
+
+{/* ================= 6 ================= */}
+<section class="col s-types">
+
+## 6. Bun AoT'nin bilgi kaynağı: TypeScript tipleri
+
+Bun, Static Hermes'in yolunu seçiyor: bilgiyi tiplerden alıyor.
+
+Bir değer programın kendi yarattığı bir değerse, tipi bir olgu olarak kabul edilir ve değer sabit bir bellek düzenine oturtulur. Bun'ın pull request'indeki örnekte iki `number` alanlı bir `Vec`, 16 baytlık bir başlık ve iki ham double'dır; tipi kanıtlanmış bir alanı okumak, Go ya da Rust'taki bir struct alanı gibi, tek bir yüklemedir. Değer dışarıdan geliyorsa, derleyicinin göremediği bir çağırandan gelen argüman ya da `JSON.parse` sonucu gibi, tip bir tahmin olarak kullanılır: bir kez test edilir, tutmazsa kod yavaş yola geçer. Bu, JIT'in spekülasyonuna benzer; farkı, tahminin gözlemden değil anotasyondan gelmesidir.
+
+Bunun iki sonucu var. Birincisi, `bun run` tipleri siler ama `bun compile` tipleri denetler, ve tip hatası varsa çalıştırılabilir dosya üretmez. Aynı `: number` bir kipte yorum, diğerinde derleyici girdisidir. İkincisi, tipsiz kod AoT altında JIT'ten yavaş çalışabilir: tipin olmadığı yerde derleyici ne gözlemleyebilir ne de kanıtlayabilir, ve property'yi çalışma anında isimle arar. Bun'ın dokümantasyonu bunu açıkça söylüyor, ve `bun compile --explain` bu erişimleri en pahalısından başlayarak listeliyor.
+
+</section>
+
+<ObserveVsProve />
+
+{/* ================= 7 ================= */}
+<section class="col s-short">
+
+## 7. Kısa ömürlü bir süreçte sonuçlar
+
+Bun'ın ilk ciddi ölçümü Claude Code CLI'ı üzerinde. Bu seçim tesadüf değil: Anthropic, Bun'ı Aralık 2025'te satın aldı, Claude Code bir Bun çalıştırılabilir dosyası olarak dağıtılıyor, ve bir kodlama ajanı kısa ömürlü, sık başlatılan süreçlerin tipik örneği.
+
+</section>
+
+<ClaudeCodeNumbers />
+
+<section class="col s-short">
+
+İkinci ölçüm daha uzun bir iş: TypeScript 6'nın 370 bin satırlık bir projede tip denetimi.
+
+<div class="tbl tbl-tsc">
+
+| | Duvar saati süresi | Bellek | CPU süresi |
+|---|---|---|---|
+| `bun run` altında TypeScript 6 (JIT) | 14,00 sn | 2.581 MB | 29,2 sn |
+| `bun compile` altında TypeScript 6 (AoT) | 4,25 sn | 963 MB | 5,3 sn |
+| TypeScript 7 (Go'ya yeniden yazılmış) | 2,68 sn | 1.256 MB | 10,8 sn |
+
+</div>
+
+Bu ikinci sonuç dikkat çekici, çünkü on dört saniye kısa bir süre değil, ve JIT yine kaybediyor. `tsc` büyük ve çok biçimli bir kod tabanı; JIT'in onu ısıtması saniyeler sürüyor, ve 29 saniyelik CPU'nun önemli bir kısmı derleyici iş parçacıklarına gidiyor. Yani bir sürecin kısa ömürlü sayılıp sayılmadığı yalnızca saniyeyle ölçülmüyor; programın büyüklüğüne de bağlı.
+
+TypeScript 7 satırı 4. bölümdeki hikâyeyi uzatıyor. Microsoft, `tsc`'nin açılış ve bellek sorununu derleyiciyi Go'ya yeniden yazarak çözdü. Jarred Sumner ise AoT'yi Rust'a yeniden yazmak zorunda kalmama seçeneği olarak sunuyor. Bu rakamlara göre AoT o farkın büyük kısmını kapatıyor, ama tamamını değil.
+
+</section>
+
+{/* ================= 8 ================= */}
+<section class="col s-long">
+
+## 8. Uzun ömürlü bir süreçte sonuçlar
+
+Aynı pull request'te sunucu çatıları için tepe verim ölçümleri de var. İlk saniyede AoT bir ila iki kat önde; JIT henüz ısınmamış. Isındıktan sonra:
+
+<div class="tbl tbl-servers">
+
+| Çatı | Sıcak durumda fark |
+|---|---|
+| Koa | <span class="jit">JIT %22,9 daha hızlı</span> |
+| Fastify | <span class="jit">JIT %16,9 daha hızlı</span> |
+| Elysia | <span class="jit">JIT %13,5 daha hızlı</span> |
+| Express | <span class="jit">JIT %7,1 daha hızlı</span> |
+| Hono, `Bun.serve` | <span class="aot">AoT yaklaşık %2,5 daha hızlı</span> |
+
+</div>
+
+Bu, GraalVM'in gösterdiği tablo. Açık kalan bir sunucuda ısınmanın bedeli bir kez ödenir, ve JIT'in gözlemlediği profil, derleyicinin kanıtlayabildiğinden daha zengindir. Sumner, önceden derlemenin genellikle daha düşük tepe performans verdiğini kabul ediyor; ekip açığı daha katı bir TypeScript türüyle ve kilitlenmiş built-in'lerle kapatmayı umuyor.
+
+Tablodaki desen 6. bölümle örtüşüyor. AoT'nin yetiştiği çatılar, Hono ve `Bun.serve`, TypeScript'le yazılmış ve az katmanlı. En çok geride kaldığı Koa ve Express ise ara katman zincirleri üzerinden dinamik çağrılar yapan, daha eski, tipsiz JavaScript. AoT, tiplerden kanıtlayabildiği kadar hızlıdır.
+
+Sıcak bir sunucuya AoT'nin hâlâ sunduğu şey bellektir. Tek bir sunucu için bu pek önemli değildir; yüzlerce küçük konteynerde ya da faturanın belleğe göre kesildiği yerde önemlidir. Otomatik ölçeklemede de her yeni kopya ilk saniyesinde soğuk bir süreçtir.
+
+</section>
+
+{/* ================= 9 ================= */}
+<section class="col s-cost">
+
+## 9. Kapalı dünyanın bedeli
+
+GraalVM'in kapalı dünya varsayımı Bun'da da var, iki biçimde.
+
+**Built-in'ler kilitli.** Derleyicinin `arr.push(x)`'i doğrudan işleme çevirebilmesi için `Array.prototype.push`'un çalışma anında değişmeyeceğini varsayması gerekir. Bun bu varsayımı zorunlu kılıyor: built-in nesnelerin mevcut üyeleri değiştirilemez, ve `Array.prototype.push`'a atama `TypeError` fırlatır. `Object.prototype`, `RegExp.prototype`, `Promise.prototype` ve generator prototipleri hiç değiştirilemez. Yeni üye eklemek serbesttir.
+
+**String'den üretilen kod yorumlanır.** `eval`, `new Function` ve `node:vm` yasak değildir, ama makine koduna da derlenmez: aynı süreçte, aynı nesneler üzerinde, JSC'nin yorumlayıcısında çalışır. Sıcak yolunu `new Function` ile üreten doğrulayıcı ve serileştirici kütüphaneler bu yüzden AoT altında belirgin şekilde yavaşlar. Derleyicinin izleyemediği bir çağrı, örneğin `globalThis[name](code)`, `EvalError` fırlatır. Diskten dinamik `import()` ile kod yüklemek varsayılan olarak kapalıdır.
+
+Diğer sınırlar: çapraz derleme yok, breakpoint yok, ve büyük bir uygulamanın derlenmesi onlarca saniye ve gigabaytlarca bellek alıyor; derlemeler arasında önbellek de yok. Linux x64 test ediliyor; Windows'ta birçok test hâlâ başarısız.
+
+</section>
+
+{/* ================= 10 ================= */}
+<section class="col s-iso">
+
+## 10. V8 isolate'leriyle karşılaştırma
+
+Açılış sorununa bambaşka bir cevap daha var. Cloudflare Workers ve Deno Deploy her istek için yeni bir süreç başlatmıyor; tek bir sıcak V8 süreci içinde her müşterinin kodu kendi *isolate*'inde çalışıyor. Cloudflare 2020'de bir Worker'ı yüklemenin maliyetini yaklaşık 5 milisaniye olarak verdi, TLS el sıkışmasının arkasına saklanacak kadar kısa; 2025'te ise limitleri büyüdükçe soğuk başlangıçları "ortadan kaldırmak" ifadesinin iddialı kaçtığını kabul etti.
+
+İkinci bölümdeki maliyetleri birinin ödemesi gerekiyor; değişen, kimin ödediği:
+
+<div class="tbl tbl-who">
+
+| | Bedeli kim öder | Nasıl geri alınır |
+|---|---|---|
+| Süreç başına bir JIT (`bun run`, Node) | Her süreç, açılışta | O sürecin kendi ömrü boyunca |
+| Bir V8 isolate'i | Platformun tek uzun ömürlü süreci | Binlerce müşterinin kodu arasında paylaşılarak |
+| AoT (`bun compile`) | Geliştirici, derleme anında | Her kopya bu maliyet olmadan başlar |
+
+</div>
+
+Isolate, motorun ömrünü uzatır ve kısa işleri onun içine sığdırır. AoT ise motoru hiç başlatmaz. Birincisi bir platform çözümüdür: isolate'leri barındıran bir şirket gerekir, ve kod o platformun API'leriyle sınırlıdır. İkincisi bir araç zinciri çözümüdür: çıktı, her yerde tam bir süreç olarak çalışan sıradan bir çalıştırılabilir dosyadır; bedeli derleme süresi ve 9. bölümdeki sınırlardır.
+
+Isolate'lerin zaten kullanıldığı yerde AoT'nin katkısı azdır, çünkü açılış sorunu orada çözülmüştür. AoT'nin yeri, her ölçeklemede bir konteyner ya da mikro-VM başlatılan ortamlar ve kullanıcılara dağıtılan CLI araçlarıdır.
+
+</section>
+
+<WhoPays />
+
+{/* ================= 11 ================= */}
+<section class="col s-when">
+
+## 11. Ne zaman hangisi
+
+Seçim iki şeye bağlı: sürecin ne kadar yaşadığına ve kodun ne kadarının tiplenmiş olduğuna.
+
+- **Uzun ömürlü, bellek sıkıntısı olmayan bir sunucu:** `bun run` ya da `bun build --compile`. Isındıktan sonra JIT önde, ve hiçbir şey kısıtlanmıyor.
+- **Tipsiz ya da dinamik kodlu kısa ömürlü bir süreç:** `bun build --compile --bytecode`. Ayrıştırma maliyetini kaldırır ve uyumluluktan hiçbir şey götürmez.
+- **Tiplenmiş kodlu kısa ömürlü bir süreç ya da çok sayıda küçük kopya:** `bun compile`. Açılış, bellek ve CPU kazancı en büyük burada.
+
+Emin değilseniz Bun'ın önerisi ikisini de derleyip aynı yük altına koymak; `bun compile --no-aot` aynı çalıştırılabilir dosyayı JIT'li olarak üretiyor.
+
+</section>
+
+{/* ================= 12 ================= */}
+<section class="col s-limits">
+
+## 12. Sınırlar
+
+1. **Rakamlar Bun ekibinin.** Buradaki bütün Bun ölçümleri pull request'ten ve dokümantasyondan geliyor. Bağımsız bir tekrarını görmedim, kendim de hiçbir şey ölçmedim.
+2. **Özellik deneysel ve hareket halinde.** İlk önizlemede çalıştırılabilir dosyanın neredeyse iki kat büyük olduğu bildiriliyordu; birleştirilen pull request'e göre küçük programlar artık daha küçük çıkıyor. Rakamlar ve kısıtlar değişmeye devam edecek.
+3. **Tepe performans açığı yapısal olabilir.** Android ve GraalVM bu açığı profillerle kapattı. Bun onu tiplerle kapatmayı umuyor, ama bir JIT'in çalışma anında gördüğü, statik analizin kanıtlayabildiğinden fazladır. Açığın ne kadarının kapanabileceği açık bir soru.
+
+</section>
+
+{/* ================= 13 ================= */}
+<section class="col s-close">
+
+## 13. Sonuç
+
+`--bytecode` ile `bun compile` arasındaki fark, motorun zincirini nereden kestikleridir. Bytecode yalnızca ayrıştırmayı derleme anına taşır; JIT olduğu gibi kalır. `bun compile` bütün zinciri taşır ve JIT'i kaldırır.
+
+JIT'i kaldırmak, onun çalışma anında topladığını kaybetmek demektir. Android ve Java bu bilgiyi bir önceki çalışmanın profilinden geri aldı. Bun, Static Hermes gibi, onu kaynak koddaki tiplerden alıyor. Karşılığında built-in'ler kilitleniyor, string'den üretilen kod yorumlanıyor, ve tipsiz kod yavaşlıyor.
+
+JavaScript'te tipler uzun süre geliştiriciye yönelik bir bilgiydi: derleyici onları denetleyip atıyordu. `bun compile`'da tipler, JIT'in çalışma anında öğrendiğinin derleme anındaki karşılığı oluyor.
+
+</section>
+
+{/* ================= sources ================= */}
+<section class="col refs">
+
+<h2>Kaynaklar</h2>
+
+### Bun
+
+- Jarred Sumner ve diğerleri, [Compile TypeScript to machine code ahead of time: `bun build --compile --aot`](https://github.com/oven-sh/bun/pull/45631), oven-sh/bun pull request #45631, 2026; tasarım, kısıtlar ve bu yazıdaki bütün Bun rakamları.
+- Bun dokümantasyonu, [Compiler](https://github.com/oven-sh/bun/tree/main/docs/compiler): *Ahead-of-time compilation*, *Bytecode Caching*, *Compatibility*.
+- Jarred Sumner, [Claude Code için ilk önizleme rakamları](https://x.com/jarredsumner/status/2104739495895781679) ve [AoT ile JIT'in tepe performansı üzerine](https://x.com/jarredsumner/status/2104746212662690234), 2026.
+- Anthropic, [Anthropic acquires Bun as Claude Code reaches $1B milestone](https://www.anthropic.com/news/anthropic-acquires-bun-as-claude-code-reaches-usd1b-milestone), Aralık 2025.
+
+### JavaScriptCore
+
+- Filip Pizlo, [Introducing the B3 JIT Compiler](https://webkit.org/blog/5852/), WebKit blogu, 2016.
+
+### Daha önceki önceden derleyiciler
+
+- Android Open Source Project, [Implementing ART just-in-time compiler](https://source.android.com/docs/core/runtime/jit-compiler); Android 7.0'daki hibrit JIT ve profil yönlendirmeli AOT modeli.
+- GraalVM dokümantasyonu, [Optimize a Native Executable with Profile-Guided Optimizations](https://www.graalvm.org/latest/reference-manual/native-image/guides/optimize-native-executable-with-pgo/).
+- Tzvetan Mikov, [Static Hermes](https://speakerdeck.com/tmikov2023/static-hermes-react-native-eu-2023-announcement), React Native EU, 2023.
+
+### Başka yerlerde açılış
+
+- Node.js dokümantasyonu, [Single executable applications](https://nodejs.org/api/single-executable-applications.html); `useSnapshot` ve `useCodeCache`.
+- Cloudflare, [Eliminating cold starts with Cloudflare Workers](https://blog.cloudflare.com/eliminating-cold-starts-with-cloudflare-workers/), 2020, ve [Eliminating cold starts 2: shard and conquer](https://blog.cloudflare.com/eliminating-cold-starts-2-shard-and-conquer/), 2025.
+
+<div class="note">
+
+Not: buradaki bütün Bun ölçümleri Bun ekibinin ve yukarıdaki pull request'ten alındı. Özellik deneysel; bayraklar, rakamlar ve kısıtlar bu yazı yazıldığından beri değişmiş olabilir.
+
+</div>
+
+</section>

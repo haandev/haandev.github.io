@@ -1,11 +1,15 @@
 ---
 import site from "../../site.json" with { type: "json" };
+import { other, rssPath, type Lang } from "../lib/i18n";
 
 interface Props {
   title: string;
   description?: string;
   /** Canonical path of the page, e.g. "/" or "/posts/slug.html" */
   path: string;
+  lang: Lang;
+  /** The same page in the other language, if it exists. */
+  altPath?: string;
   ogType?: "website" | "article";
   ogTitle?: string;
   ogDescription?: string;
@@ -16,6 +20,8 @@ const {
   title,
   description = "",
   path,
+  lang,
+  altPath,
   ogType = "website",
   ogTitle = title,
   ogDescription = description,
@@ -23,21 +29,53 @@ const {
 } = Astro.props;
 
 const canonical = new URL(path, Astro.site).href;
+const altLang = other(lang);
+const altUrl = altPath && new URL(altPath, Astro.site).href;
+const enUrl = lang === "en" ? canonical : altUrl;
+
+// Language routing, run before anything paints:
+// - A language the visitor picked with the switcher (localStorage "lang")
+//   always wins.
+// - With no choice made, an English page sends visitors who look Turkish —
+//   Turkish anywhere in the browser's language list, or a Turkey time zone —
+//   to the Turkish version. GitHub Pages has no server to geolocate an IP,
+//   so the time zone stands in for "visiting from Turkey".
+// - Turkish pages never redirect on a guess, only on an explicit choice.
+// The switcher links carry data-lang; clicking one records the choice.
+const routing = `(function(){
+var page=${JSON.stringify(lang)},alt=${JSON.stringify(altPath ?? null)},pref=null;
+try{pref=localStorage.getItem("lang")}catch(e){}
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[data-lang]");if(a){try{localStorage.setItem("lang",a.dataset.lang)}catch(e){}}});
+if(!alt)return;
+var go=false;
+if(pref==="en"||pref==="tr"){go=pref!==page}
+else if(page==="en"){
+var l=navigator.languages||[navigator.language||""],tz="";
+try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||""}catch(e){}
+go=l.some(function(x){return /^tr\\b/i.test(x)})||tz==="Europe/Istanbul"||tz==="Asia/Istanbul";
+}
+if(go)location.replace(alt+location.hash);
+})();`;
 ---
 
 <!doctype html>
-<html lang={site.lang}>
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline set:html={routing} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" type="application/rss+xml" title={site.title} href="/rss.xml" />
+    <link rel="alternate" hreflang={lang} href={canonical} />
+    {altUrl && <link rel="alternate" hreflang={altLang} href={altUrl} />}
+    {enUrl && <link rel="alternate" hreflang="x-default" href={enUrl} />}
+    <link rel="alternate" type="application/rss+xml" title={site.title} href={rssPath(lang)} />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={ogTitle} />
     {ogDescription && <meta property="og:description" content={ogDescription} />}
     <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === "tr" ? "tr_TR" : "en_US"} />
     <link rel="stylesheet" href="/assets/style.css" />
     <slot name="head" />
   </head>

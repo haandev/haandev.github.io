@@ -1,0 +1,51 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 258" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Aynı programı çalıştırmanın üç yolu, beş adım üzerinde: ayrıştırma, bytecode, yorumlayıcı, baseline JIT ve optimize eden JIT. Olduğu gibi çalıştırmak: beş adımın hepsi çalışma anında gerçekleşir. Bytecode'u önbelleğe almak: ayrıştırma ve bytecode derleme anında gerçekleşir, yorumlayıcı ve iki JIT katmanı yine çalışma anında çalışır. Önceden derlemek: ayrıştırma ve optimize eden derleyici, B3, derleme anında çalışır; bytecode ve baseline katmanı yoktur, yorumlayıcı yalnızca eval gibi string'den üretilen kod için tutulur.">
+   <text x="20" y="22" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#55534E">HER ADIM NEREDE GERÇEKLEŞİR</text>
+
+   <text x="254" y="50" font-size="11.5" font-weight="700" text-anchor="middle" fill="#55534E">Ayrıştırma</text>
+   <text x="362" y="50" font-size="11.5" font-weight="700" text-anchor="middle" fill="#55534E">Bytecode</text>
+   <text x="470" y="50" font-size="11.5" font-weight="700" text-anchor="middle" fill="#55534E">Yorumlayıcı</text>
+   <text x="578" y="50" font-size="11.5" font-weight="700" text-anchor="middle" fill="#55534E">Baseline JIT</text>
+   <text x="686" y="50" font-size="11.5" font-weight="700" text-anchor="middle" fill="#55534E">Optimize eden JIT</text>
+
+   <text x="20" y="80" font-size="12.5" font-weight="700" fill="#141412">Olduğu gibi çalıştır</text>
+   <text class="mono" x="20" y="96" font-size="10.5" fill="#55534E">bun build --compile</text>
+   <rect x="202" y="64" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="310" y="64" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="418" y="64" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="526" y="64" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="634" y="64" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+
+   <text x="20" y="140" font-size="12.5" font-weight="700" fill="#141412">Bytecode'u önbelleğe al</text>
+   <text class="mono" x="20" y="156" font-size="10.5" fill="#55534E">… --compile --bytecode</text>
+   <rect x="202" y="124" width="104" height="38" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <rect x="310" y="124" width="104" height="38" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <rect x="418" y="124" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="526" y="124" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="634" y="124" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <line x1="416" y1="116" x2="416" y2="170" stroke="#b3261e" stroke-width="2" stroke-dasharray="4 3"/>
+   <text x="416" y="113" font-size="10.5" font-weight="700" text-anchor="middle" fill="#b3261e">kesim</text>
+
+   <text x="20" y="200" font-size="12.5" font-weight="700" fill="#141412">Önceden derle</text>
+   <text class="mono" x="20" y="216" font-size="10.5" fill="#55534E">bun compile</text>
+   <rect x="202" y="184" width="104" height="38" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <rect x="310" y="184" width="104" height="38" rx="4" fill="#FFFFFF" stroke="#C9C7C0" stroke-width="1.5" stroke-dasharray="3 3"/>
+   <text x="362" y="207" font-size="11" text-anchor="middle" fill="#8B8983">kullanılmaz</text>
+   <rect x="418" y="184" width="104" height="38" rx="4" fill="#FFFFFF" stroke="#2733C9" stroke-width="1.5" stroke-dasharray="3 3"/>
+   <text x="470" y="207" font-size="11" text-anchor="middle" fill="#2733C9">yalnızca eval</text>
+   <rect x="526" y="184" width="104" height="38" rx="4" fill="#FFFFFF" stroke="#C9C7C0" stroke-width="1.5" stroke-dasharray="3 3"/>
+   <text x="578" y="207" font-size="11" text-anchor="middle" fill="#8B8983">kullanılmaz</text>
+   <rect x="634" y="184" width="104" height="38" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <text x="686" y="207" font-size="11" font-weight="700" text-anchor="middle" fill="#14724B">B3, derlemede</text>
+
+   <rect x="202" y="240" width="12" height="12" rx="2" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <text x="220" y="250" font-size="11" fill="#55534E">derleme anında</text>
+   <rect x="330" y="240" width="12" height="12" rx="2" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text x="348" y="250" font-size="11" fill="#55534E">çalışma anında, her süreçte</text>
+ </svg>
+</div>
+<figcaption>Bytecode önbelleği yalnızca ilk iki adımı <span class="a">derleme anına</span> taşır; yorumlayıcı ve JIT her süreçte yine çalışır. Önceden derleme optimize eden derleyicinin kendisini taşır ve yorumlayıcıyı yalnızca string'den üretilen kod için tutar.</figcaption>
+</figure>
+</div>

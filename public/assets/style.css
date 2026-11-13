@@ -879,3 +879,22 @@ figcaption strong {
     }
   }
 }
+
+/* ---------- 9. language switch ---------- */
+
+.post-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.lang-switch {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.site-nav .lang-switch {
+  margin-left: auto;
+}

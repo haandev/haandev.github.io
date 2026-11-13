@@ -37,6 +37,40 @@ target the tag directly (`figcaption b`, `.cap .legend i`) are written to cover
 the `<strong>`/`<em>` markdown produces as well — do the same when adding a new
 rule of that kind.
 
+## Languages
+
+The blog is bilingual. English is at the root (`/`, `/posts/<slug>.html`),
+Turkish under `/tr` (`/tr/`, `/tr/posts/<slug>.html`) with the **same slug**.
+A post's Turkish version sits in a `tr/` folder inside the post folder:
+
+```
+src/content/posts/<slug>/
+  index.mdx            English
+  ThreeBasicNeeds.mdx  English figure
+  style.css            shared by both languages
+  tr/
+    index.mdx          Turkish — imports "../style.css"
+    ThreeBasicNeeds.mdx Turkish figure (same name, translated labels)
+```
+
+The two are separate collections (`posts`, `postsTr` in
+`src/content.config.ts`); a post without a `tr/` folder simply has no Turkish
+page, and its switcher link falls back to the Turkish homepage. UI strings live
+in `src/lib/i18n.ts`.
+
+Routing is client-side, since GitHub Pages has no server (see the inline script
+in `src/layouts/Base.astro`):
+
+- A visitor with no saved choice who opens an English page is sent to the
+  Turkish one if Turkish appears anywhere in the browser's language list or the
+  time zone is `Europe/Istanbul` (the stand-in for "visiting from Turkey").
+- The **Türkçe / English** link on every page switches language and saves the
+  choice in `localStorage`; from then on that choice wins on every page.
+- Turkish pages never redirect on a guess, only on a saved choice.
+
+Each page carries `hreflang` alternates, the sitemap pairs the two versions,
+and there is a Turkish feed at `/tr/rss.xml`.
+
 Frontmatter fields are validated against the schema in `src/content.config.ts` —
 a bad field stops the build:
 
@@ -112,5 +146,5 @@ Everything under `dist/` — `index.html`, `posts/*.html`, `index.json`,
 `rss.xml`, `sitemap.xml`. It isn't committed; Actions regenerates it on every
 push. `build.format: "file"` is used so that post URLs keep their `.html`
 extension; changing it would break old links and RSS guids. The posts were
-originally published under Turkish slugs, and `redirects` in `astro.config.mjs`
-keeps those old URLs pointing at the current English ones.
+originally published in Turkish under Turkish slugs, and `redirects` in
+`astro.config.mjs` keeps those old URLs pointing at the Turkish versions.

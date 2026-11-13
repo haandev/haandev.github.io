@@ -1,0 +1,74 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="İki haftalık bir sprint'in gün gün dağılımı: backend ve frontend yedi gün paralel geliştirme yapar, sekizinci gün kontrat uzlaştırması olur, son iki gün QA'ya kalır ve mühendislik boşta bekler">
+  <defs>
+    <pattern id="f1-idle" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="8" height="8" fill="#F4F3EF"/>
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#C9C7C0" stroke-width="2.5"/>
+    </pattern>
+    <marker id="f1-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8B8983"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="22" font-size="13" font-weight="700" fill="#141412">İki haftalık sprint</text>
+  <text x="740" y="22" font-size="11.5" text-anchor="end" fill="#8B8983">çalışma günü</text>
+
+  <g font-size="11" fill="#8B8983" text-anchor="middle">
+    <text x="170" y="42">1</text><text x="230" y="42">2</text><text x="290" y="42">3</text>
+    <text x="350" y="42">4</text><text x="410" y="42">5</text><text x="470" y="42">6</text>
+    <text x="530" y="42">7</text><text x="590" y="42">8</text><text x="650" y="42">9</text>
+    <text x="710" y="42">10</text>
+  </g>
+  <g stroke="#EDEBE5" stroke-width="1">
+    <line x1="140" y1="50" x2="140" y2="290"/><line x1="200" y1="50" x2="200" y2="290"/>
+    <line x1="260" y1="50" x2="260" y2="290"/><line x1="320" y1="50" x2="320" y2="290"/>
+    <line x1="380" y1="50" x2="380" y2="290"/><line x1="440" y1="50" x2="440" y2="290"/>
+    <line x1="500" y1="50" x2="500" y2="290"/><line x1="560" y1="50" x2="560" y2="290"/>
+    <line x1="620" y1="50" x2="620" y2="290"/><line x1="680" y1="50" x2="680" y2="290"/>
+    <line x1="740" y1="50" x2="740" y2="290"/>
+  </g>
+
+  <g font-size="12.5" fill="#141412">
+    <text x="20" y="76">Analist</text>
+    <text x="20" y="124">Backend</text>
+    <text x="20" y="172">Frontend</text>
+    <text x="20" y="220">QA</text>
+    <text x="20" y="268">PM / PO</text>
+  </g>
+
+  <rect x="140" y="58" width="60" height="26" rx="5" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.75"/>
+  <text x="206" y="76" font-size="11.5" fill="#55534E">tanım devri — mühendislik analizi değil</text>
+
+  <rect x="140" y="106" width="420" height="26" rx="5" fill="#EBF4EF" stroke="#14724B" stroke-width="1.75"/>
+  <text x="152" y="124" font-size="11.5" fill="#141412">paralel geliştirme</text>
+  <rect x="560" y="106" width="60" height="26" rx="5" fill="#FBF1DC" stroke="#c47b00" stroke-width="1.75"/>
+  <rect x="620" y="106" width="120" height="26" rx="5" fill="url(#f1-idle)" stroke="#C9C7C0" stroke-width="1.5"/>
+
+  <rect x="140" y="154" width="420" height="26" rx="5" fill="#EBF4EF" stroke="#14724B" stroke-width="1.75"/>
+  <text x="152" y="172" font-size="11.5" fill="#141412">paralel geliştirme</text>
+  <rect x="560" y="154" width="60" height="26" rx="5" fill="#FBF1DC" stroke="#c47b00" stroke-width="1.75"/>
+  <rect x="620" y="154" width="120" height="26" rx="5" fill="url(#f1-idle)" stroke="#C9C7C0" stroke-width="1.5"/>
+
+  <rect x="140" y="202" width="480" height="26" rx="5" fill="url(#f1-idle)" stroke="#C9C7C0" stroke-width="1.5"/>
+  <rect x="620" y="202" width="120" height="26" rx="5" fill="#FBEDEC" stroke="#B3261E" stroke-width="1.75"/>
+  <text x="680" y="220" font-size="11.5" text-anchor="middle" fill="#B3261E">test</text>
+
+  <text x="590" y="86" font-size="11" text-anchor="middle" fill="#c47b00">kontrat</text>
+  <text x="590" y="99" font-size="11" text-anchor="middle" fill="#c47b00">uzlaştırma</text>
+
+  <line x1="140" y1="255" x2="746" y2="255" stroke="#8B8983" stroke-width="1.75" stroke-dasharray="6 5" marker-end="url(#f1-ar)"/>
+  <text x="152" y="274" font-size="11.5" fill="#55534E">ürün etkisi olan kararlar ancak bir sonraki sprint'te tartışılabiliyor</text>
+
+  <path d="M140 300 L140 308 L620 308 L620 300" fill="none" stroke="#8B8983" stroke-width="1.5"/>
+  <text x="380" y="328" font-size="12" text-anchor="middle" fill="#55534E">sekiz gün — QA boşta</text>
+  <path d="M620 300 L620 308 L740 308 L740 300" fill="none" stroke="#8B8983" stroke-width="1.5"/>
+  <text x="740" y="328" font-size="12" text-anchor="end" fill="#55534E">iki gün — mühendislik boşta</text>
+
+  <text x="380" y="356" font-size="12.5" text-anchor="middle" fill="#141412">hiçbir rol kötü çalışmıyor; sıra yanlış</text>
+</svg>
+</div>
+<figcaption>Sprint'in gerçek şekli. Kapasite ne az ne fazla: **yanlış zamanda**. Analizin çıktısı olgunlaşmadan geliştirme başlıyor, kontrat en sonda uzlaşıyor, QA sıranın sonuna düşüyor.</figcaption>
+</figure>
+</div>

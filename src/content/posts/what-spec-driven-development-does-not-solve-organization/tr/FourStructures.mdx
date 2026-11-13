@@ -1,0 +1,133 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 402" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dört yapı yan yana: başlangıç noktasında spec yok, Tip 1'de disiplin başına ayrı spec var, Tip 2'de tek spec çok yazarla yakınsıyor, Tip 3'te tek spec tek yazar tarafından yazılıyor">
+  <defs>
+    <marker id="f6-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8B8983"/>
+    </marker>
+    <marker id="f6-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#B3261E"/>
+    </marker>
+  </defs>
+
+  <g font-size="11" font-weight="700" letter-spacing="1.2">
+    <text x="98"  y="30" text-anchor="middle" fill="#8B8983">BAŞLANGIÇ</text>
+    <text x="286" y="30" text-anchor="middle" fill="#B3261E">TİP 1</text>
+    <text x="474" y="30" text-anchor="middle" fill="#2733C9">TİP 2</text>
+    <text x="662" y="30" text-anchor="middle" fill="#14724B">TİP 3</text>
+  </g>
+  <g font-size="10.5" fill="#8B8983">
+    <text x="98"  y="46" text-anchor="middle">SDD öncesi</text>
+    <text x="286" y="46" text-anchor="middle">parçalı spec</text>
+    <text x="474" y="46" text-anchor="middle">ortak spec</text>
+    <text x="662" y="46" text-anchor="middle">genel bilici</text>
+  </g>
+
+  <rect x="12"  y="56" width="172" height="316" rx="10" fill="#FAFAF8" stroke="#E7E5DF" stroke-width="1.5"/>
+  <rect x="200" y="56" width="172" height="316" rx="10" fill="#FDF7F6" stroke="#E8C4C1" stroke-width="1.5"/>
+  <rect x="388" y="56" width="172" height="316" rx="10" fill="#FAFBFF" stroke="#D8DCF6" stroke-width="1.5"/>
+  <rect x="576" y="56" width="172" height="316" rx="10" fill="#F9FCFA" stroke="#CFE5DA" stroke-width="1.5"/>
+
+  {/* BAŞLANGIÇ */}
+  <g fill="#8B8983">
+    <circle cx="62" cy="88" r="7"/><circle cx="86" cy="88" r="7"/>
+    <circle cx="110" cy="88" r="7"/><circle cx="134" cy="88" r="7"/>
+  </g>
+  <g stroke="#C9C7C0" stroke-width="1.25">
+    <line x1="62" y1="98" x2="70" y2="124"/><line x1="86" y1="98" x2="90" y2="124"/>
+    <line x1="110" y1="98" x2="106" y2="124"/><line x1="134" y1="98" x2="126" y2="124"/>
+  </g>
+  <rect x="26" y="126" width="144" height="44" rx="8" fill="#F2F1ED" stroke="#C9C7C0" stroke-width="1.75" stroke-dasharray="6 5"/>
+  <text x="98" y="146" font-size="11.5" font-weight="700" text-anchor="middle" fill="#55534E">tasarım + kod</text>
+  <text x="98" y="162" font-size="10" text-anchor="middle" fill="#8B8983">ikisi de disiplinde</text>
+  <line x1="98" y1="172" x2="98" y2="192" stroke="#8B8983" stroke-width="1.5" marker-end="url(#f6-ar)"/>
+  <rect x="26" y="196" width="144" height="34" rx="8" fill="#F2F1ED" stroke="#8B8983" stroke-width="1.5"/>
+  <text x="98" y="218" font-size="11.5" text-anchor="middle" fill="#55534E">ürün</text>
+
+  {/* TİP 1 */}
+  <g fill="#B3261E">
+    <circle cx="226" cy="88" r="7"/><circle cx="266" cy="88" r="7"/>
+    <circle cx="306" cy="88" r="7"/><circle cx="346" cy="88" r="7"/>
+  </g>
+  <g stroke="#B3261E" stroke-width="1.25">
+    <line x1="226" y1="98" x2="226" y2="124"/><line x1="266" y1="98" x2="266" y2="124"/>
+    <line x1="306" y1="98" x2="306" y2="124"/><line x1="346" y1="98" x2="346" y2="124"/>
+  </g>
+  <g fill="#FBEDEC" stroke="#B3261E" stroke-width="1.5">
+    <rect x="210" y="126" width="32" height="44" rx="6"/>
+    <rect x="250" y="126" width="32" height="44" rx="6"/>
+    <rect x="290" y="126" width="32" height="44" rx="6"/>
+    <rect x="330" y="126" width="32" height="44" rx="6"/>
+  </g>
+  <g font-size="9" fill="#B3261E" text-anchor="middle">
+    <text x="226" y="152">spec</text><text x="266" y="152">spec</text>
+    <text x="306" y="152">spec</text><text x="346" y="152">spec</text>
+  </g>
+  <g stroke="#B3261E" stroke-width="1.5" fill="none" marker-end="url(#f6-arr)">
+    <path d="M226 172 L212 190"/><path d="M266 172 L258 190"/>
+    <path d="M306 172 L314 190"/><path d="M346 172 L360 190"/>
+  </g>
+  <rect x="210" y="196" width="152" height="34" rx="8" fill="#FBEDEC" stroke="#B3261E" stroke-width="1.75"/>
+  <text x="286" y="212" font-size="11" text-anchor="middle" fill="#B3261E">uyumsuz kod</text>
+  <text x="286" y="225" font-size="9.5" text-anchor="middle" fill="#8B8983">makine hızında</text>
+
+  {/* TİP 2 */}
+  <g fill="#2733C9">
+    <circle cx="414" cy="88" r="7"/><circle cx="454" cy="88" r="7"/>
+    <circle cx="494" cy="88" r="7"/><circle cx="534" cy="88" r="7"/>
+  </g>
+  <g stroke="#2733C9" stroke-width="1.25" fill="none">
+    <path d="M414 98 L458 124"/><path d="M454 98 L470 124"/>
+    <path d="M494 98 L480 124"/><path d="M534 98 L492 124"/>
+  </g>
+  <rect x="402" y="126" width="144" height="44" rx="8" fill="#EEF0FC" stroke="#2733C9" stroke-width="2"/>
+  <text x="474" y="146" font-size="11.5" font-weight="700" text-anchor="middle" fill="#2733C9">tek spec</text>
+  <text x="474" y="162" font-size="10" text-anchor="middle" fill="#55534E">yakınsamış · bütün</text>
+  <line x1="474" y1="172" x2="474" y2="192" stroke="#8B8983" stroke-width="1.5" marker-end="url(#f6-ar)"/>
+  <rect x="402" y="196" width="144" height="34" rx="8" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+  <text x="474" y="218" font-size="11.5" text-anchor="middle" fill="#14724B">kod — LLM</text>
+
+  {/* TİP 3 */}
+  <circle cx="644" cy="88" r="7" fill="#14724B"/>
+  <rect x="662" y="79" width="42" height="19" rx="9.5" fill="#FBF1DC" stroke="#c47b00" stroke-width="1.25"/>
+  <text x="683" y="93" font-size="10" font-weight="700" text-anchor="middle" fill="#c47b00">AI</text>
+  <path d="M700 82 C 716 74, 722 96, 704 98" fill="none" stroke="#c47b00" stroke-width="1.25" marker-end="url(#f6-ar)"/>
+  <line x1="648" y1="98" x2="656" y2="124" stroke="#14724B" stroke-width="1.25"/>
+  <rect x="590" y="126" width="144" height="44" rx="8" fill="#EBF4EF" stroke="#14724B" stroke-width="2"/>
+  <text x="662" y="146" font-size="11.5" font-weight="700" text-anchor="middle" fill="#14724B">tek spec</text>
+  <text x="662" y="162" font-size="10" text-anchor="middle" fill="#55534E">tek yazar · çok inceleme</text>
+  <line x1="662" y1="172" x2="662" y2="192" stroke="#8B8983" stroke-width="1.5" marker-end="url(#f6-ar)"/>
+  <rect x="590" y="196" width="144" height="34" rx="8" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+  <text x="662" y="218" font-size="11.5" text-anchor="middle" fill="#14724B">kod — LLM</text>
+
+  {/* istatistik bandı */}
+  <g stroke="#EDEBE5" stroke-width="1.25">
+    <line x1="26" y1="248" x2="170" y2="248"/><line x1="214" y1="248" x2="358" y2="248"/>
+    <line x1="402" y1="248" x2="546" y2="248"/><line x1="590" y1="248" x2="734" y2="248"/>
+  </g>
+  <g font-size="9" letter-spacing="1" fill="#8B8983">
+    <text x="26" y="266">SPEC SAYISI</text><text x="214" y="266">SPEC SAYISI</text>
+    <text x="402" y="266">SPEC SAYISI</text><text x="590" y="266">SPEC SAYISI</text>
+    <text x="26" y="304">YAZAR</text><text x="214" y="304">YAZAR</text>
+    <text x="402" y="304">YAZAR</text><text x="590" y="304">YAZAR</text>
+  </g>
+  <g font-size="13" font-weight="700" fill="#141412">
+    <text x="26" y="286">yok</text><text x="214" y="286">n</text>
+    <text x="402" y="286">1</text><text x="590" y="286">1</text>
+    <text x="26" y="324">n disiplin</text><text x="214" y="324">n ayrı</text>
+    <text x="402" y="324">n uzlaşır</text><text x="590" y="324">1 kişi</text>
+  </g>
+  <g font-size="10.5" font-style="italic">
+    <text x="98"  y="356" text-anchor="middle" fill="#8B8983">klasik agile</text>
+    <text x="286" y="356" text-anchor="middle" fill="#B3261E">drift fabrikası</text>
+    <text x="474" y="356" text-anchor="middle" fill="#2733C9">yakınsama hibriti</text>
+    <text x="662" y="356" text-anchor="middle" fill="#14724B">AI-centric</text>
+  </g>
+
+  <text x="380" y="392" font-size="12.5" text-anchor="middle" fill="#141412">verimlilik farkının tamamını bu iki satır açıklıyor</text>
+</svg>
+</div>
+<figcaption>Dört yapı, iki ölçü: **kaç spec** ve **kaç yazar**. Organizasyon şemanız ne derse desin, tipinizi bu iki sayı belirliyor.</figcaption>
+</figure>
+</div>

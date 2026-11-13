@@ -1,0 +1,50 @@
+---
+import Base from "../layouts/Base.astro";
+import LangSwitch from "./LangSwitch.astro";
+import site from "../../site.json" with { type: "json" };
+import { getPosts, humanDate } from "../lib/posts";
+import { homePath, other, postPath, rssPath, ui, type Lang } from "../lib/i18n";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+
+const posts = await getPosts(lang);
+const year = new Date().getUTCFullYear();
+const t = ui[lang];
+const altPath = homePath(other(lang));
+---
+
+<Base title={site.title} description={t.description} path={homePath(lang)} lang={lang} altPath={altPath}>
+  <header class="site-header col">
+    <h1 class="site-title">{site.title}</h1>
+    <p class="site-description">{t.description}</p>
+    <nav class="site-nav">
+      <a href="https://github.com/haandev">GitHub</a>
+      <a href={rssPath(lang)}>RSS</a>
+      {lang === "en" && <a href="/index.json">JSON</a>}
+      <LangSwitch lang={lang} altPath={altPath} />
+    </nav>
+  </header>
+
+  <main class="col">
+    <ul class="post-list">
+      {posts.length === 0 && <li class="empty">{t.noPosts}</li>}
+      {posts.map((p) => (
+        <li class="post-item">
+          <a class="post-link" href={postPath(p.id, lang)}>
+            <time datetime={p.data.date}>{humanDate(p.data.date, lang)}</time>
+            <h2>{p.data.title}</h2>
+            {p.data.description && <p>{p.data.description}</p>}
+            {p.data.tags.length > 0 && (
+              <ul class="tags">{p.data.tags.map((tag) => <li>{tag}</li>)}</ul>
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </main>
+
+  <footer class="site-footer col">
+    <p>&copy; {year} {site.title}</p>
+  </footer>
+</Base>

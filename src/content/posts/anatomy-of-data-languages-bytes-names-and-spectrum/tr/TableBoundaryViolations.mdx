@@ -1,0 +1,41 @@
+<div class="tbl">
+<table>
+<thead>
+<tr><th>Sistem</th><th>Etiketi</th><th>İhlal</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>**Transactional NTFS**</td><td>dosya sistemi</td>
+<td>Dosya işlemlerine tam atomiklik (5. soru) ekledi — Registry ve SQL ile aynı işlemde. Microsoft, karmaşıklığı ve düşük ilgi nedeniyle alternatifleri “şiddetle tavsiye” ediyor. [↗](https://learn.microsoft.com/en-us/windows/win32/fileio/deprecation-of-txf)</td>
+</tr>
+<tr>
+<td>**ZFS**</td><td>dosya sistemi</td>
+<td>Mimarisinin göbeğindeki DMU katmanı, tanımı gereği **genel amaçlı bir işlemsel nesne deposudur**; POSIX dosya sistemi (ZPL) bunun üzerine geçirilmiş yalnızca *bir* görünümdür. [↗](https://gwern.net/doc/cs/end-to-end-principle/2007-05-04-jeffbonwickzfsrampantlayeringviolation.html)</td>
+</tr>
+<tr>
+<td>**Btrfs**</td><td>dosya sistemi</td>
+<td>Doğrudan bir veritabanı tekniği üzerine kurulu: gölgelemeli (copy-on-write) B-ağaçları ve klonlar. [↗](https://dl.acm.org/doi/10.1145/1326542.1326544)</td>
+</tr>
+<tr>
+<td>**SQLite**</td><td>veritabanı</td>
+<td>Dışarıdan tek dosya; ama kendi ölçümlerine göre \~10 KB'lık blob'ları ayrı dosyalar halinde okuyup yazmaktan **%35 daha hızlı** ve \~%20 daha az yer kaplıyor. Yani “dosya sistemi işini” dosya sisteminden iyi yapıyor. [↗](https://www.sqlite.org/fasterthanfs.html)</td>
+</tr>
+<tr>
+<td>**Kafka**</td><td>mesaj kuyruğu</td>
+<td>Mesajları diske yazar, süresiz saklar, offset'le geriye okutur, üstüne SQL sorgusu attırır. “Kafka bir veritabanı mıdır?” tartışması sektörde ciddi ciddi yapılmıştır. [↗](https://martin.kleppmann.com/2018/10/17/kafka-summit.html)</td>
+</tr>
+<tr>
+<td>**PostgreSQL**</td><td>veritabanı</td>
+<td>`LISTEN/NOTIFY` ve `SKIP LOCKED` ile kuyruk gibi çalıştırılır. Postgres'in kendi dokümantasyonu `SKIP LOCKED`'ı açıkça “kuyruk benzeri tablo”lardaki çoklu tüketici senaryosu için önerir. [↗](https://www.postgresql.org/docs/current/sql-select.html)</td>
+</tr>
+<tr>
+<td>**WinFS**</td><td>dosya sistemi</td>
+<td>Microsoft'un dosya sistemini doğrudan bir ilişkisel veritabanı üzerine kurma girişimi (2003–2006). Terk edildi, ama niyet açıktı. [↗](https://en.wikipedia.org/wiki/WinFS)</td>
+</tr>
+<tr>
+<td>**BeFS**</td><td>dosya sistemi</td>
+<td>İndekslenmiş öznitelikler ve sorgu desteği — 90'larda bir dosya sistemine gömülmüş DQL. [↗](https://www.nobius.org/dbg/practical-file-system-design.pdf)</td>
+</tr>
+</tbody>
+</table>
+</div>

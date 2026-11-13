@@ -1,0 +1,291 @@
+---
+title: "Zaman, sütunun bir özelliğidir"
+date: "2026-10-20"
+description: "Date, Darwen ve Lorentzos yirmi yıl önce, zamanlı veride zamanla değişen her niteliğin kendi tablosu olması gerektiğini gösterdi: altıncı normal form. Ayrıştırmayı şemayı tasarlayana bıraktılar, ve kimse yapmadı. Bunu motora taşıyan bir öneri: sütun düzeyinde bir deklarasyon, projeksiyonları LEFT JOIN'e, koşulları EXISTS'e çeviren bir planlayıcı, ileri tarihli güncellemeler ve benzersizlik üzerine tek bir katı kural."
+ogDescription: "Her niteliğin tarihçesi olmak zorunda değildir, ama tarihçesi olan her niteliğin kendi tablosu olmak zorundadır; ve o tabloyu kullanıcı değil, motor tutmalıdır."
+bodyClass: "s-tc"
+dek: "Her niteliğin tarihçesi olmak zorunda değildir, ama <span class=\"a\">tarihçesi olan her niteliğin kendi tablosu olmak zorundadır</span>. Date, Darwen ve Lorentzos ikinci yarıyı yirmi yıl önce kanıtladı ve şemayı tasarlayana bıraktı. <span class=\"g\">O tabloyu motor tutmalıdır</span>; tuttuğu anda gelecek bugünden yazılabilir."
+tags:
+  - "databases"
+  - "sql"
+  - "temporal data"
+  - "normalization"
+  - "query planning"
+  - "systems design"
+---
+
+import "../style.css";
+
+import ActionVsFact from "./ActionVsFact.mdx";
+import RowVsAttribute from "./RowVsAttribute.mdx";
+import LogicalPhysical from "./LogicalPhysical.mdx";
+import PlanRewrite from "./PlanRewrite.mdx";
+import FutureUpdate from "./FutureUpdate.mdx";
+import UniquenessInversion from "./UniquenessInversion.mdx";
+import TableApproaches from "./TableApproaches.mdx";
+
+{/* ================= 1 ================= */}
+<section class="col s-prob">
+
+## 1. Problem: ileri tarihli değişiklikler
+
+Aralık ortasında İK'dan bir talep gelir: **"1 Ocak'tan itibaren tüm personelin maaşı %10 artacak. Bordro 1 Ocak'ta yeni maaşla çalışmalı; ama yeni maaşları şimdiden sistemde görebilmeliyiz."**
+
+Bu talep genellikle iki yoldan biriyle karşılanır. Birincisi, 1 Ocak gece yarısı bir `UPDATE` çalıştıracak bir job'dır. Yeni maaşlar job çalışana kadar hiçbir yerde yoktur; "şimdiden görebilmeliyiz" kısmı bir Excel dosyasıyla çözülür. İkincisi, her değişikliği bir etkinlik tarihiyle yeni satır olarak yazmaktır. ERP sistemleri onlarca yıldır bunu yapar; PeopleSoft'ta neredeyse her tablonun anahtarında bir `EFFDT` sütunu vardır. Bedeli, her sorguya şu kalıbın eklenmesidir:
+
+```sql
+WHERE j.effdt = (
+    SELECT MAX(j2.effdt) FROM job j2
+    WHERE j2.emplid = j.emplid AND j2.effdt <= CURRENT_DATE
+)
+```
+
+Kalıp bir sorguda unutulduğunda hiçbir şey hata vermez; sorgu gelecek yılın maaşını bugünkü maaş diye gösterir. Ve satırda yalnızca maaş yoktur: departman ve unvan da oradadır, ve her maaş değişikliği onları yeni bir satıra kopyalar.
+
+İki çözüm geleceği farklı temsil eder. Job, geleceği bir **eylem** olarak tutar: zamanı gelince yapılacak bir şey. Etkinlik tarihli satır, geleceği bir **olgu** olarak tutar: zaten doğru olan, sadece henüz geçerli olmayan bir şey. Eylem başarısız olabilir, olgu olamaz. Doğru temsil ikincisidir; sorun, onu kullanmanın bütün yükünün uygulamaya kalmasıdır.
+
+</section>
+
+<ActionVsFact />
+
+{/* ================= 2 ================= */}
+<section class="col s-nf">
+
+## 2. Neden altıncı normal form?
+
+Zamansız bir çalışan tablosu, `employee(id, name, salary, department)`, zaten beşinci normal formdadır. Her nitelik yalnızca anahtara bağlıdır; maaş değişince tek bir hücre değişir. Düzeltilecek bir şey yoktur.
+
+Zamanı ekleyince tablo *yine* 5NF'tedir. Anahtar `(id, during)` olur, ve her nitelik bu anahtara bağlıdır. Ama Ayşe'nin üç satırına bakın:
+
+<div class="tbl tbl-ayse">
+
+| id | name | salary | department | during |
+|---|---|---|---|---|
+| 42 | Ayşe | 50.000 | Satış | [2024-01, 2025-01) |
+| 42 | Ayşe | 55.000 | Satış | [2025-01, 2025-05) |
+| 42 | Ayşe | 55.000 | Pazarlama | [2025-05, ∞) |
+
+</div>
+
+"Ayşe" üç kez yazılmış. "Maaşı Ocak 2025'ten beri 55.000" olgusu hiçbir satırda yok; departman Mayıs'ta değiştiği için iki satıra bölünmüş. Birbirinden bağımsız iki olgu, maaş ve departman, tek bir aralığı paylaşmak zorunda kaldığı için birbirini parçalara bölüyor.
+
+Klasik normal formlar bu tekrarı göremez, çünkü tekrarın kaynağı nitelikler arasındaki bir bağımlılık değil. 1NF'ten 5NF'e kadar olan formlar 1970 ile 1979 arasında, önce Codd, sonra Fagin tarafından, niteliklerin *birbirine* nasıl bağlı olduğu için tanımlandı. Buradaki tekrarın kaynağı başka: her niteliğin **kendi ömrü** vardır, ve tablo hepsine tek bir ömür dayatır.
+
+Date, Darwen ve Lorentzos *Temporal Data and the Relational Model*'de (2003) tam olarak bunun için 6NF'i tanımladı: bir anahtar ve en fazla bir nitelik daha. Ayşe'nin tablosu üçe ayrılır, ve her tablo yalnızca kendi niteliğinin değiştiği yerde yeni satır alır.
+
+</section>
+
+<RowVsAttribute />
+
+{/* ================= 3 ================= */}
+<section class="col s-prop">
+
+## 3. Öneri: sütun düzeyinde deklarasyon
+
+Kitap 6NF'i bir şema tasarım kuralı olarak bıraktı: ayrıştırmayı tasarımcı yapar, sorguları tasarımcı yazar. Elle uygulanan 6NF, PeopleSoft kalıbının on katıdır; bu yüzden kimse uygulamaz.
+
+Önerim, bu sorumluluğu motora taşımak:
+
+```sql
+CREATE TABLE employee (
+    id            bigint PRIMARY KEY,
+    name          text NOT NULL,
+    salary        numeric EFFECTIVE DATED,
+    department_id bigint  EFFECTIVE DATED REFERENCES department
+);
+```
+
+`EFFECTIVE DATED`, `NOT NULL` ya da `DEFAULT` gibi bir sütun özelliğidir. Sözdizimi hayalidir; hiçbir motorda bu haliyle yoktur. Kullanıcı dört sütunlu tek bir tablo görür. Motor ise her etkinlik tarihli sütun için ayrı bir tablo tutar:
+
+```sql
+employee                (id, name)
+employee$salary         (id, salary, valid daterange)
+employee$department_id  (id, department_id, valid daterange)
+-- her yan tabloda: aynı id için örtüşen aralık yasak
+```
+
+`name` zamansızdır ve ana tabloda kalır. Bu, bütün yazının dayandığı fikirdir: **her niteliğin tarihçesi olmak zorunda değildir, ama tarihçesi olan her niteliğin kendi tablosu olmak zorundadır.** 6NF'i bütün şemaya değil, yalnızca zamanın gerçekten aktığı sütunlara uygulamak teoriden bir geri adım değildir. 6NF'in gerekçesi farklı zamanlarda değişen niteliklerdi; hiç değişmeyen bir niteliği ayırmanın gerekçesi yoktur.
+
+</section>
+
+<LogicalPhysical />
+
+<section class="col s-prop">
+
+Aralıklar yarı açıktır: `[başlangıç, bitiş)`. "1 Ocak'tan itibaren, yeni bildirime kadar" `[2027-01-01, ∞)` olarak yazılır; sonsuz, `9999-12-31` gibi sahte bir tarih değil, üst sınırın yokluğudur. 6NF'te `NULL` da yoktur: bir değerin yokluğu, o zaman noktası için satırın yokluğudur.
+
+</section>
+
+{/* ================= 4 ================= */}
+<section class="col s-read">
+
+## 4. Okuma: sorgu planlama
+
+Kullanıcı sıradan bir sorgu yazar:
+
+```sql
+SELECT name, salary
+FROM employee
+WHERE salary > 50000;
+```
+
+Sorgu, oturumun **etkinlik noktasında** çalışır. Varsayılan nokta bugündür, ama açıkça da verilebilir: `FROM employee AS OF EFFECTIVE DATE '2027-01-15'`.
+
+Planlayıcının kuralı iki cümledir:
+
+1. **Projeksiyonda geçen etkinlik tarihli sütun `LEFT JOIN` olarak planlanır.** O noktada değer yoksa satır kaybolmaz; sütun boş gelir.
+2. **`WHERE`'de geçen etkinlik tarihli sütun `EXISTS` olarak planlanır.** Koşul, o noktada geçerli olan değer üzerinde değerlendirilir.
+
+İki durumda da bağlantı koşulu aynıdır: `s.id = e.id AND s.valid @> :asof`. Bu bir "en son kayıt" araması değil, aralık içerme testidir; `(id, valid)` üzerindeki bir indeksle eşitliğe yakın bir maliyetle cevaplanır. PeopleSoft kalıbındaki ilişkili `MAX` alt sorgusu ortadan kalkar.
+
+Kurallar bir başlangıç noktasıdır. Gerisini planlayıcının zaten bildiği dönüşümler yapar:
+
+- **Join elimination.** `SELECT name FROM employee` sorgusunda `salary` hiç geçmez, dolayısıyla yan tablosuna hiç dokunulmaz. 6NF'in "her sorguda on join" anlamına geldiği korkusu, kullanılmayan bir join'in maliyeti sıfır olduğu sürece yersizdir.
+- **Outer join sadeleştirme.** Yukarıdaki sorguda `salary` hem projeksiyonda hem koşulda geçer. `salary > 50000` koşulunu sağlayan her satırda değer mutlaka vardır; bu yüzden `LEFT JOIN` ile `EXISTS` tek bir `INNER JOIN`'e katlanır.
+
+</section>
+
+<PlanRewrite />
+
+<section class="col s-read">
+
+İki kenar durumu kuralların nasıl yazılması gerektiğini gösterir. `WHERE salary IS NULL`, "o noktada kayıtlı maaşı olmayan" demektir ve `EXISTS` değil `NOT EXISTS` olarak planlanmalıdır; 2. kural yalnızca boş değeri reddeden koşullar için geçerlidir. İkincisi: bir sorgudaki bütün etkinlik tarihli sütunlar **aynı noktada** okunur. Maaşı 15 Ocak'tan, departmanı bugünden okuyan bir sorgu yazmak mümkün olmamalıdır. Elle yazılan effective dating'de en sık rastlanan sessiz hata tam olarak budur: bir join'e tarih koşulu eklenir, bir sonrakinde unutulur.
+
+</section>
+
+{/* ================= 5 ================= */}
+<section class="col s-write">
+
+## 5. Yazma: ileri tarihli güncelleme
+
+Aralık'taki talep tek bir komut olur:
+
+```sql
+UPDATE employee
+SET salary = salary * 1.10
+EFFECTIVE FROM DATE '2027-01-01';
+```
+
+Motor her çalışan için `2027-01-01`'i kapsayan aralığı bulur, ikiye böler ve sağ parçaya yeni değeri yazar. Departman, unvan ve isim kopyalanmaz; yalnızca `employee$salary` değişir.
+
+Bu basit görünen işlem iki karar saklar, ve ikisi de açıkça verilmelidir.
+
+**Sağ taraftaki `salary` hangi tarihin maaşıdır?** Ayşe'nin 1 Aralık'tan geçerli bir terfisi zaten kayıtlıysa, "1 Ocak'tan itibaren %10" talebinin anlamı 1 Ocak'taki maaşının %10 fazlasıdır. Bugünkü değeri okuyan bir motor terfiyi sessizce geri alır. Atamanın sağ tarafı, değişikliğin etkin olduğu noktada değerlendirilmelidir.
+
+**Sonraki planlara ne olur?** Mart için zaten bir değişiklik kayıtlıysa iki makul anlam vardır. Yeni değer *bir sonraki kayıtlı değişikliğe kadar* geçerlidir ve Mart planı korunur; ya da *yeni bildirime kadar* geçerlidir ve Mart planı silinir. İK ikisini de ister, farklı günlerde. Sözdizimi ikisini ayırmalıdır (`UNTIL NEXT`, `ONWARD`); motor bu seçimi sessizce yapmamalıdır.
+
+</section>
+
+<FutureUpdate />
+
+{/* ================= 6 ================= */}
+<section class="col s-uniq">
+
+## 6. Kısıtlar: etkinlik tarihli sütun benzersiz olamaz
+
+Önerinin en katı kuralı şudur: **`EFFECTIVE DATED` bir sütun hiçbir biçimde `UNIQUE` olamaz.** `PRIMARY KEY` olamaz, `UNIQUE` kısıtı taşıyamaz, başka bir tablonun yabancı anahtarının hedefi olamaz. Motor bu kombinasyonu şema tanımlanırken reddeder. Üç gerekçesi var.
+
+**Kimlik zamansızdır.** Her yan tablo ana tabloya anahtarla bağlanır. Anahtar zamanla değişebilseydi, bir satırdaki maaşın kime ait olduğunu bilmek için önce kimliğin hangi tarihte okunacağını bilmek gerekirdi.
+
+**Anlam belirsizdir.** Etkinlik tarihli bir sütunda `UNIQUE`, *her noktada benzersiz* de olabilir, *bütün zaman boyunca benzersiz* de. İkisi farklı kısıtlardır; tek kelimenin ikisini taşıması, motorun sessizce seçim yapması demektir.
+
+**İhlal gelecekte gerçekleşir.** Mehmet'in bir e-posta adresini 1 Ocak'ta bırakması planlanmış, Ayşe'ye aynı adres 1 Ocak'tan itibaren atanmış olsun. Mehmet'in planı Şubat'a ertelendiğinde, düzeltme Ayşe'nin henüz gerçekleşmemiş bir kaydıyla çakışır. Benzersizlik, ileri tarihli kayıtlarla birleşince satırlar arasında görünmeyen bir bağımlılık ağı örer.
+
+"Aynı adres aynı anda iki kişide olamaz" gerçek bir kuralsa, ilişkinin yönü çevrilir. Adres zamansız bir anahtarla kendi tablosunda yaşar, ve sahibi o tablonun etkinlik tarihli niteliği olur:
+
+```sql
+CREATE TABLE email_address (
+    address  text PRIMARY KEY,
+    holder   bigint EFFECTIVE DATED REFERENCES employee
+);
+```
+
+Yan tablo aynı anahtar için örtüşen aralık kabul etmediğinden, bir adresin herhangi bir noktada en fazla bir sahibi olur. Benzersizlik ayrıca deklare edilmez; anahtarın zamansız olmasından gelir.
+
+</section>
+
+<UniquenessInversion />
+
+{/* ================= 7 ================= */}
+<section class="col s-prior">
+
+## 7. Bugün var olanlar
+
+Parçaların hepsi bir yerde var.
+
+- **SQL:2011** `PERIOD FOR` ile application time ekler, ileri tarihli satırlara izin verir ve `FOR PORTION OF` ile aralık böler. PostgreSQL 18 temporal primary key (`WITHOUT OVERLAPS`) ve foreign key (`PERIOD`) ekledi. Ama zaman **satır** düzeyinde yaşar: maaş değişince bütün satır kopyalanır, ve sorgular dönemi kendileri filtrelemek zorundadır.
+- **Anchor Modeling** (Rönnbäck ve ark., 2010) 6NF'i açıkça benimser ve point-in-time view'lar üretir; performansı da join elimination'a dayanır. Ama bir modelleme metodolojisidir: şemayı ve view'ları bir araç üretir, motor hiçbir şey bilmez.
+- **Datomic** veriyi `(entity, attribute, value, transaction)` olarak saklar: nitelik düzeyinde 6NF, motorun içinde. Ama yalnızca kayıt zamanı vardır; gelecekte doğru olacak bir olgu yazılamaz. Nubank'ın çekirdek sistemlerinde çalışır, ama Datalog ve Clojure ekosisteminin pek dışına yayılmadı.
+- **XTDB** SQL'dir ve varsayılan olarak bitemporaldir; geçerlilik zamanı gelecekte olabilir, ve sorgular aksi söylenmedikçe şimdiki noktayı okur. Ama zaman yine **satır** düzeyindedir.
+
+</section>
+
+<TableApproaches />
+
+<section class="col s-prior">
+
+Üçünü birlikte sunan bir sistem yok: nitelik düzeyinde zaman, ileri tarihli olgular ve motorda planlama. Önerinin içeriği bu üçünü aynı yerde buluşturmaktır.
+
+</section>
+
+{/* ================= 8 ================= */}
+<section class="col s-limits">
+
+## 8. Sınırlar
+
+1. **Geleceği planlamak bitemporal veri gerektirir.** 15 Aralık'ta %10 girilip 20 Aralık'ta %8'e düzeltilirse, "15 Aralık'ta ne planlamıştık?" sorusu yalnızca etkinlik zamanıyla cevaplanamaz; kayıt zamanı da gerekir. Öneri, yan tablolara SQL:2011'in system versioning'ini eklemekle doğal biçimde genişler, ama bu yazının kapsamı dışında.
+2. **Türetilmiş sistemler haber alamaz.** 1 Ocak'ta hiçbir şey yazılmaz; dolayısıyla hiçbir arama indeksi, önbellek ya da CDC hattı da bir olay almaz. Motorun "bu değer artık geçerli" olaylarını ayrıca üretmesi gerekir.
+3. **Geniş okumalar pahalıdır.** Join elimination seçilmeyen sütunu bedava yapar; seçileni bedava yapmaz. Yirmi etkinlik tarihli sütunu olan bir tabloda `SELECT *` yirmi aralık araması demektir. Öneri, birkaç sütunun gerçekten zamanla aktığı şemalar içindir.
+4. **Benzersizlik yasağı modelleme işi çıkarır.** SQL:2011'in `WITHOUT OVERLAPS`'ı "her noktada benzersiz" kısıtını zaten destekler; bu öneri onu bilerek reddeder. Bedeli, bazı şemaların 6. bölümdeki gibi ters çevrilmesidir.
+5. **Bu bir tasarım önerisidir, uygulama değil.** Kuralların mevcut bir planlayıcıya ne kadar temiz oturduğu ve aralık bölmenin eşzamanlılık altında nasıl davrandığı açık sorulardır.
+
+</section>
+
+{/* ================= 9 ================= */}
+<section class="col s-close">
+
+## 9. Sonuç
+
+Date, Darwen ve Lorentzos, zamanlı veride farklı zamanlarda değişen niteliklerin ayrı tablolarda yaşaması gerektiğini gösterdi. Fikrin yirmi yıl boyunca bir kitapta kalmasının nedeni yanlış olması değil, uygulanmasının kullanıcıya bırakılmasıydı.
+
+Önerim, bu sorumluluğu motora taşımak. Sütun `EFFECTIVE DATED` olarak deklare edilir; motor onun yan tablosunu tutar; planlayıcı projeksiyonları `LEFT JOIN`'e, koşulları `EXISTS`'e çevirir; ileri tarihli bir `UPDATE` yalnızca o tek sütunun aralığını böler, başka hiçbir şeyi değil. Bunun karşılığında etkinlik tarihli bir sütun asla benzersiz olamaz, ve kimlik zamansız kalır.
+
+Her niteliğin tarihçesi olmak zorunda değildir, ama tarihçesi olan her niteliğin kendi tablosu olmak zorundadır. Ve bunu yapan bir veritabanında 1 Ocak sıradan bir gündür: veri değişmez; yalnızca veriye bakılan nokta ilerler.
+
+</section>
+
+{/* ================= sources ================= */}
+<section class="col refs">
+
+<h2>Kaynaklar</h2>
+
+### Zamansal ilişkisel teori
+
+- C. J. Date, Hugh Darwen ve Nikos A. Lorentzos, *Temporal Data and the Relational Model*, Morgan Kaufmann, 2003; aralıklar, altıncı normal form.
+- C. J. Date, Hugh Darwen ve Nikos A. Lorentzos, *Time and Relational Theory: Temporal Databases in the Relational Model and SQL*, Morgan Kaufmann, 2014; gözden geçirilmiş ve genişletilmiş baskı.
+
+### Normal formlar
+
+- E. F. Codd, [A Relational Model of Data for Large Shared Data Banks](https://doi.org/10.1145/362384.362685), *Communications of the ACM*, 13(6), 1970.
+- E. F. Codd, "Further Normalization of the Data Base Relational Model", IBM Research Report RJ909, 1971; ikinci ve üçüncü normal form.
+- Ronald Fagin, "Multivalued Dependencies and a New Normal Form for Relational Databases", *ACM Transactions on Database Systems*, 2(3), 1977; dördüncü normal form.
+- Ronald Fagin, "Normal Forms and Relational Database Operators", *SIGMOD*, 1979; bugün beşinci normal form denen projection-join normal form.
+
+### Standartlar ve motorlar
+
+- Krishna Kulkarni ve Jan-Eike Michels, [Temporal Features in SQL:2011](https://sigmodrecord.org/2012/09/30/temporal-features-in-sql2011/), *SIGMOD Record*, 41(3), 2012.
+- PostgreSQL 18 dokümantasyonu, [CREATE TABLE](https://www.postgresql.org/docs/18/sql-createtable.html); `WITHOUT OVERLAPS` ve `PERIOD` kısıtları.
+- XTDB dokümantasyonu, [Time in XTDB](https://docs.xtdb.com/about/time-in-xtdb.html).
+- Datomic dokümantasyonu, [Datomic](https://docs.datomic.com/).
+
+### 6NF'in pratikte uygulanması
+
+- Lars Rönnbäck ve ark., "Anchor Modeling: Agile Information Modeling in Evolving Data Environments", *Data & Knowledge Engineering*, 2010. [Anchor Modeling](https://www.anchormodeling.com/).
+
+<div class="note">
+
+Not: bu yazıdaki sözdizimi (`EFFECTIVE DATED`, `AS OF EFFECTIVE`, `EFFECTIVE FROM`, `UNTIL NEXT`, `ONWARD`) öneri için uydurulmuştur; hiçbir motor onu bu haliyle uygulamaz.
+
+</div>
+
+</section>

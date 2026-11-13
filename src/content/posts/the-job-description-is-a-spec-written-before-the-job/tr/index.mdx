@@ -1,0 +1,468 @@
+---
+title: "İş ilanı, işten önce yazılmış bir spec'tir"
+date: "2026-09-28"
+description: "Bilgiye ulaşmak ucuzladığında kıt olan şey bilgi olmaktan çıkar. Kıt olan artık doğru soruyu sorabilmek ve gelen cevabı anlayabilmektir. İş ilanının arkeolojisi, işe alım araştırmalarının gerçekte ne söylediği, bilmeyi değil sormayı ölçen üç mülakat formatı ve junior paradoksuna bir cevap."
+ogDescription: "Bilmek ucuzladığında kıt olan sormak ve anlamaktır. Cevabı değil soruyu ölçen üç mülakat formatı."
+bodyClass: "s-jd"
+dek: "Bilgiye ulaşmak ucuzladığında kıt olan şey bilgi olmaktan çıkar. Kıt olan artık <span class=\"a\">doğru soruyu sorabilmek</span> ve <span class=\"a\">gelen cevabı anlayabilmek</span>tir. İlanını hâlâ beceri listesiyle yazan kurum, <span class=\"r\">artık var olmayan bir işe adam arıyordur</span>."
+tags:
+  - "hiring"
+  - "recruitment"
+  - "ai"
+  - "leadership"
+  - "organization"
+  - "interviewing"
+---
+
+import "../style.css";
+
+import AdArchaeology from "./AdArchaeology.mdx";
+import CostCurves from "./CostCurves.mdx";
+import ValidityShift from "./ValidityShift.mdx";
+import TableThreeFormats from "./TableThreeFormats.mdx";
+import SixMines from "./SixMines.mdx";
+import TwoRubrics from "./TwoRubrics.mdx";
+import ErrorMatrix from "./ErrorMatrix.mdx";
+import TwoLadders from "./TwoLadders.mdx";
+
+{/* ================= 1 ================= */}
+<section class="col s-open">
+
+## 1. Yanlış açılış cümlesi
+
+Bir yazılım iş ilanının klasik açılışı bellidir: **"5+ yıl React deneyimi. Kafka, Kubernetes, PostgreSQL. AWS sertifikası tercih sebebidir."** Cümle teknik olarak yanlış değil; ama sorulması gereken soru cümlenin doğruluğu değil. Sorulması gereken soru şu: *bu liste kim tarafından, ne zaman, hangi işi varsayarak yazıldı?*
+
+Cevap genellikle şudur: liste, ilanı yazan ekibin *geçen yıl* yaptığı işin envanteridir. Bir pozisyon açılmıştır, çünkü bir kişi ayrılmıştır ya da bir takım büyümektedir; ilan, o kişinin ya da takımın bugüne kadar kullandığı araçların dökümüyle doldurulur. İlan işin kendisini değil, işin *geçmişini* tarif eder.
+
+Bu, bir yazılım ekibinin çok iyi bildiği bir hatadır. Bir spec, ürün kararı verilmeden önce yazılırsa, kod o spec'e sadık kalarak yanlış ürünü üretir. İş ilanı da tam olarak budur: **işten önce yazılmış bir spec.** İş sabitken bu spec işe yarıyordu, çünkü geçmiş geleceğin iyi bir tahmincisiydi. İş belirsizleştikçe ilan adayı ölçmeyi bıraktı ve kurumun geçmişteki varsayımlarını ölçmeye başladı.
+
+Aşağıda üç şey savunacağım. Beceri listesine dayalı işe alım doğal bir şey değil, belirli bir üretim biçiminin ürünüdür. O üretim biçimi değişiyor. Ve değişimin yönü, bilmeyi değil *sormayı* ve *anlamayı* kıt kaynak haline getiriyor. Bu, "olacak" iddiası kadar "olmak zorunda" iddiasıdır ve ikisini yazı boyunca ayrı tutmaya çalışacağım.
+
+</section>
+
+{/* ================= 2 ================= */}
+<section class="col s-arch">
+
+## 2. İş ilanının arkeolojisi
+
+"Pozisyon" fikri, yani önceden ve kişiden bağımsız tanımlanan, içine sonradan bir insanın yerleştirildiği bir iş birimi, göründüğü kadar eski değildir. Tarihi üç durakta anlatılabilir.
+
+**Taylor, 1911.** [*The Principles of Scientific Management*](https://www.gutenberg.org/ebooks/6435)'ın kurucu hamlesi, işi düşünen ile işi yapanın ayrılmasıdır. İş, ölçülebilir görevlere bölünür; her görev için "en iyi yol" yönetim tarafından belirlenir; işçi o yola uydurulur. Taylor'ın Bethlehem Steel'deki meşhur kürek deneyinde önemli olan, işçinin ne bildiği değil, standart hareketi ne kadar tutarlı tekrar ettiğidir. Pozisyon burada doğar: iş, insandan önce vardır.
+
+**İş değerlendirme, 1950'ler.** Savaş sonrası kurumlar, binlerce pozisyonu birbirine göre sıralamak zorunda kalacak kadar büyüdü. 1951'de Edward N. Hay ve Dale Purves, bir işi, *içindeki kişiyi değil*, üç faktörde (Know-How, Problem Çözme, Sorumluluk) puanlayan ve puanı bir maaş bandına bağlayan [Guide Chart-Profile yöntemini](https://www.thrivesparrow.com/blog/hay-system) tanıttı. Yöntem pozisyonları *karşılaştırılabilir* kılar: iki farklı departmandaki iki iş, aynı puan tablosuna oturur. Karşılaştırılabilirlik bürokrasinin oksijenidir; ve karşılaştırılabilir olmak için pozisyonun, onu kim dolduruyorsa ondan bağımsız tanımlanması gerekir. Beceri listesi, bu tanımın en kolay ölçülen parçasıdır.
+
+**Aday takip sistemi, 1988 ve sonrası.** Özgeçmişler dijitalleştiğinde ve başvuru sayısı yüzlerden binlere çıktığında, ilk eleme makineye devredildi. Bu sistemlerin ilklerinden Resumix, Ocak 1989'da Sun Microsystems'te devreye alındı; özgeçmişleri OCR ile okuyor ve bir "beceri veritabanı"yla eşleştiriyordu ([Tokuda, IAAI 1990](https://cdn.aaai.org/IAAI/1990/IAAI90-014.pdf)). Bu andan itibaren makine, ilanı bir *sorgu* olarak okur: `React AND Kafka AND (Kubernetes OR K8s)`. İlanın dili artık insana değil filtreye yazılır. Beceri listesi, sorgu sözdizimidir.
+
+</section>
+
+<AdArchaeology />
+
+<section class="col s-arch">
+
+Bu üç durak bir şeyi gösteriyor: **beceri arayışı bir insan doğası değil, bir teknoloji yığınıdır.** Taylor'ın görev bölümlemesi, Hay'in puan tablosu ve ATS'nin boolean sorgusu üst üste binmiştir. Her katman altındakinin varsayımını devralır: iş önceden bellidir, kişiye atıf yapmadan tanımlanabilir ve tanım anahtar kelimelerle ifade edilebilir.
+
+Bu varsayımların üçü de aynı şeye dayanır: geçmişin geleceği tahmin ettiği bir iş ortamı. Şimdi o ortamın ne olduğuna bakalım.
+
+</section>
+
+{/* ================= 3 ================= */}
+<section class="col s-env">
+
+## 3. Nazik ve vahşi ortamlar
+
+Robin Hogarth, [*Educating Intuition*](https://en.wikipedia.org/wiki/Robin_M._Hogarth) (2001) kitabında öğrenme ortamlarını ikiye ayırır. **Nazik (kind)** ortamda kurallar sabittir, durumlar tekrar eder, geri bildirim hızlı ve doğrudur: satranç, golf, bir yolcu uçağının kokpiti. Orada tekrar uzmanlık üretir; on bin saat gerçekten işe yarar. **Vahşi (wicked)** ortamda kurallar değişir, durumlar tekrar etmez, geri bildirim gecikmeli, eksik ya da yanıltıcıdır: yatırım tahmini, örgüt tasarımı, teşhisi zor hastalıklar. Orada tekrar, uzmanlık yerine *yanlış güven* üretebilir. Hogarth'ın en bilinen örneği, yirminci yüzyılın başında hastaların dilini elle yoklayarak tifo teşhis etmesiyle ünlenen New Yorklu bir hekimdir; sonradan anlaşıldı ki hastalığı aynı ellerle yayıyordu. Ortamındaki hiçbir şey ona bunu söyleyebilecek geri bildirimi vermedi. Hogarth daha sonra bu ayrıma meslektaşlarıyla birlikte geri döndü ve onu formelleştirdi ([Hogarth, Lejarraga &amp; Soyer, 2015](https://journals.sagepub.com/doi/abs/10.1177/0963721415591878)).
+
+İş ilanı, nazik ortam için tasarlanmış bir araçtır. Beceri listesi, "bu iş geçen yılki gibi olacak" varsayımının kâğıda dökülmüş halidir ve nazik ortamda bu varsayım doğrudur. Sorun, yazılım işinin nazik uçtan vahşi uca doğru kaymasıdır.
+
+Bu kaymayı tek başına AI başlatmadı; ama AI onu geri döndürülemez hale getirdi. Nedenini, işi katmanlara ayırarak göstermek istiyorum.
+
+</section>
+
+{/* ================= 4 ================= */}
+<section class="col s-layers">
+
+## 4. Üç katman ve maliyet eğrileri
+
+Bir işi yapabilmek için gereken bilişsel işi üç katmana ayırıyorum. Katmanlar birbirinin yerine geçmez; üst üste dururlar ve her birinin maliyeti zaman içinde farklı davranır.
+
+<h3 class="t-l1">Katman 1 · <span class="en">Bilmek</span></h3>
+
+Bilgiyi kafada taşımak: bir API'nin imzasını, bir algoritmanın karmaşıklığını, bir framework'ün yaşam döngüsünü ezberden bilmek. Bu katmanın maliyeti insana bağlıdır. Öğrenmek zaman alır, unutulur ve teknoloji değişince değerini kaybeder.
+
+<h3 class="t-l2">Katman 2 · <span class="en">Erişmek</span></h3>
+
+Bilgiyi bulmak: kütüphane, kılavuz, meslektaş, Google, Stack Overflow, LLM. Bu katmanın maliyeti otuz yıldır düzenli olarak düşüyor ve son üç yılda sıfıra yaklaştı. Bir sorunun cevabı artık saniyeler içinde, bağlamınıza uyarlanmış ve çalışan kod olarak geliyor.
+
+<h3 class="t-l3">Katman 3 · <span class="en">Sormak ve anlamak</span></h3>
+
+Neyi aradığını bilmek; gelen cevabın doğru olup olmadığını, hangi bağlamda geçerli olduğunu, kendi probleminize uyup uymadığını ayırt etmek. Bu katmanın maliyeti düşmüyor. Hatta artıyor olabilir: üretilen cevap sayısı arttıkça onları denetleme yükü de artar. Akıcı ama yanlış bir cevabı yanlış olduğunu bilmeden kabul etmenin bedeli, cevabı hiç bulamamanın bedelinden yüksektir.
+
+</section>
+
+<CostCurves />
+
+<section class="col s-layers">
+
+Şimdi kritik gözlem. **İş ilanı Katman 1'i ölçer.** "5 yıl React" bilmenin ölçüsüdür. Katman 2 ölçülmez, çünkü herkes erişebilir. Katman 3 ölçülmez, çünkü ölçmesi zordur ve ilan formatı buna göre kurulmamıştır.
+
+Kıtlık Katman 1'deyken bu bir sorun değildi; en kıt olanı ölçüyordunuz. Kıtlık Katman 3'e kaydığında ilan hâlâ Katman 1'i ölçüyor. Yani **ilan, artık kıt olmayan bir kaynağı ölçen bir alettir.** Bu, bolluk piyasasında kıtlık fiyatlandırması yapmaktır.
+
+Bir itiraz hemen gelir: "Katman 3 için Katman 1 gerekmez mi? Bilmeden nasıl sorarsın?" İtiraz haklıdır ve bu yazının en önemli sorusudur; 8. bölümde ayrıca ele alacağım. Şimdilik şunu not edelim: Katman 1 gereklidir ama *ölçülmesi gereken şey* değildir. Bir cerrahın ellere ihtiyacı vardır; mülakatta kimse el saymaz.
+
+</section>
+
+{/* ================= 5 ================= */}
+<section class="col s-evid">
+
+## 5. Kanıt: performansı gerçekte ne öngörüyor?
+
+"Bence" ile ilerlemek istemiyorum. İşe alım literatürünün burada söyleyecek sözü var.
+
+**Schmidt ve Hunter, 1998.** Bu meta-analiz, işe alım yöntemlerinin iş performansını ne kadar iyi öngördüğüne dair [seksen beş yıllık araştırmayı özetler](https://doi.org/10.1037/0033-2909.124.2.262). Personel psikolojisinin en çok atıf alan tablosu oldu: iş örneği testleri 0,54, genel zihinsel yetenek 0,51, yapılandırılmış mülakat 0,51, yapılandırılmamış mülakat 0,38, yıl cinsinden iş deneyimi 0,18, eğitim yılı 0,10.
+
+**Sackett, Zhang, Berry ve Lievens, 2022.** Yirmi dört yıl sonra [aynı tablo yeniden incelendi](https://doi.org/10.1037/apl0000994). Yazarlar, önceki meta-analizlerin değişim aralığı kısıtı (range restriction) için sistematik olarak aşırı düzeltme yaptığını gösterdi ve tahminleri yeniden hesapladı. Neredeyse her şey düştü. Ama sıralama öğretici bir biçimde değişti: **yapılandırılmış mülakat birinci sıraya yükseldi (0,42)**, yıl cinsinden iş deneyimi ise 0,18'den **0,07**'ye, yani pratikte hiçliğe düştü.
+
+</section>
+
+<ValidityShift />
+
+<section class="col s-evid">
+
+Bu tablonun iki noktası benim argümanım için önemli.
+
+Birincisi, ilanların en çok istediği şey olan yıl cinsinden deneyim, iki sütunda da dipte duruyor ve düzeltme onu daha da aşağı itti. Adayı bir problemin karşısına koyup ne yaptığına bakan yapılandırılmış mülakat ise artık en tepede. Bu bulgu AI öncesi dünyaya aittir. İlan formatı, eldeki en iyi kanıttan AI'dan çok önce ayrılmıştı; AI yalnızca faturayı büyüttü.
+
+İkincisi, ve burada dürüst olmam gerekiyor: **iş bilgisi testleri 0,40 ile güçlü kalıyor.** Bu, bilmenin öngörücü olmadığı teziyle çelişmiyor mu? Bence çelişmiyor. Bir iş bilgisi testi "kaç yıldır Kafka kullanıyorsun" diye sormaz; işin gerektirdiği bilgiyi çalıştırır ve onu sınar. Ve en güçlü olduğu yer tam da işin nazik olduğu, bilgi gövdesinin sabit ve iyi tanımlı olduğu yerdir. Bu, tezimin sınır koşuludur ve 9. bölümde ona döneceğim. Kanıtın karşı çıktığı şey bilgi değil, yıllarla ve anahtar kelimelerle ölçülen bilgi *iddiasıdır*.
+
+**Bock, 2013 ve 2014.** Google'ın o dönemki insan kaynakları başkanı Laszlo Bock, *The New York Times*'ta [Adam Bryant'a verdiği röportajda](https://www.nytimes.com/2013/06/20/business/in-head-hunting-big-data-may-not-be-such-a-big-deal.html) şirketin kendi işe alım verisini kazdığında ne bulduğunu anlattı. Beyin jimnastiği soruları hiçbir şeyi öngörmüyordu. Not ortalamaları ve test puanları, yeni mezunlar için çok az dışında, işe alım ölçütü olarak değersizdi. İşe yarayan, öngörücü olup olmadıkları doğrulanmış yapılandırılmış davranışsal mülakatlardı. Birkaç ay sonra [Thomas Friedman'ın bir köşe yazısında](https://www.nytimes.com/2014/02/23/opinion/sunday/friedman-how-to-get-a-job-at-google.html) Bock, Google'ın aradığı ilk şeyi söyledi: genel bilişsel yetenek; ona göre bu IQ değil, öğrenme yeteneğiydi, yani anında işleyebilme ve birbirinden kopuk bilgi parçalarını bir araya getirebilme becerisi.
+
+Kaynaklar aynı yönü gösteriyor: **iddia edilen bilgi öngörücü değildir; öğrenebilmek ve bir problem karşısında ne yaptığın öngörücüdür.** Katman 1 değil, Katman 3.
+
+</section>
+
+{/* ================= 6 ================= */}
+<section class="col s-formats">
+
+## 6. Sorma becerisi nasıl ölçülür?
+
+"Soru sorabilen insan arıyoruz" demek kolay; ama bu cümle ilana yazılamaz, çünkü ölçülemez. Ölçülemeyen şey işe alım sürecinde yok sayılır. Bu yüzden bu bölüm yazının en pratik bölümü: Katman 3'ü Katman 1 kadar somut hale getirmek.
+
+Katman 3'ün iki yarısı vardı: *sormak* ve *anlamak*. Anlamak da kendi içinde ikiye ayrılır: **tanımadığın bir şeyi anlamak** ve **yanlış olan bir şeyi fark etmek.** Aşağıdaki üç format bu üç parçayı sırayla ölçer:
+
+</section>
+
+<TableThreeFormats />
+
+<section class="col s-formats">
+
+Bu üç durum, AI ile çalışan bir mühendisin gününün neredeyse tamamını oluşturur. Talep eksik gelir; üretilen kod çoğu zaman tanımadığı bir kütüphaneyi ya da deseni kullanır; ve bu kodun bir kısmı akıcı ama yanlıştır. Beceri listesi bunların hiçbirini ölçmez, çünkü üçü de adayın zaten bildiği şeyin *dışında* olur.
+
+### 6.1 Ortak iskelet
+
+Ayrıntılara girmeden önce, üç formatı birbirine bağlayan dört ilke.
+
+**Cevabı değil, izi ölçersin.** Adayın vardığı yer ikincildir. Ölçülen şey oraya giderken bıraktığı izdir: hangi soruları hangi sırayla sordu, neyi varsaydı ve neyi varsaydığını *söyledi mi*. Bu yüzden aday baştan sesli düşünmeye davet edilir ve mülakatçı sonucu değil, süreci not alır.
+
+**Gizli bağlam kartı.** Her formatta mülakatçının elinde adayın görmediği bir kart vardır: eksik spec'in cevapları, kodun gerçek davranışı, AI cevabındaki hatanın yeri. Kart yalnızca adayın *sorduğu* şeyi açığa çıkarır. Bu gerçek hayatın bir modelidir: kurumlarda bilgi çoğu zaman vardır, ama birinin kafasında yaşar ve ancak sorulursa ortaya çıkar.
+
+**Mülakatçı jüri değil, bilgi kaynağıdır.** Mülakatçının görevi adayı sıkıştırmak değil, her soruya dürüstçe ve yalnızca sorulduğu kadar cevap vermektir. Fazladan ipucu ölçümü bozar; soruyu geçiştirmek adayı cezalandırır. Bu rolün kendisi öğretilmesi gereken bir beceridir; formatlar mülakatçı eğitimi olmadan çalışmaz.
+
+**Rubrik önceden yazılır ve davranışa bağlanır.** "İyi soru sordu" bir puan değildir. "Silme işleminin geri alınabilir olup olmadığını sordu" bir puandır. Her formatın rubriği, gizli karttaki maddelere ve 8. bölümde anlatacağım üç basamaklı sorgulama merdivenine bağlanır: *kabul et → sorgula → neyin sorulmaya değer olduğunu seç.*
+
+### 6.2 Eksik spec mülakatı
+
+**Kurulum.** Adaya sıradan görünen, tek cümlelik bir iş verilir. Cümle bilerek eksiktir, ama eksiklik göze batmaz. İyi bir eksik spec'in ölçütü şudur: ilk okumada "bunun neresi zor?" dedirtmeli, ikinci okumada en az beş ayrı mayın ortaya çıkmalıdır. Bu mayınların cevapları mülakatçının kartındadır.
+
+**Örnek.**
+
+<div class="prompt">
+
+"Hesabını silen kullanıcıların verilerini 30 gün sonra kalıcı olarak temizleyen bir job yazmanı istiyoruz."
+
+</div>
+
+Görünüşte bu, bir cron job ve tek bir `DELETE`'tir. Zayıf aday tam olarak bunu yazar:
+
+```sql
+DELETE FROM users
+WHERE deleted_at < now() - interval '30 days';
+```
+
+</section>
+
+<SixMines />
+
+<section class="col s-formats">
+
+Güçlü aday kod yazmadan önce sorar. İlk sorusu çoğunlukla şudur: *"Burada silmek ne demek? Geri alınabiliyor mu?"* Bu tek soru, işin bir `DELETE` değil bir veri yaşam döngüsü problemi olduğunu açığa çıkarır. Ardından gelen sorular kartı madde madde açar.
+
+Çarpıcı olan şudur: kartın tamamını açmak için özel bir bilgi gerekmez. Yasal bir yükümlülüğe uymak için saklanması gereken verilere dair istisnası da dahil, [GDPR'ın 17. maddesini](https://gdpr-info.eu/art-17-gdpr/) ezberden bilmeniz gerekmez. Gereken şey, "kullanıcının verisi" ifadesinin kaç farklı şeye karşılık gelebileceğini merak etmektir. Bu formatta Katman 1 neredeyse hiç işe yaramaz; Katman 3 her şeydir.
+
+**Ne ölçülür?**
+
+- **Kaç mayın soruyla açıldı?** Varsayılarak geçilen her mayın, gelecekteki bir üretim olayıdır.
+- **Soruların sırası.** Güçlü aday önce anlamı ("silmek ne demek?"), sonra kapsamı ("hangi veri?"), en son uygulamayı ("hangi saatte çalışsın?") sorar. Sıra, adayın problemi nasıl kavradığını gösterir.
+- **Sesli söylenen varsayımlar.** Zaman baskısı altında her şeyi soramazsınız. Güçlü aday sormadığı şeyi söyler: *"Yedekleri kapsam dışında varsayıyorum, ama bunun ayrıca konuşulması gerekir."* Söylenmiş bir varsayım bir karardır; söylenmemiş bir varsayım bir kusurdur.
+- **Ne zaman duracağını bilmek.** Sonsuza kadar soru soran aday da başarısız olur. Yeterince şeyin netleştiğini ve geri kalanın iş sırasında çözülebileceğini ayırt etmek, merdivenin en üst basamağıdır: neyin sorulmaya *değer* olduğunu seçmek.
+
+### 6.3 Yabancı kod okuma
+
+**Kurulum.** Adaya, özgeçmişinde olmayan ve muhtemelen hiç görmediği bir dilde 10–15 satırlık bir kod verilir. O dili biliyorsa kod değiştirilir. Soru basittir: *"Bu ne yapıyor?"* Katman 1 bilerek sıfırlanmıştır. Geriye kalan, tanımadığı bir şeyi tanıdık şeylere benzeterek anlamlandırma becerisi ve benzetmenin nerede kırıldığını görebilmektir.
+
+**Örnek.** JavaScript, Java ya da Python geçmişli bir adaya şu Erlang kodu verilir:
+
+```erlang
+loop(Balance) ->
+    receive
+        {deposit, Amount, From} ->
+            From ! {ok, Balance + Amount},
+            loop(Balance + Amount);
+        {withdraw, Amount, From} when Amount =< Balance ->
+            From ! {ok, Balance - Amount},
+            loop(Balance - Amount);
+        {withdraw, _Amount, From} ->
+            From ! {error, insufficient_funds},
+            loop(Balance)
+    end.
+```
+
+İlk tur okuma turudur. Güçlü aday şöyle bir iz bırakır:
+
+<div class="trace">
+
+"`Balance` bir bakiye olmalı. `receive` bir şey bekliyor gibi; altındaki üç blok da süslü parantezle başlıyor ve ilk elemanları `deposit`, `withdraw`… Bu bir `switch` olabilir, gelen şeyin şekline göre dallanıyor. `From ! {...}` her dalda var ve `From`'a gidiyor gibi. Bence bu bir *gönderme*, cevabı geri yolluyor. Emin değilim; doğrulamak isterim. `when Amount =< Balance` bir koşul; bakiye yetmiyorsa üçüncü dala düşüyor. Sıra önemli olmalı, yoksa üçüncü dal her `withdraw`'u yakalardı. En ilginci: döngü yok ama fonksiyon kendini çağırıyor. Bakiye hiçbir yerde *değiştirilmiyor*; yeni değer bir sonraki çağrıya veriliyor. Durum bir değişkende değil, çağrıda yaşıyor."
+
+</div>
+
+Bu izde üç şey dikkat çeker. Aday her çıkarımı bir benzetme üzerine kurar (`switch`, gönderme, döngü). Emin olmadığı çıkarımı *emin değilim* diye işaretler. Ve benzetmenin kırıldığı yeri, yani mutasyonun yokluğunu, bir tuhaflık olarak not eder. Bu tuhaflığı fark etmek, okumanın en değerli anıdır.
+
+İkinci tur çarpıcı olan turdur. Mülakatçı sorar:
+
+<div class="prompt">
+
+"İki kişi bu hesaptan aynı anda para çekmeye çalışırsa ne olur?"
+
+</div>
+
+Java ya da Python geçmişli bir aday için refleks cevap *race condition*'dır: iki thread bakiyeyi aynı anda okur, ikisi de yeterli görür, hesap eksiye düşer; o halde bir kilit gerekir. Kodda kilit yoktur. Aday ya bir kilit eklemeyi önerir ya da takılıp kalır.
+
+Kartta yazan gerçek cevap: **race condition yoktur.** Bu fonksiyon bir Erlang sürecinin gövdesidir. Süreç, mesajlarını posta kutusundan [*birer birer*](https://www.erlang.org/doc/system/expressions.html#receive) alır; iki `withdraw` mesajı aynı anda gelse bile sırayla işlenir. Kilit yoktur, çünkü paylaşılan bir değişken yoktur. Güvenliği kilit değil, mimari sağlar.
+
+Aday bunu bilemez; Katman 1'i sıfırlanmıştır. Ölçülen şey bilip bilmediği değil, oraya *soruyla* varıp varamadığıdır. Güçlü aday refleksini askıya alır ve sorar: *"Bu kod birden fazla thread'de aynı anda çalışabiliyor mu? `receive` mesajları birer birer mi alıyor?"* Bu soru sorulduğunda kart açılır ve aday, refleksinin başka bir dünyanın varsayımı olduğunu görür.
+
+Üçüncü tur, merdivenin tepesi içindir:
+
+<div class="prompt">
+
+"Bu kodda eksik bir şey var mı?"
+
+</div>
+
+Kartta iki cevap vardır. Birincisi: tanınmayan bir mesaj, örneğin `{balance, From}`, hiçbir dala uymaz ve [posta kutusunda](https://www.erlang.org/doc/system/expressions.html#receive) sonsuza kadar kalır. Posta kutusu sessizce büyür. İkincisi: bir `withdraw` için `Amount`'un pozitif olduğunu kontrol eden hiçbir şey yoktur. Eksi bir tutar çekmek bakiyeyi artırır. İkinci cevabı bulmak için hiç Erlang bilmek gerekmez; yalnızca kodun *niyeti* ile *yaptığı* arasındaki boşluğu sormak gerekir.
+
+**Ne ölçülür?**
+
+- **Benzetmenin kalitesi.** Aday bilinmeyeni bilinene bağlayabiliyor mu? Bunu yaparken bağın nerede zayıf olduğunu görebiliyor mu?
+- **Belirsizliği işaretlemek.** Her çıkarım aynı güvenle söylenmez. "Bu kesin", "bu tahmin" ve "bunu doğrulamam lazım" ayrımını yapabilen aday, AI çıktısıyla çalışırken de aynı ayrımı yapar.
+- **Refleksi askıya almak.** Kendi dünyasının bir varsayımını (kilit gerekir) yeni bir dünyaya taşımadan önce sorgulayabiliyor mu? Bu, formatın en ayırt edici ölçüsüdür.
+- **Neyi arayacağını bilmek.** Bir varyasyon: adaya "şimdi bir LLM'e ya da dokümantasyona tam olarak bir soru sorabilirsin; ne sorardın?" denir. O sorunun kalitesi, okumanın kalitesini özetler. *"`receive` nasıl çalışır?"* orta karar bir sorudur. *"Bir Erlang süreci posta kutusundaki mesajları birer birer mi işler, eşzamanlı mı?"* çok daha iyi bir sorudur, çünkü tek kritik bilinmeyene iğne gibi iner.
+
+### 6.4 AI çıktısı denetimi
+
+**Kurulum.** Adaya bir soru ve bir LLM'in o soruya verdiği cevap gösterilir. Cevap akıcı ve özgüvenlidir, kod çalışır ve testleri geçer; ama içinde üretimde sessizce patlayacak bir hata vardır. Çerçeve şudur: *"Bunu bir takım arkadaşın gönderdi ve merge etmek üzere. Ne dersin?"*
+
+Hatanın seçimi formatın kalbidir. Sözdizimi hatası olmamalıdır; derleyici onları zaten bulur. Hata, **kodun doğruluğunun kodun dışındaki bir şeye bağlı olduğu** türden olmalıdır: veriye, şemaya, zamana, ölçeğe.
+
+**Örnek.** Soru ve cevap:
+
+<div class="llm">
+
+<span class="lbl">Soru</span>
+
+Hiç sipariş vermemiş müşterileri listelemek istiyorum. PostgreSQL.
+
+<span class="lbl">Cevap</span>
+
+Bunun için `NOT IN` ile bir alt sorgu kullanabilirsiniz:
+
+```sql
+SELECT id, email
+FROM customers
+WHERE id NOT IN (SELECT customer_id FROM orders);
+```
+
+Bu sorgu, `orders` tablosunda hiç kaydı bulunmayan müşterileri döndürür. Alt sorgu yalnızca bir kez çalıştığı için `LEFT JOIN` alternatifine göre daha okunaklı ve genellikle daha performanslıdır. Büyük tablolarda `orders.customer_id` üzerinde bir indeks olduğundan emin olmanızı öneririm.
+
+</div>
+
+Cevaptaki her şey doğru görünür. İndeks önerisi mantıklıdır, sorgu okunaklıdır ve test veritabanında doğru sonucu döndürür.
+
+Kartta yazan hata: `orders.customer_id` **nullable**'dır, çünkü şirket altı ay önce üye olmadan alışverişi (guest checkout) açmıştır. Misafir siparişlerinin `customer_id`'si yoktur. SQL'in üç değerli mantığında `x NOT IN (1, 2, NULL)` hiçbir zaman *doğru* olmaz; en iyi ihtimalle *bilinmez* olur. Alt sorgu tek bir `NULL` döndürürse, sorgu [**hiçbir satır döndürmez**](https://wiki.postgresql.org/wiki/Don%27t_Do_This#Don.27t_use_NOT_IN).
+
+Hata yok. Uyarı yok. Boş bir liste. Pazarlama ekibi sorguyu "hiç sipariş vermemiş müşterilere" kampanya göndermek için kullanır; liste boştur; kimse bir şeyin yanlış gittiğini fark etmez; kampanya kimseye ulaşmaz. Bu, 7. bölümde anlatacağım *sessiz hata*nın küçük ölçekli bir provasıdır.
+
+Cevapta ikinci, daha sığ bir sorun da vardır: "genellikle daha performanslıdır" iddiası dayanaksızdır. PostgreSQL `NOT EXISTS`'i bir anti-join'e dönüştürebilir ve çoğu durumda en az onun kadar iyi sonuç verir. Bu sorun bilerek yerleştirilmiş bir **tuzaktır**: sığ bir denetim burada durur, performans iddiasını düzeltir ve cevabı onaylar. Asıl hata altta kalır.
+
+Bu örnek, 8. bölümdeki merdivenin üç basamağını neredeyse birebir ayırır:
+
+- **Kabul eden aday:** "Temiz görünüyor, indeks önerisi de iyi. Onaylandı." Cevabın özgüveni, adayın özgüveni olur.
+- **Sorgulayan aday:** performans iddiasını yakalar ya da `NOT IN`'in `NULL`'larla sorunlu davrandığını hatırlar ve `NOT EXISTS` önerir. Hatayı bulmuştur; ama bir *kural* olarak bulmuştur.
+- **Neyin sorulmaya değer olduğunu seçen aday:** önce sorar: *"`customer_id` nullable mı? Bir siparişin müşterisinin olmadığı bir durum var mı?"* Cevap geldiğinde hatayı bulur, ama orada durmaz: *"Bu sorgunun doğruluğu şemaya bağlı. Şema altı ay önce değişmiş ve kimse fark etmemiş. Bir sonraki değişikliği kim fark edecek?"* Sorguyu düzeltmenin yanında, içinde `NULL` müşterili bir sipariş bulunan bir test önerir. Sorguyu değil, *sorgunun yanlış olabileceği koşulu* korumaya alır.
+
+Bu üç yanıt arasındaki farka dikkat edin. İkinci aday Katman 1'i kullandı: bir kural biliyordu. Üçüncü aday Katman 3'ü kullandı: kuralı bilmese bile doğru soruyla aynı yere varırdı; ve oraya vardıktan sonra dersi hatanın kendisinden değil, *hatanın nasıl mümkün olduğundan* çıkardı.
+
+**Ne ölçülür?**
+
+- **Aramaya nereden başladı?** Sözdiziminde mi, mantıkta mı, yoksa kodun dışındaki varsayımlarda mı? Güçlü aday "bu kod neyi varsayıyor?" sorusuyla başlar.
+- **Özgüvene direnç.** Akıcı, kendinden emin bir metin okuyanı onaya iter. Adayın bu baskıya ne kadar dayandığı, AI ile çalışırken ne kadar güvenilir bir denetçi olacağının en iyi göstergesidir.
+- **Tuzakta durdu mu?** Denetimi bulduğu ilk sorunda bitiren aday, gerçek hayatta da bulduğu ilk sorunda durur.
+- **Düzeltmek mi, korumak mı?** Hatayı düzeltmek bir basamaktır; tekrarlanmasını imkânsız ya da görünür kılmak bir üst basamaktır.
+
+### 6.5 Tasarım riskleri
+
+Bu formatların da zaafları var; onları bilmeden uygulamak, beceri listesinden daha kötü sonuç verebilir.
+
+**Sızma.** Formatlar bilinir hale geldiğinde adaylar hazırlanır. Bu bir sorun değil, amacın ta kendisidir: eksik spec'te önce soru sorma alışkanlığını edinerek hazırlanan aday, aranan beceriyi zaten edinmiştir. Asıl sorun *içeriğin* sızmasıdır. `NOT IN` örneği yayınlandığı anda yandı; bu yazıda olduğu gibi. Bu yüzden format sabit kalır, içerik döner. İyi bir ekip her çeyrekte kendi üretim olaylarından yeni bir örnek çıkarır. Kendi hatalarınızdan daha iyi mülakat malzemesi yoktur.
+
+**Mülakatçı yükü.** Beceri listesini bir ATS denetleyebilir. Bu formatları ancak eğitilmiş bir insan yürütebilir. Kartı iyi bilmeyen, fazla ipucu veren ya da sessizliğe tahammül edemeyen bir mülakatçı ölçümü bozar. Bu, formatların maliyetidir ve 7. bölümde anlatacağım direncin gerçek bir kaynağıdır.
+
+**Kaygı ve dil.** Sesli düşünmek herkes için eşit derecede kolay değildir. Anadili mülakat dilinden farklı olan ya da baskı altında donan bir aday, Katman 3'te güçlü olduğu halde zayıf görünebilir. Hafifletmenin yolu, adayı formata önceden hazırlamak ve bir ısınma sorusuyla başlamaktır. Formatın sürpriz olması gerekmez; sürpriz olması gereken yalnızca içeriktir.
+
+**Kalibrasyon.** Aynı kartı kullanan farklı mülakatçıların aynı adaya aynı puanı verip vermediği ölçülmelidir. Vermiyorlarsa sorun adayda değil, rubriktedir.
+
+</section>
+
+<TwoRubrics />
+
+<section class="col s-formats">
+
+Üç format da yapılandırılmıştır ve bu tesadüf değildir. "Bu kişi iyi soru soruyor mu?" sorusu yapılandırılmadan sorulduğunda, mülakatçının hoşlandığı adayı seçmesine dönüşür. Yapılandırılmış mülakatın hem 1998'de hem 2022'de zirveye çıkmasının ve yapılandırılmamış mülakatın revizyonda 0,19'a düşmesinin nedeni budur. Katman 3'ü ölçmek, Katman 1'i ölçmekten daha fazla disiplin ister; daha az değil.
+
+</section>
+
+{/* ================= 7 ================= */}
+<section class="col s-fail">
+
+## 7. İK neden direnir ve nasıl başarısız olur?
+
+Buraya kadar anlattıklarımın hiçbiri yeni değil; Schmidt ve Hunter bunu yirmi sekiz yıl önce yazdı. Peki ilanlar neden hâlâ beceri listesi? Direnç irrasyonel değil; mekanizmaları sayılabilir.
+
+**İlan hukuki bir belgedir.** Bir adayı elediğinizde nedenini savunabilmeniz gerekir. "Kafka bilmiyordu" savunulabilir; "iyi soru sormuyordu" savunması zor bir cümledir. Beceri listesi, İK'nın hukuk departmanına verdiği sözdür.
+
+**Altyapı pozisyonlar etrafında kuruludur.** Bütçe kalemleri, kadro tabloları, maaş bantları, ATS şemaları: hepsi Hay'in mirasıdır ve hepsi pozisyonun önceden tanımlı olduğunu varsayar. "Geniş bir spektrumda konumlandırılabilecek bir insan" bu tabloların hiçbirine oturmaz. Sistemin kabul edemediği şey, sistemde yoktur.
+
+**Ölçülebilirlik yanılgısı.** Katman 1 kolay ölçülür, Katman 3 zor. Kurumlar kolay ölçüleni ölçer ve sonra ölçtüklerinin önemli olan şey olduğuna inanır. Bu, anahtarını karanlıkta düşürüp sokak lambasının altında arayan adamın hikâyesidir.
+
+Şimdi başarısızlığın mekanizması. Bu dirençli kurumun "eninde sonunda" başarısız olacağını söylerken bir çöküş kastetmiyorum; **sessiz bir hata** kastediyorum.
+
+Beceri listesiyle eleme yapan bir kurum iki tür hata yapar. *Birincisi:* listeye uyan ama Katman 3'te zayıf bir adayı işe alır. Bu hata görünürdür; aday beklenen performansı göstermez ve altı ay sonra herkes bilir. *İkincisi:* listeye uymayan ama Katman 3'te güçlü bir adayı eler. Bu hata **görünmezdir.** Elenen adayın performansı hiçbir zaman ölçülmez; başka bir yerde parlasa bile bu bilgi onu eleyen kuruma hiç geri dönmez. Kurum ikinci tür hatayı yaptığını hiçbir zaman öğrenmez.
+
+</section>
+
+<ErrorMatrix />
+
+<section class="col s-fail">
+
+Başarısızlığın yavaş ve fark edilmeden gelmesinin nedeni budur. Kurum, rakiplerinin neden daha hızlı öğrendiğini anlamaz; kendi ilanlarının doğru insanları sistematik olarak dışarıda bıraktığını görmez, çünkü dışarıda kalanlar hiçbir raporda yer almaz. Onları rakip işe almıştır. Fark çeyreklik sonuçlarda değil, üç yıl sonraki ürün portföyünde ortaya çıkar; ve o zaman bile işe alıma değil, "pazar koşullarına" bağlanır.
+
+</section>
+
+{/* ================= 8 ================= */}
+<section class="col s-ladder">
+
+## 8. Junior paradoksu ve muhakemenin yeni yönü
+
+Şimdi 4. bölümde ertelediğim soru. "Sormak için bilmek gerekir. Bilgi ucuzlarsa kimse bilmeyi öğrenmez; bilmeyen soramaz; o halde Katman 3 nereden gelecek?" Bu, junior paradoksudur ve teze yöneltilebilecek en ciddi karşı argümandır.
+
+Cevabım şu: paradoks, muhakemenin *yalnızca bilgiden* geliştiği varsayımına dayanır ve bu varsayım yanlıştır. Muhakeme yine gelişecek; ama başka bir yönde.
+
+Eski dünyada bir mühendisin olgunlaşma merdiveni şöyleydi: junior bilgi biriktirir, mid-level biriktirdiğini uygular, senior uyguladıklarından örüntü çıkarır. Merdiven **bilgi üretme** kapasitesine göre derecelendirilmişti. Kıdem, ne kadar çok şeyi ezberden bildiğinin ve onu kaç kez yaptığının ölçüsüydü.
+
+Yeni merdiven farklı bir eksen üzerine kurulur: **sorgulama kapasitesi.** Junior, ürettirdiği cevabı olduğu gibi kabul eder. Mid-level, cevabın nerede yanlış olabileceğini sormayı öğrenir. Senior, hangi sorunun sorulmaya değer olduğunu, hangi cevabın doğru ama alakasız olduğunu, hangi problemin aslında başka bir problem olduğunu ayırt eder. Merdivenin basamakları bilgi miktarı değil, **sorgunun derinliğidir.**
+
+</section>
+
+<TwoLadders />
+
+<section class="col s-ladder">
+
+Junior bu yeni merdivene nasıl tırmanır? Eskisi gibi değil; bu doğru. Ama tırmanmaya *çok daha erken* başlar. Eski dünyada bir junior ilk iki yılını Katman 1'i doldurarak geçirirdi; Katman 3'e sıra hiç gelmezdi. Yeni dünyada Katman 1 ilk günden erişilebilirdir; junior ilk gününden itibaren "bu cevap doğru mu?" sorusuyla yüzleşir. Muhakeme, biriktirme aşamasının *sonrasına* ertelenmez; ilk gün başlar. Bu, öğrenmenin daha az değil, daha *erken* olduğu bir dünyadır.
+
+Ve burada gözlemlenebilir bir şey var. **AI bilmeyi eşitledi.** Yirmi yıllık bir mühendisin bir junior'a karşı en büyük avantajı, kafasında taşıdığı bilgi hacmiydi; o hacim artık herkesin masasında. Bu bir sıfırlamadır: bilmek düzleminde şartlar artık eşit. Geriye kalan tek avantaj Katman 3'te, ve Katman 3 yılla değil, pratikle büyür.
+
+Bu sıfırlamanın sonuçlarından biri şimdiden gözümüzün önünde: AI döneminde kurulan şirketlerde olağandışı derecede genç C-level yöneticiler görüyoruz. Bunu bir anomali ya da yatırımcı hevesi olarak okumak mümkün; ben bir sonuç olarak okuyorum. Bunlar, bilmek düzleminde kırk yıllık bir yöneticiyle eşitlenmiş, ama sorgulama merdivenine yirmi yıl daha erken tırmanmaya başlamış insanlar. Bilginin kıt olduğu bir dünyada bu mümkün değildi; şimdi mümkün, çünkü bilgi bol olduğunda kıdemin tanımı değişir.
+
+Junior paradoksunun cevabı, o halde, şudur: paradoks, yeni merdiveni eski merdivenin varsayımlarıyla ölçmekten doğar. Yeni merdivende bilmek bir basamak değil, zemindir. Herkes aynı zeminde durur; fark, kimin daha iyi sorduğudur.
+
+</section>
+
+{/* ================= 9 ================= */}
+<section class="col s-limits">
+
+## 9. Sınırlar ve karşı argümanlar
+
+Bu çerçeve her şeyi açıklamıyor; açıkladığından fazlasını iddia etseydi yanlış olurdu.
+
+1. **Nazik ortamlar hâlâ var.** Cerrah, uçak bakım teknisyeni, uyum (compliance) uzmanı, güvenlik-kritik gömülü sistem mühendisi. Bu işlerde kurallar sabit, geri bildirim net ve hatanın maliyeti yüksektir; Katman 1 burada zemin değil, duvardır. 5. bölümdeki iş bilgisi testlerinin 0,40'ı da buradan gelir. Tez, belirsizliği yüksek işler için geçerlidir; herkes için değil. Ve bir işin hangi ortamda durduğu, ilanı yazan ekibin dürüstçe sorması gereken ilk sorudur.
+2. **"Generalist" etiketi ucuz emeğin bahanesine dönüşebilir.** "Geniş bir spektrumda konumlandırılabilir" ifadesi "her şeyi yapsın, tek maaş alsın" diye okunabilir. Bu tezin savunduğu şey bu değil. Katman 3'te güçlü bir insan, Katman 1'de güçlü bir insandan ucuz değildir; muhtemelen daha pahalıdır, çünkü daha kıttır.
+3. **Katman 3'ü ölçmek önyargıya açıktır.** "İyi soru soruyor mu?" sorusu yapılandırılmadan sorulduğunda "bana benziyor mu?" sorusuna dönüşür. 6. bölümdeki yapı bir seçenek değil, bir zorunluluktur; yapılandırılmamış bir Katman 3 mülakatı beceri listesinden daha kötüdür. Yapılandırılmamış mülakatın 2022 revizyonunda 0,19'a düşmesi, bu uyarının arkasındaki sayıdır.
+4. **Hogarth'ın ayrımı ikili değil, bir spektrumdur.** Yazılım işinin tamamı vahşi hale gelmiş değil; aynı işin içinde nazik ve vahşi bölgeler bir arada bulunur. Bir ilanın hangi bölgeyi hedeflediğini bilmesi gerekir; çoğu ilan bilmez.
+5. **8. bölüm bir gözlemdir, kanıt değil.** Genç yöneticilerin AI kaynaklı bir sıfırlamanın sonucu olduğu iddiası makul bir yorumdur, ama alternatif açıklamalar (yatırım döngüleri, sektörün yaşı, seçilim yanlılığı) dışlanmış değildir. İddia düzeltmeye açıktır ve bir karşı örnek bulunursa düzeltilmelidir.
+
+</section>
+
+{/* ================= 10 ================= */}
+<section class="col s-close">
+
+## 10. Sonuç
+
+İş ilanı, işten önce yazılmış bir spec'tir. İş sabitken bu bir kusur değildi; geçmiş geleceği tahmin ediyordu ve ilan geçmişi tarif ediyordu. Bilgiye erişim ucuzladığında kıtlık yer değiştirdi: bilmek zemin oldu, sormak ve anlamak kıt kaynak oldu. İlan hâlâ zemini ölçüyor.
+
+Bu iddianın iki katmanı var ve ikisini ayrı tutmaya çalıştım. **Betimleyici katman:** kanıt, iddia edilen bilginin öngörücü olmadığını AI'dan çok önce göstermişti; AI yalnızca faturayı büyüttü. **Normatif katman:** beceri listesiyle işe alım yapan kurum doğru insanları sessizce dışarıda bırakıyor ve bunu hiçbir zaman öğrenmiyor; değişmek zorunda olmasının nedeni de bu, çünkü değişmemenin bedelini hiçbir raporda göremeyecek.
+
+Benzer bir dinamiği organizasyon tarafında, yani kod üretmek ucuzladığında darboğazın araçlardan organizasyona nasıl kaydığını, [spec-driven development'ın çözmediği şey](/tr/posts/what-spec-driven-development-does-not-solve-organization.html) üzerine daha önce yazdığım yazıda tartışmıştım. Buradaki tez onun işe alım tarafındaki karşılığıdır: ürün kararını koddan önce vermeyen bir organizasyon nasıl yanlış ürünü hızla üretiyorsa, işi tanımlamadan ilanı yazan bir organizasyon da doğru insanı hızla eler.
+
+Bu yazının sınırları içinde "ne yapmalı?" sorusunun cevabı küçük ama somut: ilanı yazmadan önce işin hangi ortamda yaşadığını sor; Katman 1'i ölçüyorsan neyi ölçmediğini bil; Katman 3'ü ölçeceksen yapılandır. Ve bir kez olsun, elediğin adayların nereye vardığına bak.
+
+</section>
+
+{/* ================= sources ================= */}
+<section class="col refs">
+
+<h2>Kaynaklar</h2>
+
+### İşin tanımlanması ve pozisyon fikri
+
+- Frederick Winslow Taylor, [*The Principles of Scientific Management*](https://www.gutenberg.org/ebooks/6435), 1911; planlamanın yapmaktan ayrılması, "en iyi yol", kürek deneyi.
+- Edward N. Hay ve Dale Purves'ün 1951'de tanıttığı Hay Guide Chart-Profile yöntemi; üç faktöre ve yöntemin tarihine genel bir bakış için [The Hay System](https://www.thrivesparrow.com/blog/hay-system), eleştirel bir okuma için [The Hay System of Job Evaluation: A Critical Analysis](https://jhrmls.thebrpi.org/journals/jhrmls/Vol_3_No_1_June_2015/1.pdf), *Journal of Human Resources Management and Labor Studies*, 2015.
+- Lance Tokuda, [Computers Assist Humans in Human Resources](https://cdn.aaai.org/IAAI/1990/IAAI90-014.pdf), IAAI-90, 1990; Resumix, Nisan 1988'den itibaren geliştirilmesi ve Ocak 1989'da Sun Microsystems'te devreye alınması.
+
+### Öğrenme ortamları
+
+- Robin M. Hogarth, *Educating Intuition*, University of Chicago Press, 2001; nazik/vahşi ayrımı ve tifo hekimi. [Yazar sayfası](https://en.wikipedia.org/wiki/Robin_M._Hogarth).
+- Robin M. Hogarth, Tomás Lejarraga ve Emre Soyer, [The Two Settings of Kind and Wicked Learning Environments](https://journals.sagepub.com/doi/abs/10.1177/0963721415591878), *Current Directions in Psychological Science*, 24(5), 2015.
+
+### Performansı ne öngörüyor
+
+- Frank L. Schmidt ve John E. Hunter, [The Validity and Utility of Selection Methods in Personnel Psychology: Practical and Theoretical Implications of 85 Years of Research Findings](https://doi.org/10.1037/0033-2909.124.2.262), *Psychological Bulletin*, 124(2), 262–274, 1998.
+- Paul R. Sackett, Charlene Zhang, Christopher M. Berry ve Filip Lievens, [Revisiting Meta-Analytic Estimates of Validity in Personnel Selection: Addressing Systematic Overcorrection for Restriction of Range](https://doi.org/10.1037/apl0000994), *Journal of Applied Psychology*, 107(11), 2040–2068, 2022; 5. bölümdeki figürde yer alan karşılaştırmanın kaynağı.
+- Adam Bryant, [In Head-Hunting, Big Data May Not Be Such a Big Deal](https://www.nytimes.com/2013/06/20/business/in-head-hunting-big-data-may-not-be-such-a-big-deal.html), *The New York Times*, Haziran 2013; Laszlo Bock'la beyin jimnastiği soruları, not ortalamaları ve yapılandırılmış mülakatlar üzerine röportaj.
+- Thomas L. Friedman, [How to Get a Job at Google](https://www.nytimes.com/2014/02/23/opinion/sunday/friedman-how-to-get-a-job-at-google.html), *The New York Times*, Şubat 2014; Bock'un öğrenme yeteneği üzerine söyledikleri.
+
+### Mülakat örnekleri için teknik kaynaklar
+
+- Erlang/OTP dokümantasyonu, [Expressions: Receive](https://www.erlang.org/doc/system/expressions.html#receive); mesajlar posta kutusundan sırayla alınır ve eşleşmeyen mesajlar kuyrukta kalır.
+- PostgreSQL wiki, [Don't Do This: Don't use NOT IN](https://wiki.postgresql.org/wiki/Don%27t_Do_This#Don.27t_use_NOT_IN); `NULL` içeren bir `NOT IN` hiçbir satır döndürmez ve yerine `NOT EXISTS` önerilir.
+- [(AB) 2016/679 sayılı Tüzük, 17. madde](https://gdpr-info.eu/art-17-gdpr/); silme hakkı ve yasal bir yükümlülüğe uyum için 17(3)(b)'deki istisna.
+
+### İlgili yazı
+
+- [Spec-Driven Development'ın Çözmediği Şey: Organizasyon](/tr/posts/what-spec-driven-development-does-not-solve-organization.html), bu blogda.
+
+<div class="note">
+
+Not: 8. bölümdeki genç yönetici gözlemi ölçülmüş bir bulgu değil, benim yorumumdur. Geçerlilik katsayıları gözlenmiş korelasyonlar değil, genel iş performansı için operasyonel geçerlilik tahminleridir; düzeltmenin büyüklüğü 2022 makalesinin kendi konusudur.
+
+</div>
+
+</section>

@@ -1,19 +1,29 @@
 ---
 import Base from "./Base.astro";
+import LangSwitch from "../components/LangSwitch.astro";
 import site from "../../site.json" with { type: "json" };
-import { humanDate, postPath } from "../lib/posts";
+import { humanDate } from "../lib/posts";
+import { homePath, postPath, ui, type Lang } from "../lib/i18n";
 import type { Post } from "../lib/posts";
 
-interface Props { post: Post }
-const { post } = Astro.props;
+interface Props {
+  post: Post;
+  lang: Lang;
+  /** Path of this post in the other language, if translated. */
+  altPath?: string;
+}
+const { post, lang, altPath } = Astro.props;
 const { title, date, description, ogDescription, dek, headerExtra, bodyClass } =
   post.data;
+const home = homePath(lang);
 ---
 
 <Base
   title={`${title} · ${site.title}`}
   description={description}
-  path={postPath(post.id)}
+  path={postPath(post.id, lang)}
+  lang={lang}
+  altPath={altPath}
   ogType="article"
   ogTitle={title}
   ogDescription={ogDescription ?? description}
@@ -22,10 +32,13 @@ const { title, date, description, ogDescription, dek, headerExtra, bodyClass } =
   <slot name="head" slot="head" />
 
   <header class="post-header col">
-    <a class="back" href="/">← {site.title}</a>
+    <div class="post-topbar">
+      <a class="back" href={home}>← {site.title}</a>
+      <LangSwitch lang={lang} altPath={altPath} />
+    </div>
     {headerExtra && <Fragment set:html={headerExtra} />}
     <h1>{title}</h1>
-    <time datetime={date}>{humanDate(date)}</time>
+    <time datetime={date}>{humanDate(date, lang)}</time>
     {/* The dek carries markup (span.g, span.a …), hence raw HTML. */}
     {dek && <p class="dek" set:html={dek} />}
   </header>
@@ -37,6 +50,6 @@ const { title, date, description, ogDescription, dek, headerExtra, bodyClass } =
   </main>
 
   <footer class="site-footer col">
-    <a class="back" href="/">← all posts</a>
+    <a class="back" href={home}>← {ui[lang].allPosts}</a>
   </footer>
 </Base>
