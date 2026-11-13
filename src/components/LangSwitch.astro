@@ -9,13 +9,19 @@ interface Props {
 
 const { lang, altPath } = Astro.props;
 const target = other(lang);
+const href = altPath ?? homePath(target);
+const label = { en: "EN", tr: "TR" } as const;
+// Order stays fixed (EN · TR) so the switch doesn't jump between pages.
 ---
 
-<a
-  class="lang-switch"
-  href={altPath ?? homePath(target)}
-  hreflang={target}
-  lang={target}
-  data-lang={target}
-  title={ui[lang].switchTitle}>{ui[lang].switchLabel}</a
->
+<span class="lang-switch" role="group" aria-label={ui[lang].switchGroup}>
+  {(["en", "tr"] as const).map((l) =>
+    l === lang ? (
+      <span class="current" aria-current="true" lang={l}>{label[l]}</span>
+    ) : (
+      <a href={href} hreflang={l} lang={l} data-lang={l} title={ui[lang].switchTitle}>
+        {label[l]}
+      </a>
+    ),
+  )}
+</span>

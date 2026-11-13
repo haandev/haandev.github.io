@@ -885,14 +885,42 @@ figcaption strong {
 .post-topbar {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 1rem;
 }
 
 .lang-switch {
+  display: inline-flex;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  overflow: hidden;
   font-family: var(--font-ui);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.lang-switch > * {
+  padding: 0.35rem 0.6rem;
   text-decoration: none;
+}
+
+.lang-switch a {
+  color: var(--muted);
+}
+
+.lang-switch a:hover {
+  color: var(--fg);
+}
+
+.lang-switch .current {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.site-nav {
+  align-items: center;
 }
 
 .site-nav .lang-switch {

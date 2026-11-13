@@ -11,15 +11,15 @@ export const ui = {
     description: "Notes on software, the web, and everything in between.",
     noPosts: "No posts yet.",
     allPosts: "all posts",
-    switchLabel: "Türkçe",
     switchTitle: "Bu sayfanın Türkçesi",
+    switchGroup: "Language",
   },
   tr: {
     description: "Yazılım, web ve aradaki her şey üzerine notlar.",
     noPosts: "Henüz yazı yok.",
     allPosts: "tüm yazılar",
-    switchLabel: "English",
     switchTitle: "This page in English",
+    switchGroup: "Dil",
   },
 } satisfies Record<Lang, Record<string, string>>;
 
