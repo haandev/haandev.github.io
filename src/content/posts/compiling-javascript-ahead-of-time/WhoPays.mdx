@@ -1,0 +1,51 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Who pays the warm-up cost, across build time and run time. A JIT per process: every one of four processes starts with its own warm-up before it does its work. A V8 isolate: one long-lived platform process warms up once, and many short jobs run inside it. Ahead of time: the cost is paid once at build time as compilation, and every process at run time starts doing work immediately.">
+   <line x1="200" y1="14" x2="200" y2="236" stroke="#8B8983" stroke-width="1" stroke-dasharray="4 4"/>
+   <text x="110" y="24" font-size="10.5" font-weight="700" letter-spacing="0.14em" text-anchor="middle" fill="#14724B">BUILD TIME</text>
+   <text x="470" y="24" font-size="10.5" font-weight="700" letter-spacing="0.14em" text-anchor="middle" fill="#2733C9">RUN TIME</text>
+
+   <text x="20" y="58" font-size="12.5" font-weight="700" fill="#141412">A JIT per process</text>
+   <rect x="220" y="66" width="30" height="26" rx="3" fill="#b3261e"/>
+   <rect x="250" y="66" width="70" height="26" rx="3" fill="#2733C9"/>
+   <rect x="340" y="66" width="30" height="26" rx="3" fill="#b3261e"/>
+   <rect x="370" y="66" width="70" height="26" rx="3" fill="#2733C9"/>
+   <rect x="460" y="66" width="30" height="26" rx="3" fill="#b3261e"/>
+   <rect x="490" y="66" width="70" height="26" rx="3" fill="#2733C9"/>
+   <rect x="580" y="66" width="30" height="26" rx="3" fill="#b3261e"/>
+   <rect x="610" y="66" width="70" height="26" rx="3" fill="#2733C9"/>
+   <text x="700" y="84" font-size="11" fill="#55534E">…</text>
+
+   <text x="20" y="128" font-size="12.5" font-weight="700" fill="#141412">A V8 isolate</text>
+   <rect x="220" y="136" width="40" height="26" rx="3" fill="#b3261e"/>
+   <rect x="260" y="136" width="480" height="26" rx="3" fill="#2733C9"/>
+   <g stroke="#FFFFFF" stroke-width="2">
+     <line x1="290" y1="140" x2="290" y2="158"/><line x1="320" y1="140" x2="320" y2="158"/><line x1="350" y1="140" x2="350" y2="158"/>
+     <line x1="380" y1="140" x2="380" y2="158"/><line x1="410" y1="140" x2="410" y2="158"/><line x1="440" y1="140" x2="440" y2="158"/>
+     <line x1="470" y1="140" x2="470" y2="158"/><line x1="500" y1="140" x2="500" y2="158"/><line x1="530" y1="140" x2="530" y2="158"/>
+     <line x1="560" y1="140" x2="560" y2="158"/><line x1="590" y1="140" x2="590" y2="158"/><line x1="620" y1="140" x2="620" y2="158"/>
+     <line x1="650" y1="140" x2="650" y2="158"/><line x1="680" y1="140" x2="680" y2="158"/><line x1="710" y1="140" x2="710" y2="158"/>
+   </g>
+   <text x="260" y="180" font-size="11" fill="#55534E">one platform process, warmed once; many customers' short jobs inside it</text>
+
+   <text x="20" y="200" font-size="12.5" font-weight="700" fill="#141412">Ahead of time</text>
+   <rect x="40" y="208" width="140" height="26" rx="3" fill="#b3261e"/>
+   <text x="110" y="225" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">compile, once</text>
+   <rect x="220" y="208" width="70" height="26" rx="3" fill="#14724B"/>
+   <rect x="340" y="208" width="70" height="26" rx="3" fill="#14724B"/>
+   <rect x="460" y="208" width="70" height="26" rx="3" fill="#14724B"/>
+   <rect x="580" y="208" width="70" height="26" rx="3" fill="#14724B"/>
+   <text x="700" y="226" font-size="11" fill="#55534E">…</text>
+
+   <rect x="220" y="250" width="12" height="12" rx="2" fill="#b3261e"/>
+   <text x="238" y="260" font-size="11" fill="#55534E">warm-up or compilation</text>
+   <rect x="400" y="250" width="12" height="12" rx="2" fill="#2733C9"/>
+   <text x="418" y="260" font-size="11" fill="#55534E">work under a JIT</text>
+   <rect x="540" y="250" width="12" height="12" rx="2" fill="#14724B"/>
+   <text x="558" y="260" font-size="11" fill="#55534E">work in compiled code</text>
+ </svg>
+</div>
+<figcaption>The cost of learning the program is paid somewhere. A JIT per process pays it in every process; an isolate pays it once inside a platform that lives for a long time; <span class="a">ahead-of-time compilation</span> pays it once, before anything runs.</figcaption>
+</figure>
+</div>

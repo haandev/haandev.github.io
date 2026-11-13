@@ -1,0 +1,61 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The same property access, p.x, compiled two ways. The JIT watches: objects of shape A keep arriving, the profile records it, and the access is compiled to one load behind a shape guard; when an object of shape B arrives, the guard fails and the function is deoptimized back to the interpreter. The ahead-of-time compiler proves: if p was built by the program, its type is a fact and the access is one load; if p comes from outside, as an argument or from JSON.parse, the type is a prediction, tested once with a slow path on a miss; if p has no type, the property is looked up by name.">
+   <defs>
+     <marker id="ovp-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#2733C9"/></marker>
+     <marker id="ovp-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#b3261e"/></marker>
+   </defs>
+   <line x1="380" y1="14" x2="380" y2="276" stroke="#C9C7C0" stroke-width="1" stroke-dasharray="3 4"/>
+
+   <text x="20" y="22" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#2733C9">JIT · WATCHES</text>
+   <text class="mono" x="20" y="52" font-size="14" font-weight="700" fill="#141412">p.x</text>
+
+   <rect x="20" y="70" width="28" height="28" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text x="34" y="89" font-size="12" font-weight="700" text-anchor="middle" fill="#2733C9">A</text>
+   <rect x="56" y="70" width="28" height="28" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text x="70" y="89" font-size="12" font-weight="700" text-anchor="middle" fill="#2733C9">A</text>
+   <rect x="92" y="70" width="28" height="28" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text x="106" y="89" font-size="12" font-weight="700" text-anchor="middle" fill="#2733C9">A</text>
+   <rect x="128" y="70" width="28" height="28" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text x="142" y="89" font-size="12" font-weight="700" text-anchor="middle" fill="#2733C9">A</text>
+   <line x1="164" y1="84" x2="190" y2="84" stroke="#2733C9" stroke-width="1.5" marker-end="url(#ovp-b)"/>
+   <text x="198" y="81" font-size="11.5" fill="#141412">profile: always</text>
+   <text x="198" y="95" font-size="11.5" fill="#141412">shape A</text>
+
+   <rect x="20" y="118" width="340" height="40" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text x="190" y="143" font-size="12" font-weight="700" text-anchor="middle" fill="#2733C9">compiled: one load behind a shape guard</text>
+
+   <rect x="20" y="184" width="28" height="28" rx="4" fill="#FBEDEC" stroke="#b3261e" stroke-width="1.5"/>
+   <text x="34" y="203" font-size="12" font-weight="700" text-anchor="middle" fill="#b3261e">B</text>
+   <line x1="56" y1="198" x2="82" y2="198" stroke="#b3261e" stroke-width="1.5" marker-end="url(#ovp-r)"/>
+   <text x="90" y="195" font-size="11.5" fill="#b3261e">the guard fails: deoptimize,</text>
+   <text x="90" y="209" font-size="11.5" fill="#b3261e">back to the interpreter, watch again</text>
+
+   <text x="20" y="262" font-size="11.5" fill="#55534E">learns from the run; needs no types</text>
+
+   <text x="400" y="22" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#14724B">AHEAD OF TIME · PROVES</text>
+   <text class="mono" x="400" y="52" font-size="14" font-weight="700" fill="#141412">p.x</text>
+
+   <text x="400" y="82" font-size="11.5" fill="#141412">p was built by the program:</text>
+   <text x="400" y="96" font-size="11.5" fill="#141412">the type is a fact</text>
+   <rect x="590" y="70" width="150" height="34" rx="17" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <text x="665" y="92" font-size="11.5" font-weight="700" text-anchor="middle" fill="#14724B">one load</text>
+
+   <text x="400" y="138" font-size="11.5" fill="#141412">p comes from outside (an</text>
+   <text x="400" y="152" font-size="11.5" fill="#141412">argument, JSON.parse):</text>
+   <text x="400" y="166" font-size="11.5" fill="#141412">the type is a prediction</text>
+   <rect x="590" y="128" width="150" height="40" rx="20" fill="#FFFFFF" stroke="#14724B" stroke-width="1.5"/>
+   <text x="665" y="145" font-size="11" font-weight="700" text-anchor="middle" fill="#14724B">one test, then a load;</text>
+   <text x="665" y="159" font-size="11" text-anchor="middle" fill="#14724B">slow path on a miss</text>
+
+   <text x="400" y="202" font-size="11.5" fill="#141412">p has no type</text>
+   <rect x="590" y="186" width="150" height="34" rx="17" fill="#FBEDEC" stroke="#b3261e" stroke-width="1.5"/>
+   <text x="665" y="208" font-size="11.5" font-weight="700" text-anchor="middle" fill="#b3261e">lookup by name</text>
+
+   <text x="400" y="262" font-size="11.5" fill="#55534E">nothing to watch; uses only what it can prove</text>
+ </svg>
+</div>
+<figcaption>The <span class="g">JIT</span> finds out what <code>p</code> is by watching the program run. The <span class="a">ahead-of-time compiler</span> has no run to watch, so how fast <code>p.x</code> is depends on what the types let it prove.</figcaption>
+</figure>
+</div>

@@ -1,0 +1,68 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 262" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="How JavaScriptCore runs a function, left to right: source text, parse into a syntax tree, bytecode, the LLInt interpreter, the baseline JIT, the DFG optimizing JIT, and the FTL optimizing JIT with its B3 back end. From the interpreter a profile of object shapes, call targets and number kinds feeds the baseline, DFG and FTL tiers. When a guess in optimized code fails, deoptimization sends the function back to the interpreter. Parsing costs CPU at start-up, the interpreter makes the first runs slow, and the JIT tiers cost profile memory and compiler threads.">
+   <defs>
+     <marker id="ep-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#55534E"/></marker>
+     <marker id="ep-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2733C9"/></marker>
+     <marker id="ep-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#b3261e"/></marker>
+   </defs>
+
+   <text x="20" y="22" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#55534E">JAVASCRIPTCORE · FROM SOURCE TO MACHINE CODE</text>
+
+   <text x="382" y="52" font-size="11.5" fill="#2733C9">profile: object shapes, call targets, integer or double</text>
+   <path d="M382 96 V64 H700" fill="none" stroke="#2733C9" stroke-width="1.5"/>
+   <line x1="488" y1="64" x2="488" y2="94" stroke="#2733C9" stroke-width="1.5" marker-end="url(#ep-b)"/>
+   <line x1="594" y1="64" x2="594" y2="94" stroke="#2733C9" stroke-width="1.5" marker-end="url(#ep-b)"/>
+   <line x1="700" y1="64" x2="700" y2="94" stroke="#2733C9" stroke-width="1.5" marker-end="url(#ep-b)"/>
+
+   <rect x="20" y="96" width="88" height="48" rx="4" fill="#FFFFFF" stroke="#8B8983" stroke-width="1.5"/>
+   <text x="64" y="117" font-size="12.5" font-weight="700" text-anchor="middle" fill="#141412">Source</text>
+   <text x="64" y="133" font-size="10.5" text-anchor="middle" fill="#55534E">text</text>
+
+   <rect x="126" y="96" width="88" height="48" rx="4" fill="#FFFFFF" stroke="#8B8983" stroke-width="1.5"/>
+   <text x="170" y="117" font-size="12.5" font-weight="700" text-anchor="middle" fill="#141412">Parse</text>
+   <text x="170" y="133" font-size="10.5" text-anchor="middle" fill="#55534E">syntax tree</text>
+
+   <rect x="232" y="96" width="88" height="48" rx="4" fill="#FFFFFF" stroke="#8B8983" stroke-width="1.5"/>
+   <text x="276" y="117" font-size="12.5" font-weight="700" text-anchor="middle" fill="#141412">Bytecode</text>
+   <text x="276" y="133" font-size="10.5" text-anchor="middle" fill="#55534E">instructions</text>
+
+   <rect x="338" y="96" width="88" height="48" rx="4" fill="#FFFFFF" stroke="#2733C9" stroke-width="1.5"/>
+   <text x="382" y="117" font-size="12.5" font-weight="700" text-anchor="middle" fill="#141412">LLInt</text>
+   <text x="382" y="133" font-size="10.5" text-anchor="middle" fill="#55534E">interpreter</text>
+
+   <rect x="444" y="96" width="88" height="48" rx="4" fill="#FFFFFF" stroke="#2733C9" stroke-width="1.5"/>
+   <text x="488" y="117" font-size="12.5" font-weight="700" text-anchor="middle" fill="#141412">Baseline</text>
+   <text x="488" y="133" font-size="10.5" text-anchor="middle" fill="#55534E">plain JIT</text>
+
+   <rect x="550" y="96" width="88" height="48" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text x="594" y="117" font-size="12.5" font-weight="700" text-anchor="middle" fill="#141412">DFG</text>
+   <text x="594" y="133" font-size="10.5" text-anchor="middle" fill="#55534E">optimizing JIT</text>
+
+   <rect x="656" y="96" width="88" height="48" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text x="700" y="117" font-size="12.5" font-weight="700" text-anchor="middle" fill="#141412">FTL · B3</text>
+   <text x="700" y="133" font-size="10.5" text-anchor="middle" fill="#55534E">optimizing JIT</text>
+
+   <line x1="108" y1="120" x2="124" y2="120" stroke="#55534E" stroke-width="1.5" marker-end="url(#ep-a)"/>
+   <line x1="214" y1="120" x2="230" y2="120" stroke="#55534E" stroke-width="1.5" marker-end="url(#ep-a)"/>
+   <line x1="320" y1="120" x2="336" y2="120" stroke="#55534E" stroke-width="1.5" marker-end="url(#ep-a)"/>
+   <line x1="426" y1="120" x2="442" y2="120" stroke="#2733C9" stroke-width="1.5" marker-end="url(#ep-b)"/>
+   <line x1="532" y1="120" x2="548" y2="120" stroke="#2733C9" stroke-width="1.5" marker-end="url(#ep-b)"/>
+   <line x1="638" y1="120" x2="654" y2="120" stroke="#2733C9" stroke-width="1.5" marker-end="url(#ep-b)"/>
+
+   <path d="M700 144 V172 H382 V148" fill="none" stroke="#b3261e" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ep-r)"/>
+   <text x="541" y="190" font-size="11.5" text-anchor="middle" fill="#b3261e">deoptimization: a guess fails, back to the interpreter</text>
+
+   <path d="M126 214 v6 H320 v-6" fill="none" stroke="#8B8983" stroke-width="1"/>
+   <text x="223" y="238" font-size="11" text-anchor="middle" fill="#55534E">parsing: CPU at start-up</text>
+   <path d="M338 214 v6 H426 v-6" fill="none" stroke="#8B8983" stroke-width="1"/>
+   <text x="382" y="238" font-size="11" text-anchor="middle" fill="#55534E">slow first runs</text>
+   <path d="M444 214 v6 H744 v-6" fill="none" stroke="#8B8983" stroke-width="1"/>
+   <text x="594" y="238" font-size="11" text-anchor="middle" fill="#55534E">profile memory, compiler threads in the background</text>
+   <text x="740" y="258" font-size="11" text-anchor="end" fill="#8B8983">all paid at the start of every process</text>
+ </svg>
+</div>
+<figcaption>JavaScriptCore's tiers. The interpreter collects a <span class="g">profile</span> while it runs, and the optimizing tiers compile against it; when a guess turns out wrong, the code is thrown away and the function goes back to the interpreter.</figcaption>
+</figure>
+</div>

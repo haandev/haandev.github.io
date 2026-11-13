@@ -1,0 +1,309 @@
+---
+title: "Compiling JavaScript ahead of time: bytecode, JIT and Bun AoT"
+date: "2026-11-13"
+description: "Bun can now compile TypeScript straight to machine code. What that means only becomes clear after looking at how a JavaScript engine runs code, where that pipeline can be cut, and what Android, Java and Hermes ran into when they tried to compile ahead of time. A walk from JavaScriptCore's tiers to bun compile, with Bun's own numbers for short-lived and long-lived processes, the closed-world price, and a comparison with V8 isolates."
+ogDescription: "An ahead-of-time compiler has to know at build time what a JIT learns at run time. In JavaScript, the only source of that knowledge is types."
+bodyClass: "s-aot"
+dek: "Bun can now compile TypeScript straight to machine code. To see what that means, start with how a JavaScript engine runs code, then look at what Android, Java and Hermes ran into when they tried the same thing. They all arrive at one point: <span class=\"a\">an ahead-of-time compiler has to know at build time</span> <span class=\"g\">what a JIT learns at run time</span>, and in JavaScript the only source of that knowledge is types."
+tags:
+  - "javascript"
+  - "typescript"
+  - "compilers"
+  - "bun"
+  - "runtimes"
+  - "systems design"
+---
+
+import "./style.css";
+
+import EnginePipeline from "./EnginePipeline.mdx";
+import CutPoints from "./CutPoints.mdx";
+import AotHistory from "./AotHistory.mdx";
+import ObserveVsProve from "./ObserveVsProve.mdx";
+import ClaudeCodeNumbers from "./ClaudeCodeNumbers.mdx";
+import WhoPays from "./WhoPays.mdx";
+
+{/* ================= 1 ================= */}
+<section class="col s-q">
+
+## 1. The question: `--bytecode` versus `--aot`
+
+For a while now Bun has been able to package a program into a single executable (`bun build --compile`), and to embed pre-built bytecode in it (`--bytecode`). The new option, `bun compile`, short for `bun build --compile --aot`, compiles the program to machine code.
+
+At first glance the two do the same job. Both say: process the source in advance so there is less to do at run time. To see the difference, you have to follow what a JavaScript engine does with a function from the moment it first sees it to the moment it turns it into machine code. The two options cut that chain at different places.
+
+</section>
+
+{/* ================= 2 ================= */}
+<section class="col s-engine">
+
+## 2. How a JavaScript engine runs code
+
+Take JavaScriptCore (JSC), the engine Bun uses. V8 and SpiderMonkey differ in detail, but the outline is the same.
+
+1. **Parsing.** The source text becomes a syntax tree. Engines do this lazily: a function body is fully parsed only when the function is first called.
+2. **Bytecode.** The tree is translated into the engine's own intermediate language. Bytecode isn't machine code; it's a sequence of instructions for an interpreter to read.
+3. **The interpreter (LLInt).** A function first runs in the interpreter, which steps through its bytecode. It's slow, but it starts at once. While it runs, the engine keeps a *profile*: what shapes of object arrive at each property access, which function each call reaches, whether each addition sees integers.
+4. **The baseline JIT.** A function that has run enough is translated into a plain machine-code version of its bytecode. It still handles the general case, but the cost of interpreting is gone.
+5. **DFG and FTL.** Functions that stay hot go to optimizing compilers that use the profile. FTL's back end is B3, a compiler Apple wrote for JSC in 2016 to replace LLVM there.
+
+The key word in the last step is *speculation*. If the profile says `p.x` always sees objects of the same shape, the optimizing compiler turns the access into a single memory load with a small check in front. If one day an object of another shape arrives, the check fails, the optimized code is thrown away and the function falls back to the interpreter (*deoptimization*). This is why a JIT can be fast in a dynamic language: it doesn't need to know the types; it watches them.
+
+The costs of this arrangement are paid at the start of a process: parsing, slow first runs in the interpreter, memory for the profile, and CPU for compilers running on background threads. The return comes over the rest of the process's life. For a server that stays up for weeks, that's a good trade. For a CLI tool that starts, does one job and exits after 300 milliseconds, the cost is paid and most of the return never arrives.
+
+</section>
+
+<EnginePipeline />
+
+{/* ================= 3 ================= */}
+<section class="col s-cut">
+
+## 3. Where the chain can be cut
+
+Someone who wants to lower the start-up cost can cut this chain in three places.
+
+**Caching the bytecode.** The first two steps, parsing and producing bytecode, happen at build time and the result is written to a file. V8's code cache and Bun's `--bytecode` are of this kind. The execution model doesn't change: the program still starts in the interpreter, still collects a profile, still warms up through the JIT. What is saved is the parsing time.
+
+**Snapshotting the heap.** The program is started, run until its initial set-up is done, and the state of memory at that moment is written to a file. Later starts resume from that image. V8's startup snapshots, and the snapshot option of Node's single executable applications (since 20.6), are of this kind. It removes the set-up cost; it doesn't remove the JIT's warm-up.
+
+**Moving the whole chain to build time.** Machine code is produced at build time and there is no JIT at run time. This removes not just the start-up cost but the profile memory and the compiler threads too. But it also removes the profile that the speculation in section 2 rests on: at build time there is no run to watch.
+
+The first two cuts are safe, because they leave the JIT alone. The third requires knowing, from somewhere else, what the JIT would have learned while running. Everyone who has tried it ran into the same question.
+
+</section>
+
+<CutPoints />
+
+{/* ================= 4 ================= */}
+<section class="col s-hist">
+
+## 4. Those who tried before
+
+**Android: Dalvik, ART and the hybrid.** Android apps ran for years on the Dalvik virtual machine, which gained a JIT in 2010. Android 5.0 (2014) replaced Dalvik with ART and began compiling apps entirely to machine code at install time. Apps started fast, but installs and system updates took minutes and the compiled code took real storage. Android 7.0 (2016) went hybrid: an app first runs with a JIT, the JIT records which methods are hot, and while the device is idle only those methods are compiled ahead of time. Ahead-of-time compilation worked once it was fed a profile.
+
+**Java: GraalVM Native Image.** GraalVM can compile a Java application into a single executable; the JVM's warm-up disappears and start-up drops to milliseconds. The price is the *closed-world assumption*: the compiler has to see, at build time, all the code the program can reach. Reflection, dynamic class loading and proxies generated at run time either have to be declared in configuration files in advance or they don't work. At peak it usually trails a warm JVM, and Oracle's answer is again a profile: in Oracle GraalVM, an instrumented build is run on real work and the program is rebuilt with the profile it collected.
+
+**JavaScript: Hermes and Static Hermes.** Meta released the Hermes engine for React Native in 2019. Its central decision was to give up the JIT: JavaScript is compiled to bytecode at build time and shipped inside the app, and on the phone only an interpreter runs. On phones the priority was start-up time and memory rather than peak speed, and iOS doesn't let third-party apps create executable memory at run time in any case. Static Hermes, announced in 2023, went further: it compiles JavaScript with type annotations to native code, by way of C and LLVM, and treats sound types as reliable information at build time. That work later became Hermes's main line of development, which, tellingly, has since gained a JIT as well.
+
+The lesson of the three stories is the same. Compiling ahead of time reliably improves start-up and memory. Keeping peak performance requires the compiler to have, at build time, the knowledge the JIT gathers at run time. Android and GraalVM took it from the profile of an earlier run. Static Hermes chose to take it from the types in the source.
+
+</section>
+
+<AotHistory />
+
+{/* ================= 5 ================= */}
+<section class="col s-bun">
+
+## 5. Bun's three options
+
+Bun offers three ways that map onto three points of that range:
+
+<div class="tbl tbl-options">
+
+| | `bun build --compile` | `… --compile --bytecode` | `bun compile` |
+|---|---|---|---|
+| What the file holds | Bundled JS | Bundled JS + JSC bytecode | Machine code |
+| Where the chain is cut | Nowhere | After parsing and bytecode | The whole chain |
+| JIT at run time | Yes | Yes | No |
+| TypeScript types | Removed | Removed | Checked, then used |
+| Builds for | Any platform, with `--target` | Any platform, with `--target` | Only the platform it runs on |
+| Status | Stable | Stable | Experimental |
+
+</div>
+
+`--bytecode` is the first cut from section 3. By Bun's own measurement, `tsc` starts twice as fast with bytecode, and large applications gain two to four times. But once the program is up, everything is as it is under `bun run`.
+
+`bun compile` is the third cut. Starting from the entry point it follows the imports, type checks the TypeScript, and works out across the whole program which objects reach each variable and which function each call reaches. Then it generates machine code for every reachable function, npm packages included. It does this with B3, the same back end JSC uses in FTL: Bun has, in effect, moved the JIT's top tier to build time. The output is a copy of the Bun runtime without a JIT. On Linux 6.7 and later the process even asks the kernel to forbid new executable memory (`PR_SET_MDWE`), so the JIT isn't merely unused; it can't be used.
+
+The question from section 4 applies here too: where does `bun compile` get what the JIT would have learned from the profile?
+
+</section>
+
+{/* ================= 6 ================= */}
+<section class="col s-types">
+
+## 6. Bun AoT's source of knowledge: TypeScript types
+
+Bun takes Static Hermes's road: it takes the knowledge from types.
+
+If a value is one the program creates itself, its type is treated as a fact and the value gets a fixed memory layout. In the example in Bun's pull request, a `Vec` with two `number` fields is a 16-byte header and two raw doubles, and reading a field whose type is proven is one load, like a struct field in Go or Rust. If the value comes from outside, an argument from a caller the compiler can't see or the result of `JSON.parse`, the type is used as a prediction: it is tested once, and on a miss the code takes a slow path. That resembles the JIT's speculation, except that the guess comes from an annotation rather than from watching.
+
+Two consequences follow. First, `bun run` strips the types but `bun compile` checks them, and if there is a type error it writes no executable. The same `: number` is a comment in one mode and compiler input in the other. Second, untyped code can run slower under AoT than under the JIT: where there is no type, the compiler can neither watch nor prove, and it looks the property up by name at run time. Bun's documentation says so plainly, and `bun compile --explain` lists those accesses, most expensive first.
+
+</section>
+
+<ObserveVsProve />
+
+{/* ================= 7 ================= */}
+<section class="col s-short">
+
+## 7. Results for a short-lived process
+
+Bun's first serious measurement was on the Claude Code CLI. The choice is no accident: Anthropic acquired Bun in December 2025, Claude Code ships as a Bun executable, and a coding agent is the textbook short-lived, frequently started process.
+
+</section>
+
+<ClaudeCodeNumbers />
+
+<section class="col s-short">
+
+The second measurement is a longer job: TypeScript 6 type checking a project of 370,000 lines.
+
+<div class="tbl tbl-tsc">
+
+| | Wall time | Memory | CPU time |
+|---|---|---|---|
+| TypeScript 6 under `bun run` (JIT) | 14.00 s | 2,581 MB | 29.2 s |
+| TypeScript 6 under `bun compile` (AoT) | 4.25 s | 963 MB | 5.3 s |
+| TypeScript 7 (rewritten in Go) | 2.68 s | 1,256 MB | 10.8 s |
+
+</div>
+
+This second result stands out, because fourteen seconds is not a short time, and the JIT still loses. `tsc` is a large, highly polymorphic code base; warming it up takes the JIT seconds, and much of the 29 seconds of CPU goes to compiler threads. So whether a process counts as short-lived isn't measured in seconds alone; it also depends on the size of the program.
+
+The TypeScript 7 row extends the story from section 4. Microsoft solved `tsc`'s start-up and memory problem by rewriting the compiler in Go. Jarred Sumner presents AoT as the option of not having to rewrite in Rust. By these numbers AoT closes most of that gap, but not all of it.
+
+</section>
+
+{/* ================= 8 ================= */}
+<section class="col s-long">
+
+## 8. Results for a long-lived process
+
+The same pull request has peak-throughput measurements for server frameworks. In the first second AoT is one to two times ahead; the JIT hasn't warmed up yet. After warm-up:
+
+<div class="tbl tbl-servers">
+
+| Framework | Warm difference |
+|---|---|
+| Koa | <span class="jit">JIT 22.9% faster</span> |
+| Fastify | <span class="jit">JIT 16.9% faster</span> |
+| Elysia | <span class="jit">JIT 13.5% faster</span> |
+| Express | <span class="jit">JIT 7.1% faster</span> |
+| Hono, `Bun.serve` | <span class="aot">AoT about 2.5% faster</span> |
+
+</div>
+
+This is the picture GraalVM showed. In a server that stays up, the warm-up is paid once, and the profile the JIT watches is richer than what the compiler can prove. Sumner concedes that ahead-of-time compilation generally gives lower peak performance; the team hopes to close the gap with a stricter flavour of TypeScript and locked-down built-ins.
+
+The pattern in the table matches section 6. The frameworks where AoT keeps up, Hono and `Bun.serve`, are written in TypeScript and have few layers. The ones where it falls furthest behind, Koa and Express, are older, untyped JavaScript making dynamic calls through middleware chains. AoT is as fast as what it can prove from types.
+
+What AoT still offers a warm server is memory. For one server that hardly matters; across hundreds of small containers, or where memory is what you're billed for, it does. And under autoscaling, every new copy is a cold process for its first second.
+
+</section>
+
+{/* ================= 9 ================= */}
+<section class="col s-cost">
+
+## 9. The price of a closed world
+
+GraalVM's closed-world assumption exists in Bun too, in two forms.
+
+**Built-ins are locked.** For the compiler to turn `arr.push(x)` directly into the operation, it has to assume `Array.prototype.push` won't change at run time. Bun enforces that assumption: existing members of built-in objects can't be replaced, and assigning to `Array.prototype.push` throws a `TypeError`. `Object.prototype`, `RegExp.prototype`, `Promise.prototype` and the generator prototypes can't be changed at all. Adding new members is allowed.
+
+**Code built from strings is interpreted.** `eval`, `new Function` and `node:vm` aren't forbidden, but they aren't compiled to machine code either: they run in JSC's interpreter, in the same process, on the same objects. Validator and serializer libraries that generate their hot path with `new Function` therefore slow down noticeably under AoT. A call the compiler can't trace, such as `globalThis[name](code)`, throws an `EvalError`. Loading code from disk with a dynamic `import()` is off by default.
+
+The other limits: no cross-compilation, no breakpoints, and building a large application takes tens of seconds and gigabytes of memory, with no cache between builds. Linux x64 is tested; on Windows many tests still fail.
+
+</section>
+
+{/* ================= 10 ================= */}
+<section class="col s-iso">
+
+## 10. A comparison with V8 isolates
+
+There is another, quite different answer to the start-up problem. Cloudflare Workers and Deno Deploy don't start a new process per request; inside one warm V8 process, each customer's code runs in its own *isolate*. Cloudflare put the cost of loading a Worker at about 5 milliseconds in 2020, short enough to hide behind the TLS handshake; in 2025 it conceded that "eliminating" cold starts had been a strong word, as its limits grew.
+
+The costs from section 2 have to be paid by someone; what differs is who:
+
+<div class="tbl tbl-who">
+
+| | Who pays | How it's recovered |
+|---|---|---|
+| A JIT per process (`bun run`, Node) | Every process, at start-up | Over that process's own life |
+| A V8 isolate | The platform's one long-lived process | By sharing it across thousands of customers' code |
+| AoT (`bun compile`) | The developer, at build time | Every copy starts without the cost |
+
+</div>
+
+An isolate stretches the engine's life and fits short jobs inside it. AoT never starts the engine at all. The first is a platform solution: it needs a company hosting the isolates, and the code is limited to that platform's APIs. The second is a toolchain solution: the output is an ordinary executable that runs anywhere as a full process, at the price of build time and the limits in section 9.
+
+Where isolates are already in use, AoT adds little, because the start-up problem is solved there. AoT belongs where every scale-up starts a container or a micro-VM, and in CLI tools that are shipped to users.
+
+</section>
+
+<WhoPays />
+
+{/* ================= 11 ================= */}
+<section class="col s-when">
+
+## 11. Which one, when
+
+The choice turns on two things: how long the process lives, and how much of the code is typed.
+
+- **A long-lived server with no memory pressure:** `bun run` or `bun build --compile`. Once warm, the JIT is ahead, and nothing is restricted.
+- **A short-lived process with untyped or dynamic code:** `bun build --compile --bytecode`. It removes the parsing cost and costs nothing in compatibility.
+- **A short-lived process, or many small copies, with typed code:** `bun compile`. This is where the gains in start-up, memory and CPU are largest.
+
+If you aren't sure, Bun's advice is to build both and put them under the same load; `bun compile --no-aot` produces the same executable with the JIT.
+
+</section>
+
+{/* ================= 12 ================= */}
+<section class="col s-limits">
+
+## 12. Limits
+
+1. **The numbers are the Bun team's.** All the Bun measurements here come from the pull request and the documentation. I haven't seen an independent reproduction, and I haven't measured anything myself.
+2. **The feature is experimental and moving.** The first preview reported an executable nearly twice as large; the merged pull request says small programs now come out smaller. The numbers and the restrictions will keep changing.
+3. **The peak-performance gap may be structural.** Android and GraalVM closed it with profiles. Bun hopes to close it with types, but what a JIT sees at run time is more than what static analysis can prove. How much of the gap can close is an open question.
+
+</section>
+
+{/* ================= 13 ================= */}
+<section class="col s-close">
+
+## 13. Conclusion
+
+The difference between `--bytecode` and `bun compile` is where they cut the engine's chain. Bytecode moves only the parsing to build time; the JIT stays as it is. `bun compile` moves the whole chain and removes the JIT.
+
+Removing the JIT means losing what it gathers at run time. Android and Java got that knowledge back from the profile of an earlier run. Bun, like Static Hermes, takes it from the types in the source. In return, built-ins are locked, code built from strings is interpreted, and untyped code gets slower.
+
+For a long time, types in JavaScript were information for the developer: the compiler checked them and threw them away. In `bun compile`, types become the build-time counterpart of what the JIT learns at run time.
+
+</section>
+
+{/* ================= sources ================= */}
+<section class="col refs">
+
+<h2>Sources</h2>
+
+### Bun
+
+- Jarred Sumner et al., [Compile TypeScript to machine code ahead of time: `bun build --compile --aot`](https://github.com/oven-sh/bun/pull/45631), oven-sh/bun pull request #45631, 2026; the design, the restrictions and every Bun number in this essay.
+- Bun documentation, [Compiler](https://github.com/oven-sh/bun/tree/main/docs/compiler): *Ahead-of-time compilation*, *Bytecode Caching*, *Compatibility*.
+- Jarred Sumner, [early preview numbers for Claude Code](https://x.com/jarredsumner/status/2104739495895781679) and [on AoT versus JIT peak performance](https://x.com/jarredsumner/status/2104746212662690234), 2026.
+- Anthropic, [Anthropic acquires Bun as Claude Code reaches $1B milestone](https://www.anthropic.com/news/anthropic-acquires-bun-as-claude-code-reaches-usd1b-milestone), December 2025.
+
+### JavaScriptCore
+
+- Filip Pizlo, [Introducing the B3 JIT Compiler](https://webkit.org/blog/5852/), WebKit blog, 2016.
+
+### Earlier ahead-of-time compilers
+
+- Android Open Source Project, [Implementing ART just-in-time compiler](https://source.android.com/docs/core/runtime/jit-compiler); the hybrid JIT and profile-guided AOT model from Android 7.0.
+- GraalVM documentation, [Optimize a Native Executable with Profile-Guided Optimizations](https://www.graalvm.org/latest/reference-manual/native-image/guides/optimize-native-executable-with-pgo/).
+- Tzvetan Mikov, [Static Hermes](https://speakerdeck.com/tmikov2023/static-hermes-react-native-eu-2023-announcement), React Native EU, 2023.
+
+### Start-up elsewhere
+
+- Node.js documentation, [Single executable applications](https://nodejs.org/api/single-executable-applications.html); `useSnapshot` and `useCodeCache`.
+- Cloudflare, [Eliminating cold starts with Cloudflare Workers](https://blog.cloudflare.com/eliminating-cold-starts-with-cloudflare-workers/), 2020, and [Eliminating cold starts 2: shard and conquer](https://blog.cloudflare.com/eliminating-cold-starts-2-shard-and-conquer/), 2025.
+
+<div class="note">
+
+Note: every Bun measurement here is the Bun team's, taken from the pull request above. The feature is experimental, and the flags, numbers and restrictions may have changed since this was written.
+
+</div>
+
+</section>

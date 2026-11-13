@@ -1,0 +1,56 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three timelines from 2008 to 2026. Android: Dalvik gains a JIT in 2010; ART compiles everything ahead of time at install in 2014; in 2016 Android goes hybrid, a JIT plus profile-guided ahead-of-time compilation; the knowledge comes from the profile of earlier runs. Java: HotSpot's JIT; GraalVM Native Image from 2018; later profile-guided optimization in Oracle GraalVM; the knowledge comes from a training run. JavaScript: V8 and JavaScriptCore JITs from 2008; Hermes, bytecode and no JIT, in 2019; Static Hermes, types to native code, in 2023; Bun AoT in 2026; the knowledge comes from type annotations.">
+   <text x="20" y="22" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#55534E">AHEAD OF TIME, THREE TIMES</text>
+
+   <text x="20" y="72" font-size="12.5" font-weight="700" fill="#141412">Android</text>
+   <text x="20" y="88" font-size="10.5" fill="#55534E">knows from: a profile</text>
+   <text x="20" y="101" font-size="10.5" fill="#55534E">of earlier runs</text>
+   <line x1="140" y1="80" x2="740" y2="80" stroke="#C9C7C0" stroke-width="2"/>
+   <circle cx="207" cy="80" r="5" fill="#2733C9"/>
+   <text x="207" y="66" font-size="11" text-anchor="middle" fill="#2733C9">Dalvik JIT</text>
+   <circle cx="340" cy="80" r="5" fill="#14724B"/>
+   <text x="340" y="66" font-size="11" text-anchor="middle" fill="#14724B">ART: all AOT at install</text>
+   <circle cx="407" cy="80" r="5" fill="#14724B" stroke="#2733C9" stroke-width="2"/>
+   <text x="407" y="100" font-size="11" fill="#141412">hybrid: JIT + profile-guided AOT</text>
+
+   <text x="20" y="142" font-size="12.5" font-weight="700" fill="#141412">Java</text>
+   <text x="20" y="158" font-size="10.5" fill="#55534E">knows from: a profile</text>
+   <text x="20" y="171" font-size="10.5" fill="#55534E">of a training run</text>
+   <line x1="140" y1="150" x2="740" y2="150" stroke="#C9C7C0" stroke-width="2"/>
+   <circle cx="140" cy="150" r="5" fill="#2733C9"/>
+   <text x="146" y="136" font-size="11" fill="#2733C9">HotSpot JIT</text>
+   <circle cx="473" cy="150" r="5" fill="#14724B"/>
+   <text x="473" y="136" font-size="11" text-anchor="middle" fill="#14724B">GraalVM Native Image</text>
+   <text x="473" y="170" font-size="11" fill="#141412">later: PGO, in Oracle GraalVM</text>
+
+   <text x="20" y="212" font-size="12.5" font-weight="700" fill="#141412">JavaScript</text>
+   <text x="20" y="228" font-size="10.5" fill="#55534E">knows from: type</text>
+   <text x="20" y="241" font-size="10.5" fill="#55534E">annotations</text>
+   <line x1="140" y1="220" x2="740" y2="220" stroke="#C9C7C0" stroke-width="2"/>
+   <circle cx="140" cy="220" r="5" fill="#2733C9"/>
+   <text x="146" y="206" font-size="11" fill="#2733C9">V8, JSC: tiered JITs</text>
+   <circle cx="507" cy="220" r="5" fill="#14724B"/>
+   <text x="507" y="206" font-size="11" text-anchor="middle" fill="#14724B">Hermes: bytecode, no JIT</text>
+   <circle cx="640" cy="220" r="5" fill="#14724B"/>
+   <text x="640" y="240" font-size="11" text-anchor="middle" fill="#141412">Static Hermes: types → native</text>
+   <circle cx="740" cy="220" r="5" fill="#14724B"/>
+   <text x="740" y="206" font-size="11" font-weight="700" text-anchor="end" fill="#14724B">Bun AoT</text>
+
+   <line x1="140" y1="268" x2="740" y2="268" stroke="#8B8983" stroke-width="1"/>
+   <line x1="140" y1="264" x2="140" y2="272" stroke="#8B8983" stroke-width="1"/>
+   <text x="140" y="288" font-size="11" text-anchor="middle" fill="#8B8983">2008</text>
+   <line x1="273" y1="264" x2="273" y2="272" stroke="#8B8983" stroke-width="1"/>
+   <text x="273" y="288" font-size="11" text-anchor="middle" fill="#8B8983">2012</text>
+   <line x1="407" y1="264" x2="407" y2="272" stroke="#8B8983" stroke-width="1"/>
+   <text x="407" y="288" font-size="11" text-anchor="middle" fill="#8B8983">2016</text>
+   <line x1="540" y1="264" x2="540" y2="272" stroke="#8B8983" stroke-width="1"/>
+   <text x="540" y="288" font-size="11" text-anchor="middle" fill="#8B8983">2020</text>
+   <line x1="673" y1="264" x2="673" y2="272" stroke="#8B8983" stroke-width="1"/>
+   <text x="673" y="288" font-size="11" text-anchor="middle" fill="#8B8983">2024</text>
+ </svg>
+</div>
+<figcaption>Each platform moved from a <span class="g">JIT</span> toward <span class="a">ahead-of-time compilation</span>, and each had to find another source for what the JIT used to learn by watching. Android and Java found it in a profile; JavaScript is looking for it in types.</figcaption>
+</figure>
+</div>

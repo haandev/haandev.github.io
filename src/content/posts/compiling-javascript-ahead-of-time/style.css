@@ -1,0 +1,42 @@
+/* Compiling JavaScript ahead of time — post-specific style.
+   Imported from the MDX. Work done at run time by the JIT is blue (geo);
+   work moved to build time by the ahead-of-time compiler is green (alg);
+   costs and failures are red. In the figures the same roles sit on the
+   .fig-frame paper as fixed hex values (the paper stays white in dark mode). */
+.s-aot {
+  --jit: var(--geo);
+  --aot: var(--alg);
+}
+
+/* the edge colour of section headings follows the subject */
+.s-q h2,
+.s-cut h2,
+.s-hist h2,
+.s-iso h2,
+.s-when h2,
+.s-limits h2,
+.s-close h2   { border-left: 4px solid var(--fg);     padding-left: 0.875rem; }
+.s-engine h2,
+.s-long h2    { border-left: 4px solid var(--jit);    padding-left: 0.875rem; }
+.s-bun h2,
+.s-types h2,
+.s-short h2   { border-left: 4px solid var(--aot);    padding-left: 0.875rem; }
+.s-cost h2    { border-left: 4px solid var(--danger); padding-left: 0.875rem; }
+
+/* tables */
+.tbl-options table { min-width: 40rem; }
+.tbl-options td:first-child,
+.tbl-tsc td:first-child,
+.tbl-who td:first-child,
+.tbl-servers td:first-child { font-weight: 600; }
+.tbl-options th:last-child,
+.tbl-options td:last-child { background: var(--alg-faint); }
+.tbl-tsc table { min-width: 34rem; }
+.tbl-tsc td:not(:first-child) { font-family: var(--font-mono); font-size: 0.875em; white-space: nowrap; }
+.tbl-who table { min-width: 36rem; }
+.tbl-servers .jit { color: var(--jit); font-family: var(--font-ui); font-weight: 600; }
+.tbl-servers .aot { color: var(--aot); font-family: var(--font-ui); font-weight: 600; }
+
+/* this post's figures don't declare their own font; tie them to the UI font */
+figure svg text { font-family: var(--font-ui); }
+figure svg text.mono { font-family: var(--font-mono); }

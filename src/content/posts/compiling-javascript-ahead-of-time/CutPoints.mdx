@@ -1,0 +1,51 @@
+<div class="wide">
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 258" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three ways to run the same program, across five stages: parse, bytecode, interpreter, baseline JIT, and optimizing JIT. Run as is: all five stages happen at run time. Cache the bytecode: parsing and bytecode happen at build time, the interpreter and both JIT tiers still run at run time. Ahead of time: parsing and the optimizing compiler, B3, run at build time; there is no bytecode and no baseline tier, and the interpreter is kept only for code built from strings, such as eval.">
+   <text x="20" y="22" font-size="10.5" font-weight="700" letter-spacing="0.14em" fill="#55534E">WHERE EACH STAGE HAPPENS</text>
+
+   <text x="254" y="50" font-size="11.5" font-weight="700" text-anchor="middle" fill="#55534E">Parse</text>
+   <text x="362" y="50" font-size="11.5" font-weight="700" text-anchor="middle" fill="#55534E">Bytecode</text>
+   <text x="470" y="50" font-size="11.5" font-weight="700" text-anchor="middle" fill="#55534E">Interpreter</text>
+   <text x="578" y="50" font-size="11.5" font-weight="700" text-anchor="middle" fill="#55534E">Baseline JIT</text>
+   <text x="686" y="50" font-size="11.5" font-weight="700" text-anchor="middle" fill="#55534E">Optimizing JIT</text>
+
+   <text x="20" y="80" font-size="12.5" font-weight="700" fill="#141412">Run as is</text>
+   <text class="mono" x="20" y="96" font-size="10.5" fill="#55534E">bun build --compile</text>
+   <rect x="202" y="64" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="310" y="64" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="418" y="64" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="526" y="64" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="634" y="64" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+
+   <text x="20" y="140" font-size="12.5" font-weight="700" fill="#141412">Cache the bytecode</text>
+   <text class="mono" x="20" y="156" font-size="10.5" fill="#55534E">… --compile --bytecode</text>
+   <rect x="202" y="124" width="104" height="38" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <rect x="310" y="124" width="104" height="38" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <rect x="418" y="124" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="526" y="124" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <rect x="634" y="124" width="104" height="38" rx="4" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <line x1="416" y1="116" x2="416" y2="170" stroke="#b3261e" stroke-width="2" stroke-dasharray="4 3"/>
+   <text x="416" y="113" font-size="10.5" font-weight="700" text-anchor="middle" fill="#b3261e">cut</text>
+
+   <text x="20" y="200" font-size="12.5" font-weight="700" fill="#141412">Ahead of time</text>
+   <text class="mono" x="20" y="216" font-size="10.5" fill="#55534E">bun compile</text>
+   <rect x="202" y="184" width="104" height="38" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <rect x="310" y="184" width="104" height="38" rx="4" fill="#FFFFFF" stroke="#C9C7C0" stroke-width="1.5" stroke-dasharray="3 3"/>
+   <text x="362" y="207" font-size="11" text-anchor="middle" fill="#8B8983">not used</text>
+   <rect x="418" y="184" width="104" height="38" rx="4" fill="#FFFFFF" stroke="#2733C9" stroke-width="1.5" stroke-dasharray="3 3"/>
+   <text x="470" y="207" font-size="11" text-anchor="middle" fill="#2733C9">eval only</text>
+   <rect x="526" y="184" width="104" height="38" rx="4" fill="#FFFFFF" stroke="#C9C7C0" stroke-width="1.5" stroke-dasharray="3 3"/>
+   <text x="578" y="207" font-size="11" text-anchor="middle" fill="#8B8983">not used</text>
+   <rect x="634" y="184" width="104" height="38" rx="4" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <text x="686" y="207" font-size="11" font-weight="700" text-anchor="middle" fill="#14724B">B3, at build</text>
+
+   <rect x="202" y="240" width="12" height="12" rx="2" fill="#EBF4EF" stroke="#14724B" stroke-width="1.5"/>
+   <text x="220" y="250" font-size="11" fill="#55534E">at build time</text>
+   <rect x="330" y="240" width="12" height="12" rx="2" fill="#EEF0FC" stroke="#2733C9" stroke-width="1.5"/>
+   <text x="348" y="250" font-size="11" fill="#55534E">at run time, in every process</text>
+ </svg>
+</div>
+<figcaption>Bytecode caching moves only the first two stages to <span class="a">build time</span>; the interpreter and the JIT still run in every process. Ahead-of-time compilation moves the optimizing compiler itself and keeps the interpreter only for code built from strings.</figcaption>
+</figure>
+</div>
